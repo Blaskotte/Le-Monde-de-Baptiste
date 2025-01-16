@@ -118,6 +118,12 @@ void setup() {
   delay(200);
   lcd.setCursor(0, 1);
   lcd.print(" changer le code");
+  delay(500);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("=====Alarme=====");
+  lcd.setCursor(0, 1);
+  lcd.print("   Bienvenue!   ");
   soundenter();
   lcd.clear(); // Fin séquence de démarrage visuelle
   home = true; // Active le menu home
@@ -133,14 +139,26 @@ void loop() {
   }
 
   if (key_pressed == 'B'){ // Activation de l'alarme jour
+    lcd.backlight();
     activationAlarmeJOUR = true;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("=====Alarme=====");
+    lcd.setCursor(0, 1);
+    lcd.print("    Aurevoir    ");
     soundquit();
     sequ();
     activationAlarmeJOUR = false;
   }
 
   if (key_pressed == 'C'){ // Activation de l'alarme nuit
+    lcd.backlight();
     activationAlarmeNUIT = true;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("=====Alarme=====");
+    lcd.setCursor(0, 1);
+    lcd.print("Zz Bonne nuit zZ");
     soundquit();
     sequ();
     activationAlarmeNUIT = false;
@@ -194,7 +212,7 @@ void soundenter(){
   tone(buzzer, 1568);
   delay(500);
   tone(buzzer, 1319);
-  delay(1500);
+  delay(1300);
   noTone(buzzer);
 
 }
@@ -207,7 +225,7 @@ void soundquit(){
   tone(buzzer, 1175);
   delay(500);
   tone(buzzer, 1047);
-  delay(1500);
+  delay(1300);
   noTone(buzzer);
 }
 
@@ -271,13 +289,12 @@ void sequ(){ // séquence avant l'enclanchement de l'alarme
     delay(100);
     i++;
   }
-    delay(1500);
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage.");
-
+  delay(1500);
     int m=0;
   while (m < 3)
   {
@@ -287,16 +304,17 @@ void sequ(){ // séquence avant l'enclanchement de l'alarme
     delay(600);
     m++;
   }
-    delay(1500);
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage");
-    tone(buzzer, mode);
-    delay(2000);
-    noTone(buzzer);
+  delay(1500);
+  tone(buzzer, mode);
+  delay(1500);
+  noTone(buzzer);
   lcd.clear();
+  lcd.noBacklight();
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
   lcd.setCursor(0, 1);
