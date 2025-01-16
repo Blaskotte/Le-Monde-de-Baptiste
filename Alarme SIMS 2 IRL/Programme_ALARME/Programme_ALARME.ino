@@ -36,17 +36,17 @@ boolean passChanged = false;
 boolean param = false;
 
 const byte ROWS = 4; //four rows
-const byte COLS = 4; //four columns
+const byte COLS = 5; //four columns
 
 
 char hexaKeys[ROWS][COLS] = { // Définie les symboles sur les touches du pad numérique
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'X','0','K','D'}
+  {'E','1','2','3','A'},
+  {'F','4','5','6','B'},
+  {'G','7','8','9','C'},
+  {'H','X','0','K','D'}
 };
 byte rowPins[ROWS] = {13, 12, 11, 10}; //broche des lignes du pad
-byte colPins[COLS] = {9, 8, 7, 6}; //broches des colonnes du pad
+byte colPins[COLS] = {9, 8, 7, 6, 5}; //broches des colonnes du pad
 
 //initialize an instance of class NewKeypad
 Keypad NumKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
@@ -63,10 +63,10 @@ void setup() {
   // updateSettings(); // initialise la fonction qui met à jour le menu paramètres
   clic(); // initialise la fonction qui fait un bip à chaque clic
   // sequ();
-  pinMode(A2, INPUT); // broche pour la touche haute
-  pinMode(1, INPUT); // broche pour la touche basse
-  pinMode(4, INPUT); // broche pour la touche select
-  pinMode(5, INPUT); // broche pour la touche Paramètres
+  //pinMode(A2, INPUT); // broche pour la touche haute
+  //pinMode(1, INPUT); // broche pour la touche basse
+  //pinMode(4, INPUT); // broche pour la touche select
+  //pinMode(5, INPUT); // broche pour la touche Paramètres
   pinMode(motion, INPUT);
   Rtc.Begin();
   // RtcDateTime currentTime = RtcDateTime(__DATE__ , __TIME__);
@@ -171,35 +171,26 @@ void loop() {
   if (alarmeActiveNUIT == true){ // Alarme armée en mode nuit
   }
 
-  if (home == false && param == true && digitalRead(1) == HIGH){
+  if (home == false && param == true && key_pressed == 'F'){
     settings++;
     updateSettings();
     delay(70);
   }
-  if (home == false && param == true && digitalRead(A2) == HIGH){
+  if (home == false && param == true && key_pressed == 'E'){
     settings--;
     updateSettings();
     delay(70);
   }
-  if (home == false && param == true &&  digitalRead(4) == HIGH){
+  if (home == false && param == true &&  key_pressed == 'G'){
     param = false;
     executeAction();
   }
 
-  if (home == true && digitalRead(5) == HIGH){
+  if (home == true && key_pressed == 'H'){
     home = false;
     param = true;
     settings = 1;
     updateSettings();
-    delay(200);
-  }
-  
-    if (home == false && param == true && digitalRead(5) == HIGH){
-    home = true;
-    param = false;
-    clic();
-    accueil();
-    delay(200);
   }
 }
 
