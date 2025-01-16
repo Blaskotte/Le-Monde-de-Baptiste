@@ -175,9 +175,18 @@ void loop() {
     executeAction();
   }
 
+  if (home == false && param == true && key_pressed == 'H'){
+    clic();
+    home = true;
+    param = false;
+    accueil();
+    key_pressed = '-';
+  }
+
   if (home == true && key_pressed == 'H'){
     home = false;
     param = true;
+    lcd.backlight();
     settings = 1;
     updateSettings();
   }
