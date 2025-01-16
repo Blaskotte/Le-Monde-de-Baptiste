@@ -9,6 +9,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // initialise le LCD
 int settings = 1; // initialise la valeur par défaut du menu paramètres
 int buzzer = A3; // initialise le pin du buzzer
 int motion = 2;
+int mode;
 
 long duration;
 
@@ -117,15 +118,10 @@ void setup() {
   delay(200);
   lcd.setCursor(0, 1);
   lcd.print(" changer le code");
-  delay(1000);
+  soundenter();
   lcd.clear(); // Fin séquence de démarrage visuelle
   home = true; // Active le menu home
 }
-
-
-
-
-
 
 void loop() {
 
@@ -136,12 +132,18 @@ void loop() {
     accueil();
   }
 
-  if (activationAlarmeJOUR == true){ // Activation de l'alarme jour
-  sequ();
+  if (key_pressed == 'B'){ // Activation de l'alarme jour
+    activationAlarmeJOUR = true;
+    soundquit();
+    sequ();
+    activationAlarmeJOUR = false;
   }
 
-  if (activationAlarmeNUIT == true){ // Activation de l'alarme nuit
-    
+  if (key_pressed == 'C'){ // Activation de l'alarme nuit
+    activationAlarmeNUIT = true;
+    soundquit();
+    sequ();
+    activationAlarmeNUIT = false;
   }
 
   if (alarmeActiveJOUR == true){ // Alarme armée en mode jour
@@ -154,12 +156,12 @@ void loop() {
   if (home == false && param == true && digitalRead(1) == HIGH){
     settings++;
     updateSettings();
-    delay(100);
+    delay(70);
   }
   if (home == false && param == true && digitalRead(A2) == HIGH){
     settings--;
     updateSettings();
-    delay(100);
+    delay(70);
   }
   if (home == false && param == true &&  digitalRead(4) == HIGH){
     param = false;
@@ -171,11 +173,43 @@ void loop() {
     param = true;
     settings = 1;
     updateSettings();
+    delay(200);
   }
   
+    if (home == false && param == true && digitalRead(5) == HIGH){
+    home = true;
+    param = false;
+    clic();
+    accueil();
+    delay(200);
+  }
 }
 
 
+void soundenter(){
+  tone(buzzer, 1047);
+  delay(500);
+  tone(buzzer, 1175);
+  delay(500);
+  tone(buzzer, 1568);
+  delay(500);
+  tone(buzzer, 1319);
+  delay(1500);
+  noTone(buzzer);
+
+}
+
+void soundquit(){
+  tone(buzzer, 1319);
+  delay(500);
+  tone(buzzer, 1568);
+  delay(500);
+  tone(buzzer, 1175);
+  delay(500);
+  tone(buzzer, 1047);
+  delay(1500);
+  noTone(buzzer);
+}
 
 void accueil(){ // Fonction qui met en page l'accueil
   if(digitalRead(motion) == HIGH){
@@ -216,6 +250,58 @@ void clic(){ // Fonction qui produit un bip dans les menus
 
 void sequ(){ // séquence avant l'enclanchement de l'alarme
 
+  if(activationAlarmeJOUR == true){
+    mode = 1976;
+  }
+  else{
+    mode = 330;
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("=====Alarme=====");
+  lcd.setCursor(0, 1);
+  lcd.print(" Verrouillage.. ");
+  delay(1000);
+    int i=0;
+  while (i < 10)
+  {
+    tone(buzzer, mode);
+    delay(150);
+    noTone(buzzer);
+    delay(100);
+    i++;
+  }
+    delay(1500);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("=====Alarme=====");
+  lcd.setCursor(0, 1);
+  lcd.print(" Verrouillage.");
+
+    int m=0;
+  while (m < 3)
+  {
+    tone(buzzer, mode);
+    delay(600);
+    noTone(buzzer);
+    delay(600);
+    m++;
+  }
+    delay(1500);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("=====Alarme=====");
+  lcd.setCursor(0, 1);
+  lcd.print(" Verrouillage");
+    tone(buzzer, mode);
+    delay(2000);
+    noTone(buzzer);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("=====Alarme=====");
+  lcd.setCursor(0, 1);
+  lcd.print("   En marche.   ");
+  delay(2000);
 }
 
 void updateSettings() { // Fonction qui gère le menu
@@ -321,7 +407,10 @@ void action1() { // Réglage de l'heure
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print(" Sauvegarde OK");
-  delay(2000);
+  tone(buzzer, 1047);
+  delay(1000);
+  noTone(buzzer);
+  delay(1000);
 
   home = true;
 }
@@ -364,7 +453,10 @@ void action2() { // Réglage de la date
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print(" Sauvegarde OK");
-  delay(2000);
+  tone(buzzer, 1047);
+  delay(1000);
+  noTone(buzzer);
+  delay(1000);
   home = true;
 }
 
@@ -386,6 +478,11 @@ int getData() { // permet de récupérer les numéros tapés pour date / heure
   while (true) {
     char c = NumKeypad.getKey();
     if (c == 'K') {
+      clic();
+      break;
+    } 
+    if (digitalRead(4) == HIGH) {
+      clic();
       break;
     } 
     else if (isDigit(c)) {
