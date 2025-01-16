@@ -8,10 +8,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // initialise le LCD
 
 int settings = 1; // initialise la valeur par défaut du menu paramètres
 int buzzer = A3; // initialise le pin du buzzer
-int motion = 2;
-int mode;
-
-long duration;
+int motion = 2; // initialise le pin du capteur de mouvement
 
 String password="1234678";
 
@@ -33,10 +30,10 @@ boolean passChangeMode = false;
 
 boolean passChanged = false;
 
-boolean param = false;
+boolean param = false; // valeur d'activation du menu paramètres
 
-const byte ROWS = 4; //four rows
-const byte COLS = 5; //four columns
+const byte ROWS = 4; //4 lignes
+const byte COLS = 5; //5 colonnes
 
 
 char hexaKeys[ROWS][COLS] = { // Définie les symboles sur les touches du pad numérique
@@ -48,7 +45,7 @@ char hexaKeys[ROWS][COLS] = { // Définie les symboles sur les touches du pad nu
 byte rowPins[ROWS] = {13, 12, 11, 10}; //broche des lignes du pad
 byte colPins[COLS] = {9, 8, 7, 6, 5}; //broches des colonnes du pad
 
-//initialize an instance of class NewKeypad
+//Initialise l'instance "NumKeypad"
 Keypad NumKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
 
 ThreeWire myWire(A0, A1, 3);        // DAT, CLK, RST (fils pour le RTC)
@@ -60,17 +57,9 @@ RtcDS1302<ThreeWire> Rtc(myWire);    // RTC Object
 void setup() {
   lcd.init();   
   lcd.backlight();
-  // updateSettings(); // initialise la fonction qui met à jour le menu paramètres
   clic(); // initialise la fonction qui fait un bip à chaque clic
-  // sequ();
-  //pinMode(A2, INPUT); // broche pour la touche haute
-  //pinMode(1, INPUT); // broche pour la touche basse
-  //pinMode(4, INPUT); // broche pour la touche select
-  //pinMode(5, INPUT); // broche pour la touche Paramètres
   pinMode(motion, INPUT);
   Rtc.Begin();
-  // RtcDateTime currentTime = RtcDateTime(__DATE__ , __TIME__);
-  // Rtc.SetDateTime(currentTime);
 
   lcd.setCursor(0, 0);          // Séquence de démarrage visuelle
   lcd.print("=====Alarme=====");
@@ -92,6 +81,7 @@ void setup() {
   delay(100);
   clic();
   delay(100);
+
   lcd.setCursor(0, 1);
   lcd.print("Pensez a changer le code");
   delay(1000);
@@ -120,6 +110,7 @@ void setup() {
   lcd.print(" changer le code");
   delay(500);
   lcd.clear();
+
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
   lcd.setCursor(0, 1);
@@ -133,14 +124,13 @@ void loop() {
 
   char key_pressed = NumKeypad.getKey(); // Variable qui récupère la touche qui a été pressée
 
-  if(activationAlarmeJOUR == false && activationAlarmeNUIT == false && alarmeActiveJOUR == false && alarmeActiveNUIT == false && home == true) // vérifie que l'alarme est désactivée, si c'est le cas = accueil
-  {
+  if(activationAlarmeJOUR == false && activationAlarmeNUIT == false && alarmeActiveJOUR == false && alarmeActiveNUIT == false && home == true){ // vérifie que l'alarme est désactivée, si c'est le cas = accueil
     accueil();
   }
 
   if (key_pressed == 'B'){ // Activation de l'alarme jour
-    lcd.backlight();
     activationAlarmeJOUR = true;
+    lcd.backlight();
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("=====Alarme=====");
@@ -152,8 +142,8 @@ void loop() {
   }
 
   if (key_pressed == 'C'){ // Activation de l'alarme nuit
-    lcd.backlight();
     activationAlarmeNUIT = true;
+    lcd.backlight();
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("=====Alarme=====");
@@ -165,7 +155,6 @@ void loop() {
   }
 
   if (alarmeActiveJOUR == true){ // Alarme armée en mode jour
-
   }
 
   if (alarmeActiveNUIT == true){ // Alarme armée en mode nuit
@@ -174,13 +163,13 @@ void loop() {
   if (home == false && param == true && key_pressed == 'F'){
     settings++;
     updateSettings();
-    delay(70);
   }
+
   if (home == false && param == true && key_pressed == 'E'){
     settings--;
     updateSettings();
-    delay(70);
   }
+
   if (home == false && param == true &&  key_pressed == 'G'){
     param = false;
     executeAction();
@@ -193,6 +182,8 @@ void loop() {
     updateSettings();
   }
 }
+
+
 
 
 void soundenter(){
@@ -221,13 +212,16 @@ void soundquit(){
 }
 
 void accueil(){ // Fonction qui met en page l'accueil
+  RtcDateTime now = Rtc.GetDateTime();
+
   if(digitalRead(motion) == HIGH){
     lcd.backlight();
   }
+
   else{
     lcd.noBacklight();
   }
-  RtcDateTime now = Rtc.GetDateTime();
+
   lcd.setCursor(0, 0);
   lcd.print("====Accueil=====");
   lcd.setCursor(0, 1);
@@ -243,7 +237,7 @@ void accueil(){ // Fonction qui met en page l'accueil
 
 }
 
-void print2digits(int number) { //permet de rendre toutes dates à un chiffre -> à deux
+void print2digits(int number) { //permet de transformer toutes les dates en un chiffre, à des dates en deux chiffres
   if (number >= 0 && number < 10) {
     lcd.write('0');
   }
@@ -256,21 +250,25 @@ void clic(){ // Fonction qui produit un bip dans les menus
   noTone(buzzer);
 }
 
-
 void sequ(){ // séquence avant l'enclanchement de l'alarme
+  
+  int mode;
 
   if(activationAlarmeJOUR == true){
     mode = 1976;
   }
+
   else{
     mode = 330;
   }
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage.. ");
   delay(1000);
+
     int i=0;
   while (i < 10)
   {
@@ -280,12 +278,14 @@ void sequ(){ // séquence avant l'enclanchement de l'alarme
     delay(100);
     i++;
   }
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage.");
   delay(1500);
+
     int m=0;
   while (m < 3)
   {
@@ -295,6 +295,7 @@ void sequ(){ // séquence avant l'enclanchement de l'alarme
     delay(600);
     m++;
   }
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("=====Alarme=====");
@@ -304,6 +305,7 @@ void sequ(){ // séquence avant l'enclanchement de l'alarme
   tone(buzzer, mode);
   delay(1500);
   noTone(buzzer);
+
   lcd.clear();
   lcd.noBacklight();
   lcd.setCursor(0, 0);
@@ -352,7 +354,6 @@ void updateSettings() { // Fonction qui gère le menu
   }
 }
 
-
 void executeAction() { // fonction qui execute l'action sélectionnée
   switch (settings) {
     case 1:
@@ -370,8 +371,6 @@ void executeAction() { // fonction qui execute l'action sélectionnée
   }
 }
 
-
-
 void action1() { // Réglage de l'heure
   clic();
   lcd.clear();
@@ -379,7 +378,8 @@ void action1() { // Réglage de l'heure
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Heure(s) : ");
-  int hour = getData();
+
+    int hour = getData();
   if(hour >= 24){
     hour = 1;
   }
@@ -389,7 +389,8 @@ void action1() { // Réglage de l'heure
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Minute(s) : ");
-  int minute = getData();
+
+    int minute = getData();
   if(minute >= 60){
     minute = 1;
   }
@@ -399,18 +400,20 @@ void action1() { // Réglage de l'heure
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Seconde(s) : ");
-  int second = getData();
-    if(second >= 60){
+
+    int second = getData();
+  if(second >= 60){
     second = 1;
   }
 
   RtcDateTime temporaire = Rtc.GetDateTime();
-  int year = temporaire.Year();
-  int month = temporaire.Month();
-  int day = temporaire.Day();
+    int year = temporaire.Year();
+    int month = temporaire.Month();
+    int day = temporaire.Day();
 
   RtcDateTime nouveauTime = RtcDateTime(year, month, day, hour, minute, second);
   Rtc.SetDateTime(nouveauTime);
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("====Reglages====");
@@ -431,14 +434,14 @@ void action2() { // Réglage de la date
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Annee : ");
-  int year = getData();
+    int year = getData();
 
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Mois : ");
-  int month = getData();
+    int month = getData();
   if(month > 12){
     month = 1;
   }
@@ -448,15 +451,16 @@ void action2() { // Réglage de la date
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Jour : ");
-  int day = getData();
+    int day = getData();
 
   RtcDateTime temporaire = Rtc.GetDateTime();
-  int hour = temporaire.Hour();
-  int minute = temporaire.Minute();
-  int second = temporaire.Second();
+    int hour = temporaire.Hour();
+    int minute = temporaire.Minute();
+    int second = temporaire.Second();
   
   RtcDateTime nouveauTime = RtcDateTime(year, month, day, hour, minute, second);
   Rtc.SetDateTime(nouveauTime);
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("====Reglages====");
@@ -466,6 +470,7 @@ void action2() { // Réglage de la date
   delay(1000);
   noTone(buzzer);
   delay(1000);
+
   home = true;
 }
 
@@ -490,7 +495,7 @@ int getData() { // permet de récupérer les numéros tapés pour date / heure
       clic();
       break;
     } 
-    if (digitalRead(4) == HIGH) {
+    if (c == 'G') {
       clic();
       break;
     } 
