@@ -14,13 +14,13 @@ String password="12345678";
 
 String tempPassword;
 
-boolean activationAlarmeJOUR = false;
+boolean activated = false;
 
-boolean activationAlarmeNUIT = false;
+boolean activationAlarme = false;
 
-boolean alarmeActiveJOUR = false;
+boolean alarmeActive = false;
 
-boolean alarmeActiveNUIT = false;
+boolean alarmON = false;
 
 boolean home = false; // pour savoir si afficher ou pas l'accueil
 
@@ -54,11 +54,11 @@ RtcDS1302<ThreeWire> Rtc(myWire);    // RTC Object
 
 
 
+
 void setup() {
   lcd.init();   
   lcd.backlight();
   clic(); // initialise la fonction qui fait un bip à chaque clic
-  //executeAction();
   pinMode(motion, INPUT);
   Rtc.Begin();
 
@@ -125,12 +125,12 @@ void loop() {
 
   char key_pressed = NumKeypad.getKey(); // Variable qui récupère la touche qui a été pressée
 
-  if(activationAlarmeJOUR == false && activationAlarmeNUIT == false && alarmeActiveJOUR == false && alarmeActiveNUIT == false && home == true){ // vérifie que l'alarme est désactivée, si c'est le cas = accueil
+  if(activationAlarme == false && alarmeActive == false && home == true){ // vérifie que l'alarme est désactivée, si c'est le cas = accueil
     accueil();
   }
 
-  if (key_pressed == 'B'){ // Activation de l'alarme jour
-    activationAlarmeJOUR = true;
+  if (key_pressed == 'B' && alarmeActive == false){ // Activation de l'alarme jour
+    activationAlarme = true;
     lcd.backlight();
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -139,44 +139,37 @@ void loop() {
     lcd.print("    Aurevoir    ");
     soundquit();
     sequ();
-    activationAlarmeJOUR = false;
+    activationAlarme = false;
+    alarmeActive = true;
+    param = false;
+    home = false;
   }
 
-  if (key_pressed == 'C'){ // Activation de l'alarme nuit
-    activationAlarmeNUIT = true;
-    lcd.backlight();
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("=====Alarme=====");
-    lcd.setCursor(0, 1);
-    lcd.print("Zz Bonne nuit zZ");
-    soundquit();
-    sequ();
-    activationAlarmeNUIT = false;
+  if (alarmeActive == true){ // Alarme armée en mode jour
+    if(digitalRead(motion) == LOW){
+    }
+    if(digitalRead(motion) == HIGH){
+      lcd.backlight();
+      enterPassword();
+    }
   }
 
-  if (alarmeActiveJOUR == true){ // Alarme armée en mode jour
-  }
-
-  if (alarmeActiveNUIT == true){ // Alarme armée en mode nuit
-  }
-
-  if (home == false && param == true && key_pressed == 'F'){
+  if (home == false && param == true && alarmeActive == false && key_pressed == 'F'){
     settings++;
     updateSettings();
   }
 
-  if (home == false && param == true && key_pressed == 'E'){
+  if (home == false && param == true && alarmeActive == false && key_pressed == 'E'){
     settings--;
     updateSettings();
   }
 
-  if (home == false && param == true &&  key_pressed == 'G'){
+  if (home == false && param == true && alarmeActive == false && key_pressed == 'G'){
     param = false;
     executeAction();
   }
 
-  if (home == false && param == true && key_pressed == 'H'){
+  if (home == false && param == true && alarmeActive == false && key_pressed == 'H'){
     clic();
     home = true;
     param = false;
@@ -184,7 +177,7 @@ void loop() {
     key_pressed = '-';
   }
 
-  if (home == true && key_pressed == 'H'){
+  if (home == true && alarmeActive == false && key_pressed == 'H'){
     home = false;
     param = true;
     lcd.backlight();
@@ -196,7 +189,7 @@ void loop() {
 
 
 
-void soundenter(){
+void soundenter(){ // Mélodie qui se joue au démarrage et au désarmement de l'alarme
   tone(buzzer, 1047);
   delay(500);
   tone(buzzer, 1175);
@@ -209,7 +202,7 @@ void soundenter(){
 
 }
 
-void soundquit(){
+void soundquit(){ // Mélodie qui se joue quand on arme l'alarme
   tone(buzzer, 1319);
   delay(500);
   tone(buzzer, 1568);
@@ -261,16 +254,9 @@ void clic(){ // Fonction qui produit un bip dans les menus
 }
 
 void sequ(){ // séquence avant l'enclanchement de l'alarme
+
   
-  int mode;
-
-  if(activationAlarmeJOUR == true){
-    mode = 1976;
-  }
-
-  else{
-    mode = 330;
-  }
+  int mode = 1976;
 
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -381,14 +367,14 @@ void executeAction() { // fonction qui execute l'action sélectionnée
   }
 }
 
-void action1() { // Réglage de l'heure
+void action1() { // Réglage de l'heure (paramètres)
   clic();
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Heure(s) : ");
-  
+
     int hour = getData();
   if(hour >= 24){
     hour = 1;
@@ -424,27 +410,19 @@ void action1() { // Réglage de l'heure
   RtcDateTime nouveauTime = RtcDateTime(year, month, day, hour, minute, second);
   Rtc.SetDateTime(nouveauTime);
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("====Reglages====");
-  lcd.setCursor(0, 1);
-  lcd.print(" Sauvegarde OK");
-  tone(buzzer, 1047);
-  delay(1000);
-  noTone(buzzer);
-  delay(1000);
+  Save();
 
   home = true;
 }
 
-void action2() { // Réglage de la date
+void action2() { // Réglage de la date (paramètres)
   clic();
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
-  lcd.print("Annee : ");
-    int year = getData();
+  lcd.print("Jour : ");
+    int day = getData();
 
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -460,8 +438,8 @@ void action2() { // Réglage de la date
   lcd.setCursor(0, 0);
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
-  lcd.print("Jour : ");
-    int day = getData();
+  lcd.print("Annee : ");
+    int year = getData();
 
   RtcDateTime temporaire = Rtc.GetDateTime();
     int hour = temporaire.Hour();
@@ -471,28 +449,17 @@ void action2() { // Réglage de la date
   RtcDateTime nouveauTime = RtcDateTime(year, month, day, hour, minute, second);
   Rtc.SetDateTime(nouveauTime);
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("====Reglages====");
-  lcd.setCursor(0, 1);
-  lcd.print(" Sauvegarde OK");
-  tone(buzzer, 1047);
-  delay(1000);
-  noTone(buzzer);
-  delay(1000);
+  Save();
 
   home = true;
 }
 
-void action3() { // Réglage du mot de passe
+void action3() { // Réglage du mot de passe (paramètres)
   clic();
   lcd.clear();
     int mdp=0;
-    tempPassword = "";
   lcd.setCursor(0,0);
   lcd.print("Code actuel :");
-  lcd.setCursor(0,1);
-  lcd.print("= ");
   passChangeMode = true;
   passChanged = true;   
   while(passChanged) {      
@@ -502,7 +469,7 @@ void action3() { // Réglage du mot de passe
         key_pressed == '4' || key_pressed == '5' || key_pressed == '6' || key_pressed == '7' ||
         key_pressed == '8' || key_pressed == '9' ) {
         tempPassword += key_pressed;
-        lcd.setCursor(mdp+2,1);
+        lcd.setCursor(mdp+4,1);
         lcd.print("*");
         mdp++;
         clic();
@@ -523,19 +490,15 @@ void action3() { // Réglage du mot de passe
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Code actuel :");
-      lcd.setCursor(0,1);
-      lcd.print("= "); 
     }
     if (key_pressed == 'K') {
       mdp=0;
       clic();
-      if (password == tempPassword) {
+      if (password == tempPassword){
         tempPassword="";
         lcd.clear();
         lcd.setCursor(0,0);
         lcd.print("Nouveau code :");
-        lcd.setCursor(0,1);
-        lcd.print("= ");
         while(passChangeMode) {
           char key_pressed = NumKeypad.getKey();
           if (key_pressed != NO_KEY){
@@ -543,7 +506,7 @@ void action3() { // Réglage du mot de passe
                 key_pressed == '4' || key_pressed == '5' || key_pressed == '6' || key_pressed == '7' ||
                 key_pressed == '8' || key_pressed == '9' ) {
               tempPassword += key_pressed;
-              lcd.setCursor(mdp+2,1);
+              lcd.setCursor(mdp+4,1);
               lcd.print("*");
               mdp++;
               clic();
@@ -556,8 +519,6 @@ void action3() { // Réglage du mot de passe
             lcd.clear();
             lcd.setCursor(0,0);
             lcd.print("Nouveau code :");
-            lcd.setCursor(0,1);
-            lcd.print("= ");
           }
           if ( key_pressed == 'K') {
             mdp=0;
@@ -566,22 +527,25 @@ void action3() { // Réglage du mot de passe
             passChangeMode = false;
             passChanged = false;
             home = true;
-            lcd.clear();
-            lcd.setCursor(0, 0);
-            lcd.print("====Reglages====");
-            lcd.setCursor(0, 1);
-            lcd.print(" Sauvegarde OK");
-            tone(buzzer, 1047);
-            delay(1000);
-            noTone(buzzer);
-            delay(1000);
+            Save();
           }            
         }
+      }
+      else{
+        tempPassword = "";
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Code actuel :");
+        lcd.setCursor(0,1);
+        lcd.print("   Code faux.   "); 
+        delay(2000);
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Code actuel :");
       }
     }
   }
 }
-
 
 void action4() { // bouton retour
   clic();
@@ -603,9 +567,99 @@ int getData() { // permet de récupérer les numéros tapés pour date / heure
     else if (isDigit(c)) {
       container += c;
       lcd.print(c);
+      clic();
     } 
     else {
     }
   }
   return container.toInt();
+}
+
+void Save() { //séquence qui affiche un message si les informations ont bien été enregistrées.
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("====Reglages====");
+  lcd.setCursor(0, 1);
+  lcd.print(" Sauvegarde OK");
+  tone(buzzer, 1047);
+  delay(1000);
+  noTone(buzzer);
+  delay(1000);
+}
+
+void enterPassword() {
+  int k=0;
+  tempPassword = "";
+  activated = true;
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(" *** ALERTE *** ");
+  lcd.setCursor(0,1);
+  lcd.print("Code :");
+  tone(buzzer, 1976);
+  delay(1000);
+  noTone(buzzer);
+  unsigned long prevMillis = millis();
+
+  while(activated) {
+      delay(1);
+      unsigned long currentTime = millis();
+
+      if (currentTime - prevMillis >= 12000) {
+        alarmON = true;
+      }
+
+      if (alarmON == true){
+        tone(buzzer, 2093);
+      }
+      char key_pressed = NumKeypad.getKey();
+      if (key_pressed != NO_KEY){
+       if (key_pressed == '0' || key_pressed == '1' || key_pressed == '2' || key_pressed == '3' ||
+        key_pressed == '4' || key_pressed == '5' || key_pressed == '6' || key_pressed == '7' ||
+        key_pressed == '8' || key_pressed == '9' ) {
+          tempPassword += key_pressed;
+          lcd.setCursor(k+7,1);
+          lcd.print("*");
+          k++;
+          clic();
+        }
+      }
+      if (k > 8 || key_pressed == 'X') {
+        tempPassword = "";
+        k=0;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(" *** ALERTE *** ");
+        lcd.setCursor(0,1);
+        lcd.print("Code :");
+        clic();
+      }
+      if ( key_pressed == 'K') {
+        if ( tempPassword == password ) {
+          activated = false;
+          alarmeActive = false;
+            home = true;
+            alarmON = false;
+            noTone(buzzer);
+            lcd.setCursor(0, 0);
+            lcd.print("=====Alarme=====");
+            lcd.setCursor(0, 1);
+            lcd.print("   Bienvenue!   ");
+            soundenter();
+            lcd.clear();
+        }
+        else if (tempPassword != password) {
+          k=0;
+          tempPassword = "";
+          lcd.setCursor(0,1);
+          lcd.print("   Code faux.   "); 
+          delay(2000);
+          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print(" *** ALERTE *** ");
+          lcd.setCursor(0,1);
+          lcd.print("Code :");
+        }
+      }    
+    }
 }
