@@ -10,7 +10,7 @@ int settings = 1; // initialise la valeur par défaut du menu paramètres
 int buzzer = A3; // initialise le pin du buzzer
 int motion = 2; // initialise le pin du capteur de mouvement
 
-String password="1234678";
+String password="12345678";
 
 String tempPassword;
 
@@ -58,6 +58,7 @@ void setup() {
   lcd.init();   
   lcd.backlight();
   clic(); // initialise la fonction qui fait un bip à chaque clic
+  //executeAction();
   pinMode(motion, INPUT);
   Rtc.Begin();
 
@@ -387,7 +388,7 @@ void action1() { // Réglage de l'heure
   lcd.print("====Reglages====");
   lcd.setCursor(0, 1);
   lcd.print("Heure(s) : ");
-
+  
     int hour = getData();
   if(hour >= 24){
     hour = 1;
@@ -486,10 +487,101 @@ void action2() { // Réglage de la date
 void action3() { // Réglage du mot de passe
   clic();
   lcd.clear();
-  lcd.print("hey3");
-  delay(1000);
-  home = true;
+    int mdp=0;
+    tempPassword = "";
+  lcd.setCursor(0,0);
+  lcd.print("Code actuel :");
+  lcd.setCursor(0,1);
+  lcd.print("= ");
+  passChangeMode = true;
+  passChanged = true;   
+  while(passChanged) {      
+    char key_pressed = NumKeypad.getKey();
+    if (key_pressed != NO_KEY){
+      if (key_pressed == '0' || key_pressed == '1' || key_pressed == '2' || key_pressed == '3' ||
+        key_pressed == '4' || key_pressed == '5' || key_pressed == '6' || key_pressed == '7' ||
+        key_pressed == '8' || key_pressed == '9' ) {
+        tempPassword += key_pressed;
+        lcd.setCursor(mdp+2,1);
+        lcd.print("*");
+        mdp++;
+        clic();
+      }
+      if (key_pressed == 'H'){
+        tempPassword = "";
+        mdp=0;
+        passChangeMode = false;
+        passChanged = false;  
+        param = true;
+        settings = 3;
+        updateSettings();
+      }
+    }
+    if (mdp > 8 || key_pressed == 'X') {
+      tempPassword = "";
+      mdp=0;
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Code actuel :");
+      lcd.setCursor(0,1);
+      lcd.print("= "); 
+    }
+    if (key_pressed == 'K') {
+      mdp=0;
+      clic();
+      if (password == tempPassword) {
+        tempPassword="";
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Nouveau code :");
+        lcd.setCursor(0,1);
+        lcd.print("= ");
+        while(passChangeMode) {
+          char key_pressed = NumKeypad.getKey();
+          if (key_pressed != NO_KEY){
+            if (key_pressed == '0' || key_pressed == '1' || key_pressed == '2' || key_pressed == '3' ||
+                key_pressed == '4' || key_pressed == '5' || key_pressed == '6' || key_pressed == '7' ||
+                key_pressed == '8' || key_pressed == '9' ) {
+              tempPassword += key_pressed;
+              lcd.setCursor(mdp+2,1);
+              lcd.print("*");
+              mdp++;
+              clic();
+            }
+          }
+          if (mdp > 8 || key_pressed == 'X') {
+            tempPassword = "";
+            mdp=0;
+            clic();
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("Nouveau code :");
+            lcd.setCursor(0,1);
+            lcd.print("= ");
+          }
+          if ( key_pressed == 'K') {
+            mdp=0;
+            clic();
+            password = tempPassword;
+            passChangeMode = false;
+            passChanged = false;
+            home = true;
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("====Reglages====");
+            lcd.setCursor(0, 1);
+            lcd.print(" Sauvegarde OK");
+            tone(buzzer, 1047);
+            delay(1000);
+            noTone(buzzer);
+            delay(1000);
+          }            
+        }
+      }
+    }
+  }
 }
+
 
 void action4() { // bouton retour
   clic();
