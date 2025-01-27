@@ -32,6 +32,8 @@ boolean passVerifMode = false;
 
 boolean settiMenu = false;  // valeur d'activation du menu paramètres
 
+char language;
+
 const byte ROWS = 4;  //4 lignes
 const byte COLS = 5;  //5 colonnes
 
@@ -56,69 +58,177 @@ RtcDS1302<ThreeWire> Rtc(myWire);  // RTC Object
 
 
 void setup() {
+
+  boolean firstsetup = true;
+
   lcd.init();
   lcd.backlight();
-  clic();  // initialise la fonction qui fait un bip à chaque clic
   pinMode(motion, INPUT);
   Rtc.Begin();
-
-  lcd.setCursor(0, 0);  // Séquence de démarrage visuelle
-  lcd.print("=====Alarme=====");
-  lcd.setCursor(0, 1);
-  lcd.print("  Demarrage     ");
-  delay(1000);
-  lcd.setCursor(0, 1);
-  lcd.print("  Demarrage.    ");
-  lcd.setCursor(0, 1);
-  delay(1000);
-  lcd.print("  Demarrage..   ");
-  delay(1000);
-  lcd.setCursor(0, 1);
-  lcd.print("  Demarrage...  ");
-  delay(1000);
-  clic();
-  delay(100);
-  clic();
-  delay(100);
-  clic();
-  delay(100);
-
-  lcd.setCursor(0, 1);
-  lcd.print("Pensez a changer le code");
-  delay(1000);
-  lcd.setCursor(0, 1);
-  lcd.print("ensez a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print("nsez a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print("sez a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print("ez a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print("z a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print(" a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print("a changer le code");
-  delay(200);
-  lcd.setCursor(0, 1);
-  lcd.print(" changer le code");
-  delay(500);
-  lcd.clear();
-
   lcd.setCursor(0, 0);
-  lcd.print("=====Alarme=====");
+  lcd.print("1. Francais");
   lcd.setCursor(0, 1);
-  lcd.print("   Bienvenue!   ");
-  soundenter();
-  lcd.clear();  // Fin séquence de démarrage visuelle
-  homePage = true;  // Active le menu home
+  lcd.print("2. English");
+
+  unsigned long prevMillis = millis();
+
+  while (firstsetup == true) {
+
+    unsigned long currentTime = millis();
+
+    char key_pressed = NumKeypad.getKey();  // enregistre la touche qui a été pressée
+
+    if (currentTime - prevMillis >= 20000) {
+      key_pressed = '1';
+    }
+
+    if (key_pressed == '1') {
+      language = 'FR';
+      clic();
+      lcd.setCursor(0, 0);
+      lcd.print("===Alarme2003===");
+      lcd.setCursor(0, 1);
+      lcd.print("  Demarrage     ");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print("  Demarrage.    ");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print("  Demarrage..   ");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print("  Demarrage...  ");
+      delay(1000);
+      clic();
+      delay(100);
+      clic();
+      delay(100);
+      clic();
+      delay(100);
+
+      lcd.setCursor(0, 1);
+      lcd.print("Pensez a changer le code");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print("ensez a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("nsez a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("sez a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("ez a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("z a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print(" a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("a changer le code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print(" changer le code");
+      delay(500);
+      lcd.clear();
+
+      lcd.setCursor(0, 0);
+      lcd.print("===Alarme2003===");
+      lcd.setCursor(0, 1);
+      lcd.print("   Bienvenue!   ");
+      soundenter();
+      lcd.clear();
+      homePage = true;
+      firstsetup = false;
+    }
+
+    if (key_pressed == '2') {
+      language = 'EN';
+      clic();
+      lcd.setCursor(0, 0);
+      lcd.print("===Alarme2003===");
+      lcd.setCursor(0, 1);
+      lcd.print(" Starting up    ");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print(" Starting up.   ");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print(" Starting up..  ");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print(" Starting up... ");
+      delay(1000);
+      clic();
+      delay(100);
+      clic();
+      delay(100);
+      clic();
+      delay(100);
+
+      lcd.setCursor(0, 1);
+      lcd.print("DON'T forget to change the code");
+      delay(1000);
+      lcd.setCursor(0, 1);
+      lcd.print("ON'T forget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("N'T forget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("'T forget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("T forget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print(" forget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("forget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("orget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("rget to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("get to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("et to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("t to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print(" to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("to change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print("o change the code");
+      delay(200);
+      lcd.setCursor(0, 1);
+      lcd.print(" change the code");
+      delay(500);
+      lcd.clear();
+
+      lcd.setCursor(0, 0);
+      lcd.print("===Alarme2003===");
+      lcd.setCursor(0, 1);
+      lcd.print("    Welcome!    ");
+      soundenter();
+      lcd.clear();
+      homePage = true;
+      firstsetup = false;
+    }
+  }
 }
 
 void loop() {
@@ -134,7 +244,7 @@ void loop() {
     lcd.backlight();
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("=====Alarme=====");
+    lcd.print("===Alarme2003===");
     lcd.setCursor(0, 1);
     lcd.print("    Aurevoir    ");
     soundquit();
@@ -258,7 +368,7 @@ void lockingSequ() {  // séquence avant l'enclanchement de l'alarme
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("=====Alarme=====");
+  lcd.print("===Alarme2003===");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage.. ");
   delay(1000);
@@ -274,7 +384,7 @@ void lockingSequ() {  // séquence avant l'enclanchement de l'alarme
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("=====Alarme=====");
+  lcd.print("===Alarme2003===");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage.");
   delay(1500);
@@ -290,7 +400,7 @@ void lockingSequ() {  // séquence avant l'enclanchement de l'alarme
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("=====Alarme=====");
+  lcd.print("===Alarme2003===");
   lcd.setCursor(0, 1);
   lcd.print(" Verrouillage");
   delay(1500);
@@ -301,7 +411,7 @@ void lockingSequ() {  // séquence avant l'enclanchement de l'alarme
   lcd.clear();
   lcd.noBacklight();
   lcd.setCursor(0, 0);
-  lcd.print("=====Alarme=====");
+  lcd.print("===Alarme2003===");
   lcd.setCursor(0, 1);
   lcd.print("   En marche.   ");
   delay(2000);
@@ -598,9 +708,6 @@ void enterPassword() {
       siren = true;
     }
 
-    if (siren == true) {
-      tone(buzzer, 2093);
-    }
     char key_pressed = NumKeypad.getKey();
     if (key_pressed != NO_KEY) {
       if (key_pressed == '0' || key_pressed == '1' || key_pressed == '2' || key_pressed == '3' || key_pressed == '4' || key_pressed == '5' || key_pressed == '6' || key_pressed == '7' || key_pressed == '8' || key_pressed == '9') {
@@ -608,10 +715,29 @@ void enterPassword() {
         lcd.setCursor(k + 7, 1);
         lcd.print("*");
         k++;
-        clic();
       }
     }
-    if (k > 8 || key_pressed == 'X') {
+
+    if (siren == true) {
+      tone(buzzer, 2093);
+    }
+
+    if (k > 8) {
+      tempPassword = "";
+      k = 0;
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print(" *** ALERTE *** ");
+      lcd.setCursor(0, 1);
+      lcd.print("   Code faux.   ");
+      delay(2000);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print(" *** ALERTE *** ");
+      lcd.setCursor(0, 1);
+      lcd.print("Code :");
+    }
+    if (key_pressed == 'X') {
       tempPassword = "";
       k = 0;
       lcd.clear();
@@ -619,7 +745,6 @@ void enterPassword() {
       lcd.print(" *** ALERTE *** ");
       lcd.setCursor(0, 1);
       lcd.print("Code :");
-      clic();
     }
     if (key_pressed == 'K') {
       if (tempPassword == password) {
@@ -629,7 +754,7 @@ void enterPassword() {
         siren = false;
         noTone(buzzer);
         lcd.setCursor(0, 0);
-        lcd.print("=====Alarme=====");
+        lcd.print("===Alarme2003===");
         lcd.setCursor(0, 1);
         lcd.print("   Bienvenue!   ");
         soundenter();
