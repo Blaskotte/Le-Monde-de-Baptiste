@@ -6,10 +6,10 @@
 #include <SerialMP3Player.h>
 
 //prototype display
-U8G2_ST7571_128X128_2_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8);
+//U8G2_ST7571_128X128_2_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8);
 
 //final display
-//U8G2_UC1701_MINI12864_2_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8);
+U8G2_UC1701_MINI12864_2_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8);
 
 //Defining pins
 const int RotaryCLK = 2;  //CLK
@@ -168,15 +168,24 @@ bool alarmSetPage = false;
 bool chimeSetPage = false;
 bool calendarSetPage = false;
 
+bool alarmSetMusic_page = false;
+bool chimeSetMusic_page = false;
+bool volumeSet_page = false;
+
 int alarmMusic = 2;
 int chimeMusic = 4;
 
-unsigned int alarmHour = 0;
+unsigned int alarmHour = 12;
 unsigned int alarmMinute = 0;
+
+unsigned int chimeStartHour = 9;
+unsigned int chimeLastHour = 21;
 
 unsigned int temporaryHour = 0;
 unsigned int temporaryMinute = 0;
 unsigned int temporarySecond = 0;
+
+unsigned int volume = 15;
 
 DS3231 rtc(SDA, SCL);
 Time RTClock;
@@ -296,7 +305,7 @@ void printHomePage() {
       }
     }
 
-    u8g2.setFont(u8g2_font_timR24_tr);
+    u8g2.setFont(u8g2_font_timR24_tn);
     u8g2.setCursor(28, 51);
     u8g2.print(twoDigit(RTClock.hour));
     u8g2.print(':');
@@ -348,11 +357,7 @@ void executeHomePage() {
       case 0:
         break;
       case -1:
-        if (chime_is_activated == true) {
-          chime_is_activated = false;
-        } else {
-          chime_is_activated = true;
-        }
+        chimeSet_state();
         break;
 
       case -2:
@@ -495,6 +500,8 @@ void executeSettingsPage() {
         break;
 
       case 2:
+        updateChimePage();
+        rotateCounter = 2;
         break;
 
       case 3:
@@ -506,7 +513,8 @@ void executeSettingsPage() {
         break;
 
       case 5:
-        updateClockPage();
+        updateVolumePage();
+        rotateCounter = 5;
         break;
 
       case 6:
@@ -518,6 +526,7 @@ void executeSettingsPage() {
   }
   buttonPressedState = false;  //reset this variable
 }
+
 
 //alarm page
 void updateAlarmPage() {
@@ -656,7 +665,7 @@ void alarmSet_hour() {
     u8g2.firstPage();
     do {
       drawAlarmMenu();
-      u8g2.setFont(u8g2_font_timR24_tr);
+      u8g2.setFont(u8g2_font_timR24_tn);
       u8g2.setCursor(28, 44);
       u8g2.print(twoDigit(alarmHour));
       u8g2.print(':');
@@ -723,7 +732,7 @@ void alarmSet_hour() {
   } while (alarmSetHour_page == true);
 }
 void alarmSet_music() {
-  bool alarmSetMusic_page = true;
+  alarmSetMusic_page = true;
   int alarmSetStep = 1;
   rotateCounter = 2;
   buttonPressedState = false;
@@ -749,24 +758,7 @@ void alarmSet_music() {
           break;
 
         case 2:
-          if (rotateCounter == 1) {
-            u8g2.drawStr(25, 29, "Ce choix vous");
-            u8g2.drawStr(25, 41, "convient-il ?");
-            u8g2.drawStr(34, 56, "Oui");
-            u8g2.drawStr(77, 56, "Non");
-            u8g2.setDrawColor(2);
-            u8g2.drawBox(31, 46, 22, 13);
-            u8g2.setDrawColor(1);
-          }
-          if (rotateCounter == 2) {
-            u8g2.drawStr(25, 29, "Ce choix vous");
-            u8g2.drawStr(25, 41, "convient-il ?");
-            u8g2.drawStr(34, 56, "Oui");
-            u8g2.drawStr(77, 56, "Non");
-            u8g2.setDrawColor(2);
-            u8g2.drawBox(74, 46, 23, 13);
-            u8g2.setDrawColor(1);
-          }
+          choice_is_OK();
           break;
 
         case 3:
@@ -826,16 +818,8 @@ void alarmSet_music() {
 }
 
 
-
-
-
-
-
-
-
-
 //chime page
-/*void updateChimePage() {
+void updateChimePage() {
   chimeSetPage = true;
   rotateCounter = 1;
   buttonPressedState = false;
@@ -858,13 +842,13 @@ void alarmSet_music() {
 
         u8g2.firstPage();
         do {
-          drawAlarmMenu();
+          drawChimeMenu();
           if (chime_is_activated == true) {
             u8g2.drawUTF8(18, 28, "Désactiver");
           } else {
             u8g2.drawStr(18, 28, "Activer");
           }
-          u8g2.drawStr(15, 43, "Heure");
+          u8g2.drawUTF8(15, 43, "Heure de début/fin");
           u8g2.drawStr(15, 58, "Musique");
           u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
         } while (u8g2.nextPage());
@@ -873,13 +857,13 @@ void alarmSet_music() {
       case 2:
         u8g2.firstPage();
         do {
-          drawAlarmMenu();
-          if (alarm_is_activated == true) {
+          drawChimeMenu();
+          if (chime_is_activated == true) {
             u8g2.drawUTF8(15, 28, "Désactiver");
           } else {
             u8g2.drawStr(15, 28, "Activer");
           }
-          u8g2.drawStr(18, 43, "Heure");
+          u8g2.drawUTF8(18, 43, "Heure de début/fin");
           u8g2.drawStr(15, 58, "Musique");
           u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
         } while (u8g2.nextPage());
@@ -888,8 +872,8 @@ void alarmSet_music() {
       case 3:
         u8g2.firstPage();
         do {
-          drawAlarmMenu();
-          u8g2.drawStr(15, 28, "Heure");
+          drawChimeMenu();
+          u8g2.drawUTF8(15, 28, "Heure de début/fin");
           u8g2.drawStr(18, 43, "Musique");
           u8g2.drawStr(15, 58, "Retour");
           u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
@@ -899,8 +883,8 @@ void alarmSet_music() {
       case 4:
         u8g2.firstPage();
         do {
-          drawAlarmMenu();
-          u8g2.drawStr(15, 28, "Heure");
+          drawChimeMenu();
+          u8g2.drawUTF8(15, 28, "Heure de début/fin");
           u8g2.drawStr(15, 43, "Musique");
           u8g2.drawStr(18, 58, "Retour");
           u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
@@ -920,126 +904,130 @@ void alarmSet_music() {
         rotateCounter = 4;
         break;
     }
-    executeAlarmSetPage();
-  } while (alarmSetPage == true);
+    executeChimeSetPage();
+  } while (chimeSetPage == true);
 }
-void executeAlarmSetPage() {
+void executeChimeSetPage() {
   if (buttonPressedState == true) {
     switch (rotateCounter) {
       case 1:
-        alarmSet_state();
+        chimeSet_state();
         break;
 
       case 2:
-        alarmSet_hour();
-        alarmSetPage = false;
+        chimeSet_hour();
+        chimeSetPage = false;
+        rotateCounter = 2;
         break;
 
       case 3:
-        alarmSet_music();
-        alarmSetPage = false;
+        chimeSet_music();
+        chimeSetPage = false;
+        rotateCounter = 2;
         break;
 
       case 4:
-        alarmSetPage = false;
-        rotateCounter = 1;
+        chimeSetPage = false;
+        rotateCounter = 2;
         break;
     }
     buttonPressedState = false;  //reset this variable
   }
 }
 
-//alarm page submenus
-void alarmSet_state() {
-  if (alarm_is_activated == true) {
-    alarm_is_activated = false;
-    mp3.stop();
+//chime page submenus
+void chimeSet_state() {
+  if (chime_is_activated == true) {
+    chime_is_activated = false;
   } else {
-    alarm_is_activated = true;
+    chime_is_activated = true;
   }
   buttonPressedState = false;
 }
-void alarmSet_hour() {
-  bool alarmSetHour_page = true;
-  int alarmSetStep = 1;
+void chimeSet_hour() {
+  bool chimeSetHour_page = true;
+  int chimeSetStep = 1;
   rotateCounter = 0;
   buttonPressedState = false;
-  alarmHour = 0;
-  alarmMinute = 0;
+  chimeStartHour = 0;
+  chimeLastHour = 0;
 
   do {
     u8g2.firstPage();
     do {
-      drawAlarmMenu();
-      u8g2.setFont(u8g2_font_timR24_tr);
-      u8g2.setCursor(28, 44);
-      u8g2.print(twoDigit(alarmHour));
-      u8g2.print(':');
-      u8g2.print(twoDigit(alarmMinute));
-      switch (alarmSetStep) {
+      drawChimeMenu();
+      switch (chimeSetStep) {
         case 1:
+          u8g2.setFont(u8g2_font_timR24_tn);
+          u8g2.setCursor(19, 44);
+          u8g2.print(twoDigit(chimeStartHour));
+          u8g2.print(" - ");
+          u8g2.print(twoDigit(chimeLastHour));
           u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawStr(34, 57, "Heure(s) ?");
+          u8g2.drawUTF8(13, 57, "Première sonnerie");
           break;
-
         case 2:
+          u8g2.setFont(u8g2_font_timR24_tn);
+          u8g2.setCursor(19, 44);
+          u8g2.print(twoDigit(chimeStartHour));
+          u8g2.print(" - ");
+          u8g2.print(twoDigit(chimeLastHour));
           u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawStr(31, 57, "Minute(s) ?");
+          u8g2.drawUTF8(13, 57, "Dernière sonnerie");
           break;
-
         case 3:
           u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawUTF8(28, 57, "Enregistré !");
+          u8g2.drawUTF8(28, 41, "Enregistrées !");
           break;
       }
 
     } while (u8g2.nextPage());
 
-    switch (alarmSetStep) {
+    switch (chimeSetStep) {
 
-      case 1:  //Setting hours
+      case 1:  //Setting first hour
         if (rotateCounter >= 24) {
           rotateCounter = 0;
         }
         if (rotateCounter < 0) {
           rotateCounter = 23;
         }
-        alarmHour = rotateCounter;
+        chimeStartHour = rotateCounter;
         if (buttonPressedState == true) {
           rotateCounter = 0;
           buttonPressedState = false;
-          alarmSetStep = 2;
+          chimeSetStep = 2;
         }
         break;
 
-      case 2:  //Setting minutes
-        if (rotateCounter >= 60) {
+      case 2:  //Setting last hour
+        if (rotateCounter >= 24) {
           rotateCounter = 0;
         }
         if (rotateCounter < 0) {
-          rotateCounter = 59;
+          rotateCounter = 23;
         }
-        alarmMinute = rotateCounter;
+        chimeLastHour = rotateCounter;
         if (buttonPressedState == true) {
           rotateCounter = 0;
           buttonPressedState = false;
-          alarmSetStep = 3;
+          chimeSetStep = 3;
         }
         break;
 
       case 3:
         mp3.play(5);
-        alarmSetHour_page = false;
+        chimeSetHour_page = false;
         delay(500);
         buttonPressedState = false;
         rotateCounter = 2;
         break;
     }
-  } while (alarmSetHour_page == true);
+  } while (chimeSetHour_page == true);
 }
-void alarmSet_music() {
-  bool alarmSetMusic_page = true;
-  int alarmSetStep = 1;
+void chimeSet_music() {
+  chimeSetMusic_page = true;
+  int chimeSetStep = 1;
   rotateCounter = 2;
   buttonPressedState = false;
 
@@ -1047,41 +1035,24 @@ void alarmSet_music() {
     u8g2.firstPage();
     do {
       drawAlarmMenu();
-      switch (alarmSetStep) {
+      switch (chimeSetStep) {
         case 1:
-          if (alarmMusic == 2) {
+          if (chimeMusic == 4) {
             u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawStr(18, 34, "Grieg : Peer Gynt");
-            u8g2.drawStr(15, 52, "Haydn : Concerto");
+            u8g2.drawStr(18, 34, "Westminster");
+            u8g2.drawStr(15, 52, "Goutelette");
             u8g2.drawXBMP(5, 28, 7, 5, right_arrow_BM);
           }
-          if (alarmMusic == 3) {
+          if (chimeMusic == 5) {
             u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawStr(15, 34, "Grieg : Peer Gynt");
-            u8g2.drawStr(18, 52, "Haydn : Concerto");
+            u8g2.drawStr(15, 34, "Westminster");
+            u8g2.drawStr(18, 52, "Goutelette");
             u8g2.drawXBMP(5, 46, 7, 5, right_arrow_BM);
           }
           break;
 
         case 2:
-          if (rotateCounter == 1) {
-            u8g2.drawStr(25, 29, "Ce choix vous");
-            u8g2.drawStr(25, 41, "convient-il ?");
-            u8g2.drawStr(34, 56, "Oui");
-            u8g2.drawStr(77, 56, "Non");
-            u8g2.setDrawColor(2);
-            u8g2.drawBox(31, 46, 22, 13, 1);
-            u8g2.setDrawColor(1);
-          }
-          if (rotateCounter == 2) {
-            u8g2.drawStr(25, 29, "Ce choix vous");
-            u8g2.drawStr(25, 41, "convient-il ?");
-            u8g2.drawStr(34, 56, "Oui");
-            u8g2.drawStr(77, 56, "Non");
-            u8g2.setDrawColor(2);
-            u8g2.drawBox(74, 46, 23, 13, 1);
-            u8g2.setDrawColor(1);
-          }
+          choice_is_OK();
           break;
 
         case 3:
@@ -1093,20 +1064,21 @@ void alarmSet_music() {
 
     } while (u8g2.nextPage());
 
-    switch (alarmSetStep) {
+    switch (chimeSetStep) {
 
       case 1:  //Selection of the music
-        if (rotateCounter < 2) {
-          rotateCounter = 2;
+        if (rotateCounter < 4) {
+          rotateCounter = 4;
         }
-        if (rotateCounter > 3) {
-          rotateCounter = 3;
+        if (rotateCounter > 5) {
+          rotateCounter = 5;
         }
-        alarmMusic = rotateCounter;
+        chimeMusic = rotateCounter;
         if (buttonPressedState == true) {
           buttonPressedState = false;
-          alarmSetStep = 2;
+          chimeSetStep = 2;
           rotateCounter = 1;
+          mp3.play(chimeMusic);
         }
         break;
 
@@ -1119,32 +1091,24 @@ void alarmSet_music() {
         }
         if (buttonPressedState == true && rotateCounter == 1) {
           buttonPressedState = false;
-          alarmSetStep = 3;
+          chimeSetStep = 3;
         }
         if (buttonPressedState == true && rotateCounter == 2) {
           buttonPressedState = false;
-          alarmSetStep = 1;
+          chimeSetStep = 1;
+          mp3.stop();
         }
         break;
 
       case 3:
         mp3.play(5);
-        alarmSetMusic_page = false;
+        chimeSetMusic_page = false;
         delay(500);
         buttonPressedState = false;
-        rotateCounter = 1;
         break;
     }
-  } while (alarmSetMusic_page == true);
-}*/
-
-
-
-
-
-
-
-
+  } while (chimeSetMusic_page == true);
+}
 
 
 //clock page
@@ -1164,7 +1128,7 @@ void updateClockPage() {
       drawMenuLine();
       u8g2.setFont(u8g2_font_profont11_tf);
       u8g2.drawUTF8(43, 10, "Horloge");
-      u8g2.setFont(u8g2_font_timR24_tr);
+      u8g2.setFont(u8g2_font_timR24_tn);
       u8g2.setCursor(7, 44);
       u8g2.print(twoDigit(temporaryHour));
       u8g2.print(':');
@@ -1251,13 +1215,87 @@ void updateClockPage() {
   } while (clockSet_page == true);
 }
 
+
 //volume page
 void updateVolumePage() {
-  bool volumeSetPage = true;
+  volumeSet_page = true;
+  int volumeSetStep = 1;
+  rotateCounter = volume;
+  buttonPressedState = false;
+
   do {
-    volumeSetPage = false;
-  } while (volumeSetPage == true);
+    u8g2.firstPage();
+    do {
+      switch (volumeSetStep) {
+        case 1:
+          drawVolumeMenu();
+          u8g2.drawFrame(16, 28, 96, 21);
+          u8g2.drawBox(19, 31, volume * 3, 15);
+          break;
+
+        case 2:
+          drawVolumeMenu();
+          choice_is_OK();
+          break;
+
+        case 3:
+          drawVolumeMenu();
+          u8g2.setFont(u8g2_font_profont11_tf);
+          u8g2.drawStr(16, 35, "Niveau du volume");
+          u8g2.drawUTF8(28, 48, "enregistré !");
+          break;
+      }
+
+    } while (u8g2.nextPage());
+
+    switch (volumeSetStep) {
+
+      case 1:  //Setting volume
+
+        if (rotateCounter >= 30) {
+          rotateCounter = 30;
+        }
+        if (rotateCounter < 0) {
+          rotateCounter = 0;
+        }
+        volume = rotateCounter;
+        if (buttonPressedState == true) {
+          rotateCounter = 1;
+          buttonPressedState = false;
+          volumeSetStep = 2;
+          mp3.setVol(volume);
+          mp3.play(alarmMusic);
+        }
+        break;
+
+      case 2:  //Validate the choice
+        if (rotateCounter < 1) {
+          rotateCounter = 1;
+        }
+        if (rotateCounter > 2) {
+          rotateCounter = 2;
+        }
+        if (buttonPressedState == true && rotateCounter == 1) {
+          buttonPressedState = false;
+          volumeSetStep = 3;
+        }
+        if (buttonPressedState == true && rotateCounter == 2) {
+          buttonPressedState = false;
+          volumeSetStep = 1;
+          mp3.stop();
+          rotateCounter = volume;
+        }
+        break;
+
+      case 3:
+        mp3.play(5);
+        volumeSet_page = false;
+        delay(500);
+        break;
+    }
+  } while (volumeSet_page == true);
 }
+
 
 
 
@@ -1279,6 +1317,51 @@ void drawAlarmMenu() {
   u8g2.drawXBMP(2, 2, 8, 9, alarmON_BM);
 }
 
+void drawChimeMenu() {
+  drawMenuLine();
+  u8g2.drawUTF8(40, 10, "Carillon");
+  u8g2.drawXBMP(2, 2, 8, 9, chimeON_BM);
+}
+
+void drawVolumeMenu() {
+  drawMenuLine();
+  u8g2.setFont(u8g2_font_profont11_tf);
+  u8g2.drawStr(46, 10, "Volume");
+  u8g2.drawXBMP(2, 3, 8, 7, volume_BM);
+}
+
+void choice_is_OK() {
+  if (rotateCounter == 1) {
+    if (alarmSetMusic_page == true || chimeSetMusic_page == true) {
+      u8g2.drawStr(25, 29, "Ce choix vous");
+      u8g2.drawStr(25, 41, "convient-il ?");
+    }
+    if (volumeSet_page == true) {
+      u8g2.drawStr(10, 29, "Ce choix de volume");
+      u8g2.drawStr(10, 41, "vous convient-il ?");
+    }
+    u8g2.drawStr(34, 56, "Oui");
+    u8g2.drawStr(77, 56, "Non");
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(31, 46, 22, 13);
+    u8g2.setDrawColor(1);
+  }
+  if (rotateCounter == 2) {
+    if (alarmSetMusic_page == true || chimeSetMusic_page == true) {
+      u8g2.drawStr(25, 29, "Ce choix vous");
+      u8g2.drawStr(25, 41, "convient-il ?");
+    }
+    if (volumeSet_page == true) {
+      u8g2.drawStr(10, 29, "Ce choix de volume");
+      u8g2.drawStr(10, 41, "vous convient-il ?");
+    }
+    u8g2.drawStr(34, 56, "Oui");
+    u8g2.drawStr(77, 56, "Non");
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(74, 46, 23, 13);
+    u8g2.setDrawColor(1);
+  }
+}
 
 void button_is_pressed() {
   TimeNow2 = millis();
@@ -1309,13 +1392,12 @@ void wheel_is_rotated() {
 }
 
 void testAlarmChime() {
-
   if (alarm_is_activated == true && RTClock.hour == alarmHour && RTClock.min == alarmMinute && RTClock.sec == 1) {
+    delay(1200);
     mp3.play(alarmMusic);
-  }
-
-  if (chime_is_activated == true && RTClock.min == 0 && RTClock.sec == 0) {
-    mp3.play(4);
+  } else if (chime_is_activated == true && RTClock.hour >= chimeStartHour && RTClock.hour <= chimeLastHour && RTClock.min == 0 && RTClock.sec == 1) {
+    delay(1200);
+    mp3.play(chimeMusic);
   }
 }
 
