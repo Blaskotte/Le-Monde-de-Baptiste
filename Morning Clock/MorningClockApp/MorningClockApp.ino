@@ -4,6 +4,7 @@
 #include <DS3231.h>
 #include <Wire.h>
 #include <SerialMP3Player.h>
+#include <EEPROM.h>
 
 //prototype display
 //U8G2_ST7571_128X128_2_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8);
@@ -172,32 +173,41 @@ bool alarmSetMusic_page = false;
 bool chimeSetMusic_page = false;
 bool volumeSet_page = false;
 
-int alarmMusic = 2;
-int chimeMusic = 4;
+int alarmMusic;               //EEPROM adress 1
+int chimeMusic;               //EEPROM adress 2
+unsigned int alarmHour;       //EEPROM adress 3
+unsigned int alarmMinute;     //EEPROM adress 4
+unsigned int chimeStartHour;  //EEPROM adress 5
+unsigned int chimeLastHour;   //EEPROM adress 6
 
-unsigned int alarmHour = 12;
-unsigned int alarmMinute = 0;
-
-unsigned int chimeStartHour = 9;
-unsigned int chimeLastHour = 21;
-
-unsigned int temporaryHour = 0;
-unsigned int temporaryMinute = 0;
-unsigned int temporarySecond = 0;
+unsigned int temporaryHour;
+unsigned int temporaryMinute;
+unsigned int temporarySecond;
 
 unsigned int volume = 15;
 
 DS3231 rtc(SDA, SCL);
+
 Time RTClock;
 
 
 
 void setup() {
+  u8g2.begin();
+  u8g2.enableUTF8Print();
+  u8g2.firstPage();
+
+  do {
+    u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
+    //u8g2.drawXBMP(61, 19, 7, 9, happyMenu_BM);
+    //u8g2.drawBox(23, 46, progress, 2);
+    //u8g2.drawFrame(21, 44, 84, 6);
+    //u8g2.drawLine(0, 64, 127, 64);
+  } while (u8g2.nextPage());
+
   Serial.begin(9600);  // start serial interface
   mp3.begin(9600);
   rtc.begin();
-  u8g2.begin();
-  u8g2.enableUTF8Print();
   mp3.sendCommand(CMD_SEL_DEV, 0, 2);  //select sd-card
   //setting up pins
   pinMode(2, INPUT_PULLUP);
@@ -210,29 +220,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(RotaryCLK), wheel_is_rotated, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RotarySW), button_is_pressed, FALLING);
 
-  int progress = 0;
-
-  u8g2.firstPage();
-  do {
-
-    u8g2.firstPage();
-    do {
-      u8g2.drawXBMP(57, 14, 14, 18, bigHappy_BM);
-      //u8g2.drawXBMP(61, 19, 7, 9, happyMenu_BM);
-      u8g2.drawBox(23, 46, progress, 2);
-      u8g2.drawFrame(21, 44, 84, 6);
-      u8g2.drawLine(0, 64, 127, 64);
-    } while (u8g2.nextPage());
-
-    delay(24);
-
-    progress = progress + 1;
-
-  } while (progress <= 80);
-
+  alarmMusic = EEPROM.read(1);      //EEPROM adress 1
+  chimeMusic = EEPROM.read(2);      //EEPROM adress 2
+  alarmHour = EEPROM.read(3);       //EEPROM adress 3
+  alarmMinute = EEPROM.read(4);     //EEPROM adress 4
+  chimeStartHour = EEPROM.read(5);  //EEPROM adress 5
+  chimeLastHour = EEPROM.read(6);   //EEPROM adress 6
   mp3.setVol(30);
   mp3.play(1);
-  delay(300);
   TimeNow1 = millis();  //Start timer 1
 }
 
@@ -306,10 +301,14 @@ void printHomePage() {
     }
 
     u8g2.setFont(u8g2_font_timR24_tn);
-    u8g2.setCursor(28, 51);
+    u8g2.setCursor(28, 44);
     u8g2.print(twoDigit(RTClock.hour));
     u8g2.print(':');
     u8g2.print(twoDigit(RTClock.min));
+
+    // print the date
+    printDate();
+
 
   } while (u8g2.nextPage());
 }
@@ -510,6 +509,7 @@ void executeSettingsPage() {
         break;
 
       case 4:
+        updateCalendarPage();
         break;
 
       case 5:
@@ -722,7 +722,9 @@ void alarmSet_hour() {
         break;
 
       case 3:
-        mp3.play(5);
+        EEPROM.update(3, alarmHour);
+        EEPROM.update(4, alarmMinute);
+        mp3.play(2);
         alarmSetHour_page = false;
         delay(500);
         buttonPressedState = false;
@@ -743,17 +745,33 @@ void alarmSet_music() {
       drawAlarmMenu();
       switch (alarmSetStep) {
         case 1:
-          if (alarmMusic == 2) {
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawStr(18, 34, "Grieg : Peer Gynt");
-            u8g2.drawStr(15, 52, "Haydn : Concerto");
-            u8g2.drawXBMP(5, 28, 7, 5, right_arrow_BM);
-          }
           if (alarmMusic == 3) {
             u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawStr(15, 34, "Grieg : Peer Gynt");
-            u8g2.drawStr(18, 52, "Haydn : Concerto");
-            u8g2.drawXBMP(5, 46, 7, 5, right_arrow_BM);
+            u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
+            u8g2.drawUTF8(18, 28, "Haydn : Concerto");
+            u8g2.drawStr(15, 43, "Frutiger Aero");
+            u8g2.drawStr(15, 58, "Grieg : Peer Gynt");
+          }
+          if (alarmMusic == 4) {
+            u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
+            u8g2.setFont(u8g2_font_profont11_tf);
+            u8g2.drawUTF8(15, 28, "Haydn : Concerto");
+            u8g2.drawStr(18, 43, "Frutiger Aero");
+            u8g2.drawStr(15, 58, "Grieg : Peer Gynt");
+          }
+          if (alarmMusic == 5) {
+            u8g2.setFont(u8g2_font_profont11_tf);
+            u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
+            u8g2.drawUTF8(15, 28, "Frutiger Aero");
+            u8g2.drawStr(18, 43, "Grieg : Peer Gynt");
+            u8g2.drawUTF8(15, 58, "Vivaldi : Été");
+          }
+          if (alarmMusic == 6) {
+            u8g2.setFont(u8g2_font_profont11_tf);
+            u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
+            u8g2.drawUTF8(15, 28, "Frutiger Aero");
+            u8g2.drawStr(15, 43, "Grieg : Peer Gynt");
+            u8g2.drawUTF8(18, 58, "Vivaldi : Été");
           }
           break;
 
@@ -773,11 +791,11 @@ void alarmSet_music() {
     switch (alarmSetStep) {
 
       case 1:  //Selection of the music
-        if (rotateCounter < 2) {
-          rotateCounter = 2;
-        }
-        if (rotateCounter > 3) {
+        if (rotateCounter < 3) {
           rotateCounter = 3;
+        }
+        if (rotateCounter > 6) {
+          rotateCounter = 6;
         }
         alarmMusic = rotateCounter;
         if (buttonPressedState == true) {
@@ -807,7 +825,8 @@ void alarmSet_music() {
         break;
 
       case 3:
-        mp3.play(5);
+        mp3.play(2);
+        EEPROM.update(1, alarmMusic);
         alarmSetMusic_page = false;
         delay(500);
         buttonPressedState = false;
@@ -1016,7 +1035,9 @@ void chimeSet_hour() {
         break;
 
       case 3:
-        mp3.play(5);
+        mp3.play(2);
+        EEPROM.update(5, chimeStartHour);
+        EEPROM.update(6, chimeLastHour);
         chimeSetHour_page = false;
         delay(500);
         buttonPressedState = false;
@@ -1037,17 +1058,26 @@ void chimeSet_music() {
       drawAlarmMenu();
       switch (chimeSetStep) {
         case 1:
-          if (chimeMusic == 4) {
+          if (chimeMusic == 7) {
             u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawStr(18, 34, "Westminster");
-            u8g2.drawStr(15, 52, "Goutelette");
-            u8g2.drawXBMP(5, 28, 7, 5, right_arrow_BM);
+            u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
+            u8g2.drawUTF8(18, 28, "West. moderne");
+            u8g2.drawStr(15, 43, "West. ancienne");
+            u8g2.drawStr(15, 58, "Campagne chinoise");
           }
-          if (chimeMusic == 5) {
+          if (chimeMusic == 8) {
+            u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
             u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawStr(15, 34, "Westminster");
-            u8g2.drawStr(18, 52, "Goutelette");
-            u8g2.drawXBMP(5, 46, 7, 5, right_arrow_BM);
+            u8g2.drawUTF8(15, 28, "West. moderne");
+            u8g2.drawStr(18, 43, "West. ancienne");
+            u8g2.drawStr(15, 58, "Campagne chinoise");
+          }
+          if (chimeMusic == 9) {
+            u8g2.setFont(u8g2_font_profont11_tf);
+            u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
+            u8g2.drawUTF8(15, 28, "West. moderne");
+            u8g2.drawStr(15, 43, "West. ancienne");
+            u8g2.drawStr(18, 58, "Campagne chinoise");
           }
           break;
 
@@ -1067,11 +1097,11 @@ void chimeSet_music() {
     switch (chimeSetStep) {
 
       case 1:  //Selection of the music
-        if (rotateCounter < 4) {
-          rotateCounter = 4;
+        if (rotateCounter < 7) {
+          rotateCounter = 7;
         }
-        if (rotateCounter > 5) {
-          rotateCounter = 5;
+        if (rotateCounter > 9) {
+          rotateCounter = 9;
         }
         chimeMusic = rotateCounter;
         if (buttonPressedState == true) {
@@ -1101,7 +1131,8 @@ void chimeSet_music() {
         break;
 
       case 3:
-        mp3.play(5);
+        mp3.play(2);
+        EEPROM.update(2, chimeMusic);
         chimeSetMusic_page = false;
         delay(500);
         buttonPressedState = false;
@@ -1206,7 +1237,7 @@ void updateClockPage() {
         break;
 
       case 4:
-        mp3.play(5);
+        mp3.play(2);
         rtc.setTime(temporaryHour, temporaryMinute, temporarySecond);
         clockSet_page = false;
         delay(500);
@@ -1215,6 +1246,111 @@ void updateClockPage() {
   } while (clockSet_page == true);
 }
 
+
+//calendar page
+void updateCalendarPage() {
+  bool calendarSet_page = true;
+  int calendarSetStep = 1;
+  unsigned int temporaryDate = 1;
+  unsigned int temporaryMon = 1;
+  unsigned int temporaryYear = 2025;
+  rotateCounter = 1;
+  buttonPressedState = false;
+
+  do {
+    u8g2.firstPage();
+    do {
+      u8g2.drawXBMP(2, 2, 8, 9, calendar_BM);
+      drawMenuLine();
+      u8g2.setFont(u8g2_font_profont11_tf);
+      u8g2.drawUTF8(34, 10, "Calendrier");
+      u8g2.setFont(u8g2_font_timR18_tn);
+      u8g2.setCursor(9, 41);
+      u8g2.setFontMode(1);
+      u8g2.print(twoDigit(temporaryDate));
+      u8g2.print("/");
+      u8g2.print(twoDigit(temporaryMon));
+      u8g2.print("/");
+      u8g2.print(twoDigit(temporaryYear));
+      switch (calendarSetStep) {
+        case 1:
+          u8g2.setFont(u8g2_font_profont11_tf);
+          u8g2.drawStr(46, 57, "Jour ?");
+          break;
+
+        case 2:
+          u8g2.setFont(u8g2_font_profont11_tf);
+          u8g2.drawStr(46, 57, "Mois ?");
+          break;
+
+        case 3:
+          u8g2.setFont(u8g2_font_profont11_tf);
+          u8g2.drawUTF8(43, 57, "Année ?");
+          break;
+        case 4:
+          u8g2.setFont(u8g2_font_profont11_tf);
+          u8g2.drawUTF8(25, 57, "Enregistrée !");
+          break;
+      }
+
+    } while (u8g2.nextPage());
+
+    switch (calendarSetStep) {
+
+      case 1:  //Setting day
+        if (rotateCounter > 31) {
+          rotateCounter = 1;
+        }
+        if (rotateCounter < 1) {
+          rotateCounter = 31;
+        }
+        temporaryDate = rotateCounter;
+        if (buttonPressedState == true) {
+          rotateCounter = 1;
+          buttonPressedState = false;
+          calendarSetStep = 2;
+        }
+        break;
+
+      case 2:  //Setting month
+        if (rotateCounter > 12) {
+          rotateCounter = 1;
+        }
+        if (rotateCounter < 1) {
+          rotateCounter = 12;
+        }
+        temporaryMon = rotateCounter;
+        if (buttonPressedState == true) {
+          rotateCounter = 2025;
+          buttonPressedState = false;
+          calendarSetStep = 3;
+        }
+        break;
+
+      case 3:  //Setting year
+        if (rotateCounter > 2100) {
+          rotateCounter = 2025;
+        }
+        if (rotateCounter < 2025) {
+          rotateCounter = 2100;
+        }
+        temporaryYear = rotateCounter;
+        if (buttonPressedState == true) {
+          rotateCounter = 0;
+          buttonPressedState = false;
+          calendarSetStep = 4;
+        }
+        break;
+
+      case 4:
+        mp3.play(2);
+        rtc.setDate(temporaryDate, temporaryMon, temporaryYear);
+        calendarSet_page = false;
+        delay(500);
+        break;
+    }
+  } while (calendarSet_page == true);
+}
 
 //volume page
 void updateVolumePage() {
@@ -1252,13 +1388,13 @@ void updateVolumePage() {
 
       case 1:  //Setting volume
 
-        if (rotateCounter >= 30) {
-          rotateCounter = 30;
+        if (rotateCounter >= 15) {
+          rotateCounter = 15;
         }
         if (rotateCounter < 0) {
           rotateCounter = 0;
         }
-        volume = rotateCounter;
+        volume = rotateCounter * 2;
         if (buttonPressedState == true) {
           rotateCounter = 1;
           buttonPressedState = false;
@@ -1288,7 +1424,7 @@ void updateVolumePage() {
         break;
 
       case 3:
-        mp3.play(5);
+        mp3.play(2);
         volumeSet_page = false;
         delay(500);
         break;
@@ -1360,6 +1496,96 @@ void choice_is_OK() {
     u8g2.setDrawColor(2);
     u8g2.drawBox(74, 46, 23, 13);
     u8g2.setDrawColor(1);
+  }
+}
+
+
+void printDate() {
+  int dateY = 58;
+  u8g2.setFont(u8g2_font_profont11_tf);
+  if (RTClock.mon == 1) {
+    u8g2.setCursor(19, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("janvier ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 2) {
+    u8g2.setCursor(19, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("février ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 3) {
+    u8g2.setCursor(28, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("mars ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 4) {
+    u8g2.setCursor(25, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("avril ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 5) {
+    u8g2.setCursor(31, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("mai ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 6) {
+    u8g2.setCursor(28, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("juin ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 7) {
+    u8g2.setCursor(19, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("juillet ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 8) {
+    u8g2.setCursor(28, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("août ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 9) {
+    u8g2.setCursor(13, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("septembre ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 10) {
+    u8g2.setCursor(19, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("octobre ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 11) {
+    u8g2.setCursor(16, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("novembre ");
+    u8g2.print(RTClock.year);
+  }
+  if (RTClock.mon == 12) {
+    u8g2.setCursor(16, dateY);
+    u8g2.print(twoDigit(RTClock.date));
+    u8g2.print(' ');
+    u8g2.print("décembre ");
+    u8g2.print(RTClock.year);
   }
 }
 
