@@ -185,6 +185,7 @@ unsigned int temporaryMinute;
 unsigned int temporarySecond;
 
 unsigned int volume = 15;
+bool page1_2bool = true;
 
 DS3231 rtc(SDA, SCL);
 
@@ -494,11 +495,13 @@ void executeSettingsPage() {
   if (buttonPressedState == true) {
     switch (rotateCounter) {
       case 1:
+        alarmMenuTransition();
         updateAlarmPage();
         rotateCounter = 1;
         break;
 
       case 2:
+        chimeMenuTransition();
         updateChimePage();
         rotateCounter = 2;
         break;
@@ -635,6 +638,7 @@ void executeAlarmSetPage() {
         break;
 
       case 4:
+        alarmToSettingsTransition();
         alarmSetPage = false;
         rotateCounter = 1;
         break;
@@ -835,6 +839,105 @@ void alarmSet_music() {
     }
   } while (alarmSetMusic_page == true);
 }
+void alarmMenuTransition() {
+  int speed = 16;
+
+  int pageTransition = 128;
+
+  int arrowSet = 5;
+  int menuSet1 = 18;
+  int menuSet2 = 15;
+  int icon1 = 113;
+  int icon2 = 114;
+
+  int menuAlarm1 = 146;
+  int menuAlarm2 = 143;
+  int arrowAlarm = 133;
+
+  do {
+
+    u8g2.firstPage();
+    do {
+      u8g2.drawXBMP(arrowSet, 22, 7, 5, right_arrow_BM);
+      u8g2.drawUTF8(menuSet1, 28, "Réveil");
+      u8g2.drawXBMP(icon1, 19, 10, 11, alarmON_select_BM);
+      u8g2.drawStr(menuSet2, 43, "Carillon");
+      u8g2.drawXBMP(icon2, 35, 8, 9, chimeON_BM);
+      u8g2.drawStr(menuSet2, 58, "Horloge");
+      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
+      drawAlarmMenu();
+
+      if (alarm_is_activated == true) {
+        u8g2.drawUTF8(menuAlarm1, 28, "Désactiver");
+      } else {
+        u8g2.drawStr(menuAlarm1, 28, "Activer");
+      }
+      u8g2.drawStr(menuAlarm2, 43, "Heure");
+      u8g2.drawStr(menuAlarm2, 58, "Musique");
+      u8g2.drawXBMP(arrowAlarm, 22, 7, 5, right_arrow_BM);
+
+
+    } while (u8g2.nextPage());
+
+    u8g2.clearBuffer();
+
+    arrowSet = arrowSet - speed;
+    menuSet1 = menuSet1 - speed;
+    menuSet2 = menuSet2 - speed;
+    icon1 = icon1 - speed;
+    icon2 = icon2 - speed;
+
+    pageTransition = pageTransition - speed;
+    menuAlarm1 = menuAlarm1 - speed;
+    menuAlarm2 = menuAlarm2 - speed;
+    arrowAlarm = arrowAlarm - speed;
+  } while (pageTransition > 0);
+}
+void alarmToSettingsTransition() {
+  int speed = 16;
+  int pageTransition = -128;
+  int arrowSet = -123;
+  int menuSet1 = -110;
+  int menuSet2 = -113;
+  int icon1 = -15;
+  int icon2 = -14;
+  int menuAlarm1 = 15;
+  int menuAlarm2 = 18;
+  int arrowAlarm = 5;
+
+  do {
+
+    u8g2.firstPage();
+    do {
+
+      drawSettingsBar();
+      u8g2.drawXBMP(arrowSet, 22, 7, 5, right_arrow_BM);
+      u8g2.drawUTF8(menuSet1, 28, "Réveil");
+      u8g2.drawXBMP(icon1, 19, 10, 11, alarmON_select_BM);
+      u8g2.drawStr(menuSet2, 43, "Carillon");
+      u8g2.drawXBMP(icon2, 35, 8, 9, chimeON_BM);
+      u8g2.drawStr(menuSet2, 58, "Horloge");
+      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
+
+      u8g2.drawStr(menuAlarm1, 28, "Heure");
+      u8g2.drawStr(menuAlarm1, 43, "Musique");
+      u8g2.drawStr(menuAlarm2, 58, "Retour");
+      u8g2.drawXBMP(arrowAlarm, 52, 7, 5, right_arrow_BM);
+
+    } while (u8g2.nextPage());
+
+    arrowSet = arrowSet + speed;
+    menuSet1 = menuSet1 + speed;
+    menuSet2 = menuSet2 + speed;
+    icon1 = icon1 + speed;
+    icon2 = icon2 + speed;
+
+    pageTransition = pageTransition + speed;
+    menuAlarm1 = menuAlarm1 + speed;
+    menuAlarm2 = menuAlarm2 + speed;
+    arrowAlarm = arrowAlarm + speed;
+  } while (pageTransition < 0);
+}
 
 
 //chime page
@@ -946,6 +1049,7 @@ void executeChimeSetPage() {
         break;
 
       case 4:
+        chimeToSettingsTransition();
         chimeSetPage = false;
         rotateCounter = 2;
         break;
@@ -1139,6 +1243,104 @@ void chimeSet_music() {
         break;
     }
   } while (chimeSetMusic_page == true);
+}
+void chimeMenuTransition() {
+  int speed = 16;
+
+  int pageTransition = 128;
+
+  int arrowSet = 5;
+  int menuSet1 = 18;
+  int menuSet2 = 15;
+  int icon1 = 113;
+  int icon2 = 114;
+
+  int menuChime1 = 146;
+  int menuChime2 = 143;
+  int arrowChime = 133;
+
+  do {
+
+    u8g2.firstPage();
+    do {
+      u8g2.drawXBMP(arrowSet, 37, 7, 5, right_arrow_BM);
+      u8g2.drawUTF8(menuSet2, 28, "Réveil");
+      u8g2.drawXBMP(icon2, 20, 8, 9, alarmON_BM);
+      u8g2.drawStr(menuSet1, 43, "Carillon");
+      u8g2.drawXBMP(icon1, 34, 10, 11, chimeON_select_BM);
+      u8g2.drawStr(menuSet2, 58, "Horloge");
+      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
+      drawChimeMenu();
+
+      if (chime_is_activated == true) {
+        u8g2.drawUTF8(menuChime1, 28, "Désactiver");
+      } else {
+        u8g2.drawStr(menuChime1, 28, "Activer");
+      }
+      u8g2.drawUTF8(menuChime2, 43, "Heure de début/fin");
+      u8g2.drawStr(menuChime2, 58, "Musique");
+      u8g2.drawXBMP(arrowChime, 22, 7, 5, right_arrow_BM);
+
+    } while (u8g2.nextPage());
+
+    u8g2.clearBuffer();
+
+    arrowSet = arrowSet - speed;
+    menuSet1 = menuSet1 - speed;
+    menuSet2 = menuSet2 - speed;
+    icon1 = icon1 - speed;
+    icon2 = icon2 - speed;
+
+    pageTransition = pageTransition - speed;
+    menuChime1 = menuChime1 - speed;
+    menuChime2 = menuChime2 - speed;
+    arrowChime = arrowChime - speed;
+  } while (pageTransition > 0);
+}
+void chimeToSettingsTransition() {
+  int speed = 16;
+  int pageTransition = -128;
+  int arrowSet = -123;
+  int menuSet1 = -110;
+  int menuSet2 = -113;
+  int icon1 = -15;
+  int icon2 = -14;
+  int menuChime1 = 15;
+  int menuChime2 = 18;
+  int arrowChime = 5;
+
+  do {
+
+    u8g2.firstPage();
+    do {
+
+      drawSettingsBar();
+      u8g2.drawXBMP(arrowSet, 37, 7, 5, right_arrow_BM);
+      u8g2.drawUTF8(menuSet2, 28, "Réveil");
+      u8g2.drawXBMP(icon2, 20, 8, 9, alarmON_BM);
+      u8g2.drawStr(menuSet1, 43, "Carillon");
+      u8g2.drawXBMP(icon1, 34, 10, 11, chimeON_select_BM);
+      u8g2.drawStr(menuSet2, 58, "Horloge");
+      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
+
+      u8g2.drawUTF8(menuChime1, 28, "Heure de début/fin");
+      u8g2.drawStr(menuChime1, 43, "Musique");
+      u8g2.drawStr(menuChime2, 58, "Retour");
+      u8g2.drawXBMP(arrowChime, 52, 7, 5, right_arrow_BM);
+
+    } while (u8g2.nextPage());
+
+    arrowSet = arrowSet + speed;
+    menuSet1 = menuSet1 + speed;
+    menuSet2 = menuSet2 + speed;
+    icon1 = icon1 + speed;
+    icon2 = icon2 + speed;
+
+    pageTransition = pageTransition + speed;
+    menuChime1 = menuChime1 + speed;
+    menuChime2 = menuChime2 + speed;
+    arrowChime = arrowChime + speed;
+  } while (pageTransition < 0);
 }
 
 
