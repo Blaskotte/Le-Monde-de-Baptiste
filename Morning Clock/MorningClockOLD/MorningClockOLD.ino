@@ -840,7 +840,7 @@ void alarmSet_music() {
   } while (alarmSetMusic_page == true);
 }
 void alarmMenuTransition() {
-  int speed = 16;
+  int speed = 26;
 
   int pageTransition = 128;
 
@@ -894,7 +894,7 @@ void alarmMenuTransition() {
   } while (pageTransition > 0);
 }
 void alarmToSettingsTransition() {
-  int speed = 16;
+  int speed = 26;
   int pageTransition = -128;
   int arrowSet = -123;
   int menuSet1 = -110;
@@ -1245,7 +1245,7 @@ void chimeSet_music() {
   } while (chimeSetMusic_page == true);
 }
 void chimeMenuTransition() {
-  int speed = 16;
+  int speed = 26;
 
   int pageTransition = 128;
 
@@ -1298,7 +1298,7 @@ void chimeMenuTransition() {
   } while (pageTransition > 0);
 }
 void chimeToSettingsTransition() {
-  int speed = 16;
+  int speed = 26;
   int pageTransition = -128;
   int arrowSet = -123;
   int menuSet1 = -110;
