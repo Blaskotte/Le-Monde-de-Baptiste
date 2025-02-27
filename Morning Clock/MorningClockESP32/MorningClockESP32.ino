@@ -2,16 +2,16 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <Wire.h>
-#include <RtcDS1302.h>
+#include <RTClib.h>
 
-U8G2_ST7567_JLX12864_2_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/12, /* data=*/13, /* cs=*/14, /* dc=*/15, /* reset=*/16);
+RTC_DS3231 rtc;
+U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/12, /* data=*/13, /* cs=*/14, /* dc=*/15, /* reset=*/16);
 
 //Defining pins
 const int RotaryCLK = 2;  //CLK
 const int RotaryDT = 3;   //DT
 const int RotarySW = 4;   //SW (Button function)
-ThreeWire myWire(1, 5, 6);       // DAT, CLK, RST (fils pour le RTC)
-RtcDS1302<ThreeWire> Rtc(myWire);  // RTC Object
+
 
 
 //Bitmaps
@@ -69,6 +69,10 @@ const unsigned char right_arrow_BM[] PROGMEM = {
   // 'right_arrow, 7x5px
   0x08, 0x10, 0x3f, 0x10, 0x08
 };
+const unsigned char left_arrow_BM[] PROGMEM = {
+  // 'right_arrow, 7x5px
+  0x04,0x02,0x7f,0x02,0x04
+};
 const unsigned char clock_BM[] PROGMEM = {
   // 'clock, 8x9px
   0x3c, 0x42, 0x89, 0x89, 0xb9, 0x81, 0x42, 0x3c, 0x3c
@@ -82,28 +86,9 @@ const unsigned char calendar_BM[] PROGMEM = {
   // 'calendar_BM, 8x9px
   0x42, 0xff, 0xff, 0x81, 0x81, 0x81, 0x81, 0x81, 0xff
 };
-const unsigned char calendar_select_BM[] PROGMEM = {
-  // 'calendar_select_BM, 10x11px
-  0xfe, 0x01, 0x7b, 0x03, 0x01, 0x02, 0x01, 0x02, 0xfd, 0x02, 0xfd, 0x02, 0xfd, 0x02, 0xfd, 0x02,
-  0xfd, 0x02, 0x01, 0x02, 0xfe, 0x01
-};
 const unsigned char volume_BM[] PROGMEM = {
   // 'volume_BM, 8x7px
   0x08, 0x4c, 0x8f, 0xaf, 0x8f, 0x4c, 0x08
-};
-const unsigned char volume_select_BM[] PROGMEM = {
-  // 'volume_select_BM, 10x11px
-  0xfe, 0x01, 0xff, 0x03, 0xef, 0x03, 0x67, 0x03, 0xe1, 0x02, 0xa1, 0x02, 0xe1, 0x02, 0x67, 0x03,
-  0xef, 0x03, 0xff, 0x03, 0xfe, 0x01
-};
-const unsigned char return_BM[] PROGMEM = {
-  // 'return_BM, 8x7px
-  0x08, 0x0c, 0x7e, 0xff, 0xfe, 0xcc, 0x88
-};
-const unsigned char return_select_BM[] PROGMEM = {
-  // 'return_select_BM, 10x11px
-  0xfe, 0x01, 0xff, 0x03, 0xef, 0x03, 0xe7, 0x03, 0x03, 0x03, 0x01, 0x02, 0x03, 0x02, 0x67, 0x02,
-  0xef, 0x02, 0xff, 0x03, 0xfe, 0x01
 };
 
 // 'bigHappy_BM', 14x18px
@@ -127,15 +112,11 @@ const unsigned char return_select_BM[] PROGMEM = {
 // 'clock_select_BM, 10x11px
 
 // 'calendar_BM, 8x9px
-// 'calendar_select_BM, 10x11px
 
 // 'volume_BM, 8x7px
-// 'volume_select_BM, 10x11px
-
-// 'return_BM, 8x7px
-// 'return_select_BM, 10x11px
 
 // 'right_arrow_BM, 7x5px
+// 'left_arrow_BM, 7x5px
 
 //Defining variables for rotary encoder and button
 int rotateCounter = 0;            //counts the rotation clicks
@@ -164,10 +145,15 @@ bool settingsPage = false;
 bool alarmSetPage = false;
 bool chimeSetPage = false;
 bool calendarSetPage = false;
+bool screenSetPage = false;
 
 bool alarmSetMusic_page = false;
 bool chimeSetMusic_page = false;
 bool volumeSet_page = false;
+
+int rotatePrevious;
+int frame = 1;
+int menuItemSelect;
 
 int alarmMusic;               //EEPROM adress 1
 int chimeMusic;               //EEPROM adress 2
@@ -181,24 +167,21 @@ unsigned int temporaryMinute;
 unsigned int temporarySecond;
 
 unsigned int volume = 15;
-bool page1_2bool = true;
 
 
 
 
 void setup() {
-  Rtc.Begin();
+
+  rtc.begin();
+
   u8g2.begin();
   u8g2.enableUTF8Print();
-  u8g2.firstPage();
   u8g2.setContrast(130);
 
+  u8g2.firstPage();
   do {
     u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
-    //u8g2.drawXBMP(61, 19, 7, 9, happyMenu_BM);
-    //u8g2.drawBox(23, 46, progress, 2);
-    //u8g2.drawFrame(21, 44, 84, 6);
-    //u8g2.drawLine(0, 64, 127, 64);
   } while (u8g2.nextPage());
 
 
@@ -206,6 +189,7 @@ void setup() {
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
+
   //Store states
   CLKPrevious = digitalRead(RotaryCLK);
   DTPrevious = digitalRead(RotaryDT);
@@ -215,7 +199,7 @@ void setup() {
 
 
   TimeNow1 = millis();  //Start timer 1
-  delay(1000);
+  delay(300);
 }
 
 void loop() {
@@ -228,7 +212,8 @@ void loop() {
 
   if (homePage == false && settingsPage == true) {
     updateSettingsPage();
-    executeSettingsPage();
+    printSettingsPage();
+    //executeSettingsPage();
   }
 }
 
@@ -236,7 +221,7 @@ void loop() {
 //main page
 void printHomePage() {
 
-    RtcDateTime now = Rtc.GetDateTime();
+  DateTime now = rtc.now();
 
   u8g2.firstPage();
   do {
@@ -287,9 +272,9 @@ void printHomePage() {
 
     u8g2.setFont(u8g2_font_timR24_tn);
     u8g2.setCursor(28, 44);
-    u8g2.print(twoDigit(now.Hour()));
+    u8g2.print(twoDigit(now.hour()));
     u8g2.print(':');
-    u8g2.print(twoDigit(now.Minute()));
+    u8g2.print(twoDigit(now.minute()));
 
     // print the date
 
@@ -351,6 +336,7 @@ void executeHomePage() {
         homePage = false;
         settingsPage = true;
         rotateCounter = 1;
+        frame = 1;
         break;
     }
   }
@@ -361,118 +347,217 @@ void executeHomePage() {
 //main settings page
 void updateSettingsPage() {
   switch (rotateCounter) {
-    case -10:
-      rotateCounter = 1;
-      break;
-    case -2:
-      rotateCounter = 1;
-      break;
-    case -1:
-      rotateCounter = 1;
-      break;
-    case 0:
-      rotateCounter = 1;
+    case 1:
+      menuItemSelect = 1;
+      frame = 1;
+      if (frame > 1 || frame < 1) {
+        frame = 1;
+      }
+      rotatePrevious = rotateCounter;
       break;
 
-    case 1:
-      u8g2.firstPage();
-      do {
-        drawSettingsBar();
-        u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
-        u8g2.drawUTF8(18, 28, "Réveil");
-        u8g2.drawXBMP(113, 19, 10, 11, alarmON_select_BM);
-        u8g2.drawStr(15, 43, "Carillon");
-        u8g2.drawXBMP(114, 35, 8, 9, chimeON_BM);
-        u8g2.drawStr(15, 58, "Horloge");
-        u8g2.drawXBMP(114, 50, 8, 9, clock_BM);
-      } while (u8g2.nextPage());
-      break;
 
     case 2:
-      u8g2.firstPage();
-      do {
-        drawSettingsBar();
-        u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-        u8g2.drawUTF8(15, 28, "Réveil");
-        u8g2.drawXBMP(114, 20, 8, 9, alarmON_BM);
-        u8g2.drawStr(18, 43, "Carillon");
-        u8g2.drawXBMP(113, 34, 10, 11, chimeON_select_BM);
-        u8g2.drawStr(15, 58, "Horloge");
-        u8g2.drawXBMP(114, 50, 8, 9, clock_BM);
-      } while (u8g2.nextPage());
+      menuItemSelect = 2;
+      if (rotatePrevious > rotateCounter && frame == 3) {
+        frame--;
+      }
+      if (frame > 2 || frame < 1) {
+        frame = 1;
+      }
+      rotatePrevious = rotateCounter;
       break;
 
     case 3:
-      u8g2.firstPage();
-      do {
-        drawSettingsBar();
-        u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-        u8g2.drawStr(15, 28, "Carillon");
-        u8g2.drawXBMP(114, 20, 8, 9, chimeON_BM);
-        u8g2.drawStr(18, 43, "Horloge");
-        u8g2.drawXBMP(113, 34, 10, 11, clock_select_BM);
-        u8g2.drawStr(15, 58, "Calendrier");
-        u8g2.drawXBMP(114, 50, 8, 9, calendar_BM);
-      } while (u8g2.nextPage());
+      menuItemSelect = 3;
+      if (rotatePrevious > rotateCounter && frame == 4) {
+        frame--;
+      }
+      if (frame > 3 || frame < 1) {
+        frame = 2;
+      }
+      rotatePrevious = rotateCounter;
       break;
 
     case 4:
-      u8g2.firstPage();
-      do {
-        drawSettingsBar();
-        u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-        u8g2.drawStr(15, 28, "Horloge");
-        u8g2.drawXBMP(114, 20, 8, 9, clock_BM);
-        u8g2.drawStr(18, 43, "Calendrier");
-        u8g2.drawXBMP(113, 34, 10, 11, calendar_select_BM);
-        u8g2.drawStr(15, 58, "Volume");
-        u8g2.drawXBMP(114, 51, 8, 7, volume_BM);
-      } while (u8g2.nextPage());
+      menuItemSelect = 4;
+      if (rotatePrevious > rotateCounter && frame == 5) {
+        frame--;
+      }
+      if (rotatePrevious < rotateCounter && frame == 1) {
+        frame++;
+      }
+      if (frame > 4 || frame < 2) {
+        frame = 3;
+      }
+      rotatePrevious = rotateCounter;
       break;
 
     case 5:
-      u8g2.firstPage();
-      do {
-        drawSettingsBar();
-        u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-        u8g2.drawStr(15, 28, "Calendrier");
-        u8g2.drawXBMP(114, 20, 8, 9, calendar_BM);
-        u8g2.drawStr(18, 43, "Volume");
-        u8g2.drawXBMP(113, 34, 10, 11, volume_select_BM);
-        u8g2.drawStr(15, 58, "Retour");
-        u8g2.drawXBMP(114, 51, 8, 7, return_BM);
-      } while (u8g2.nextPage());
+      menuItemSelect = 5;
+      if (rotatePrevious < rotateCounter && frame == 2) {
+        frame++;
+      }
+      if (frame > 5 || frame < 3) {
+        frame = 4;
+      }
+      rotatePrevious = rotateCounter;
       break;
 
     case 6:
-      u8g2.firstPage();
-      do {
-        drawSettingsBar();
-        u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
-        u8g2.drawStr(15, 28, "Calendrier");
-        u8g2.drawXBMP(114, 20, 8, 9, calendar_BM);
-        u8g2.drawStr(15, 43, "Volume");
-        u8g2.drawXBMP(114, 36, 8, 7, volume_BM);
-        u8g2.drawStr(18, 58, "Retour");
-        u8g2.drawXBMP(113, 49, 10, 11, return_select_BM);
-      } while (u8g2.nextPage());
+      menuItemSelect = 6;
+      if (rotatePrevious < rotateCounter && frame == 3) {
+        frame++;
+      }
+      if (frame > 5 || frame < 4) {
+        frame = 5;
+      }
+      rotatePrevious = rotateCounter;
       break;
 
+
     case 7:
-      rotateCounter = 6;
+      menuItemSelect = 7;
+      frame = 5;
+      if (frame > 5 || frame < 4) {
+        frame = 5;
+      }
+      rotatePrevious = rotateCounter;
       break;
-    case 8:
-      rotateCounter = 6;
-      break;
-    case 9:
-      rotateCounter = 6;
-      break;
-    case 16:
-      rotateCounter = 6;
+
+    default:
+      if (rotateCounter > 7) {
+        rotateCounter = 7;
+      }
+      if (rotateCounter < 1) {
+        rotateCounter = 1;
+      }
       break;
   }
 }
-void executeSettingsPage() {
+void printSettingsPage() {
+  u8g2.firstPage();
+  do {
+    drawSettingsBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    switch (frame) {
+      case 1:
+        u8g2.drawUTF8(6, 27, "Réveil");
+        u8g2.drawStr(6, 42, "Carillon");
+        u8g2.drawStr(6, 57, "Volume");
+        u8g2.setDrawColor(2);
+        switch (menuItemSelect) {
+          case 1:
+            u8g2.drawBox(2, 17, 124, 13);
+            u8g2.drawXBM(115, 21, 7, 5, right_arrow_BM);
+            break;
+
+          case 2:
+            u8g2.drawBox(2, 32, 124, 13);
+            u8g2.drawXBM(115, 36, 7, 5, right_arrow_BM);
+            break;
+
+          case 3:
+            u8g2.drawBox(2, 47, 124, 13);
+            u8g2.drawXBM(115, 51, 7, 5, right_arrow_BM);
+            break;
+        }
+        break;
+
+      case 2:
+        u8g2.drawStr(6, 27, "Carillon");
+        u8g2.drawStr(6, 42, "Volume");
+        u8g2.drawStr(6, 57, "Affichage");
+        u8g2.setDrawColor(2);
+        switch (menuItemSelect) {
+          case 2:
+            u8g2.drawBox(2, 17, 124, 13);
+            u8g2.drawXBM(115, 21, 7, 5, right_arrow_BM);
+            break;
+
+          case 3:
+            u8g2.drawBox(2, 32, 124, 13);
+            u8g2.drawXBM(115, 36, 7, 5, right_arrow_BM);
+            break;
+
+          case 4:
+            u8g2.drawBox(2, 47, 124, 13);
+            u8g2.drawXBM(115, 51, 7, 5, right_arrow_BM);
+            break;
+        }
+        break;
+
+      case 3:
+        u8g2.drawStr(6, 27, "Volume");
+        u8g2.drawStr(6, 42, "Affichage");
+        u8g2.drawStr(6, 57, "Date & heure");
+        switch (menuItemSelect) {
+          case 3:
+            u8g2.drawBox(2, 17, 124, 13);
+            u8g2.drawXBM(115, 21, 7, 5, right_arrow_BM);
+            break;
+
+          case 4:
+            u8g2.drawBox(2, 32, 124, 13);
+            u8g2.drawXBM(115, 36, 7, 5, right_arrow_BM);
+            break;
+
+          case 5:
+            u8g2.drawBox(2, 47, 124, 13);
+            u8g2.drawXBM(115, 51, 7, 5, right_arrow_BM);
+            break;
+        }
+        break;
+
+      case 4:
+        u8g2.drawStr(6, 27, "Affichage");
+        u8g2.drawStr(6, 42, "Date & heure");
+        u8g2.drawUTF8(6, 57, "À propos");
+        switch (menuItemSelect) {
+          case 4:
+            u8g2.drawBox(2, 17, 124, 13);
+            u8g2.drawXBM(115, 21, 7, 5, right_arrow_BM);
+            break;
+
+          case 5:
+            u8g2.drawBox(2, 32, 124, 13);
+            u8g2.drawXBM(115, 36, 7, 5, right_arrow_BM);
+            break;
+
+          case 6:
+            u8g2.drawBox(2, 47, 124, 13);
+            u8g2.drawXBM(115, 51, 7, 5, right_arrow_BM);
+            break;
+        }
+        break;
+
+      case 5:
+        u8g2.drawStr(6, 27, "Date & heure");
+        u8g2.drawUTF8(6, 42, "À propos");
+        u8g2.drawStr(6, 57, "Retour");
+        switch (menuItemSelect) {
+          case 5:
+            u8g2.drawBox(2, 17, 124, 13);
+            u8g2.drawXBM(115, 21, 7, 5, right_arrow_BM);
+            break;
+
+          case 6:
+            u8g2.drawBox(2, 32, 124, 13);
+            u8g2.drawXBM(115, 36, 7, 5, right_arrow_BM);
+            break;
+
+          case 7:
+            u8g2.drawBox(2, 47, 124, 13);
+            u8g2.drawXBM(115, 51, 7, 5, left_arrow_BM);
+            break;
+        }
+        break;
+    }
+  } while (u8g2.nextPage());
+}
+/*void executeSettingsPage() {
 
   if (buttonPressedState == true) {
     switch (rotateCounter) {
@@ -510,7 +595,7 @@ void executeSettingsPage() {
     }
   }
   buttonPressedState = false;  //reset this variable
-}
+}*/
 
 
 //alarm page
@@ -814,7 +899,7 @@ void alarmSet_music() {
   } while (alarmSetMusic_page == true);
 }
 void alarmMenuTransition() {
-  int speed = 16;
+  int speed = 26;
 
   int pageTransition = 128;
 
@@ -868,7 +953,7 @@ void alarmMenuTransition() {
   } while (pageTransition > 0);
 }
 void alarmToSettingsTransition() {
-  int speed = 16;
+  int speed = 26;
   int pageTransition = -128;
   int arrowSet = -123;
   int menuSet1 = -110;
@@ -1406,12 +1491,6 @@ void updateClockPage() {
         break;
 
       case 4:
-        RtcDateTime temporaire = Rtc.GetDateTime();
-  int year = temporaire.Year();
-  int month = temporaire.Month();
-  int day = temporaire.Day();
-    RtcDateTime nouveauTime = RtcDateTime(year, month, day, temporaryHour, temporaryMinute, temporarySecond);
-  Rtc.SetDateTime(nouveauTime);
         clockSet_page = false;
         delay(500);
         break;
