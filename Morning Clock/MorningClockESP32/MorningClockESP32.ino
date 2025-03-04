@@ -19,12 +19,11 @@ U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/12, /* data=*/13, /* c
 
 
 
-
-
 //Defining pins for buttons
 const int RotaryCLK = 2;  //CLK
 const int RotaryDT = 3;   //DT
 const int RotarySW = 4;   //SW (Button function)
+const int backlight = 5;  //control LCD backlight
 
 
 
@@ -238,7 +237,13 @@ bool clockDateSettingsMenu = false;
 bool clockSet_menu = false;
 bool dateSet_menu = false;
 
+
+//about page
 bool aboutPage = false;
+static int aboutPageSize = 150;
+static int aboutStepSize = 5;
+int aboutNumberStep;
+int aboutCurrentStep;
 int text1;
 int text2;
 int text3;
@@ -253,13 +258,21 @@ int text11;
 int text12;
 
 
+//variables for the scrollbar
+static int startScrollbar = 15;
+static int endScrollbar = 62;
+static int scrollbarTotalSize = 47;
+static int screenSize = 50;
+
+int elevatorSize;
+int scrollCurrentPosition;
+
+
 //variables for the adaptatives menus
 int rotatePrevious;
 int frameSettingsMenu = 1;
 int frameAlarmMenu = 1;
 int menuItemSelect = 1;
-int aboutStep = 0;
-int aboutScrollbar;
 
 
 //variables that will be saved into the EEPROM
@@ -288,27 +301,37 @@ unsigned int volume = 15;
 
 
 void setup() {
-  Wire.begin();
-  rtc.begin();
   mp3Serial.begin(9600);
-  delay(500);
   soundSystem.begin(mp3Serial);
-  delay(500);
-  soundSystem.sendCommand(CMD_SEL_DEV, 0, 2);
   u8g2.begin();
 
   u8g2.enableUTF8Print();
   u8g2.setContrast(130);
+  pinMode(backlight, OUTPUT);
 
   u8g2.clearBuffer();
   u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
   u8g2.sendBuffer();
+  delay(200);
+  int lightning = 0;
+
+  do {
+    analogWrite(backlight, lightning);
+    lightning++;
+    delay(5);
+  } while (lightning < 256);
+
+  Wire.begin();
+  rtc.begin();
+  soundSystem.sendCommand(CMD_SEL_DEV, 0, 2);
+
 
 
   //setting up pins
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
+
 
   //Store states
   CLKPrevious = digitalRead(RotaryCLK);
@@ -329,7 +352,6 @@ void setup() {
 
 
   TimeNow1 = millis();  //Start timer 1
-  delay(500);
   soundSystem.play(1);
 }
 
@@ -725,7 +747,7 @@ void executeSettingsMenu() {
       case 6:
         aboutPage = true;
         rotateCounter = 0;
-        aboutStep = 0;
+        aboutCurrentStep = 0;
         settings_to_aboutTransition();
         break;
 
@@ -2183,30 +2205,34 @@ void printAboutPage() {
 
   drawAboutBar();
   drawScrollbar();
-  scrollbar_28frames();
+  scrollbarAbout();
   u8g2.sendBuffer();
 }
 void updateAboutPage() {
+
+  aboutNumberStep = aboutPageSize / aboutStepSize;
+
   if (rotateCounter < 0) {
     rotateCounter = 0;
   }
-  if (rotateCounter > 35) {
-    rotateCounter = 35;
+  if (rotateCounter > aboutNumberStep) {
+    rotateCounter = aboutNumberStep;
   }
 
-  aboutStep = rotateCounter * 5;
-  text1 = 34 - aboutStep;
-  text2 = 85 - aboutStep;
-  text3 = 111 - aboutStep;
-  text4 = 123 - aboutStep;
-  text5 = 96 - aboutStep;
-  text6 = 137 - aboutStep;
-  text7 = 147 - aboutStep;
-  text8 = 171 - aboutStep;
-  text9 = 182 - aboutStep;
-  text10 = 51 - aboutStep;
-  text11 = 66 - aboutStep;
-  text12 = 198 - aboutStep;
+  aboutCurrentStep = map(rotateCounter, 0, aboutNumberStep, 0, aboutPageSize);
+
+  text1 = 34 - aboutCurrentStep;
+  text2 = 85 - aboutCurrentStep;
+  text3 = 111 - aboutCurrentStep;
+  text4 = 123 - aboutCurrentStep;
+  text5 = 96 - aboutCurrentStep;
+  text6 = 137 - aboutCurrentStep;
+  text7 = 147 - aboutCurrentStep;
+  text8 = 171 - aboutCurrentStep;
+  text9 = 182 - aboutCurrentStep;
+  text10 = 51 - aboutCurrentStep;
+  text11 = 66 - aboutCurrentStep;
+  text12 = 198 - aboutCurrentStep;
 }
 void executeAboutPage() {
   if (buttonPressedState == true) {
@@ -2264,7 +2290,7 @@ void settings_to_aboutTransition() {
     u8g2.drawStr(textTransition3, 66, "BETA 2.0");
     drawAboutBar();
     drawScrollbar();
-    scrollbar_28frames();
+    scrollbarAbout();
     u8g2.sendBuffer();
 
     settingsItems = settingsItems - speed;
@@ -2512,12 +2538,18 @@ void scrollbar_5frames() {
       break;
   }
 }
-void scrollbar_28frames() {
-  aboutScrollbar = 15 + aboutStep / 5;
-  u8g2.drawFrame(124, aboutScrollbar, 2, 12);
+void scrollbarAbout() {
+
+  int aboutStopScrollbar;
+
+  elevatorSize = scrollbarTotalSize / (aboutPageSize / screenSize);
+
+  aboutStopScrollbar = endScrollbar - elevatorSize;
+
+  scrollCurrentPosition = map(aboutCurrentStep, 0, aboutPageSize, startScrollbar, aboutStopScrollbar);
+
+  u8g2.drawFrame(124, scrollCurrentPosition, 2, elevatorSize);
 }
-
-
 
 
 
