@@ -23,7 +23,6 @@ U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/12, /* data=*/13, /* c
 const int RotaryCLK = 2;  //CLK
 const int RotaryDT = 3;   //DT
 const int RotarySW = 4;   //SW (Button function)
-const int backlight = 5;  //control LCD backlight
 
 
 
@@ -100,11 +99,6 @@ const unsigned char clock_BM[] PROGMEM = {
   // 'clock, 8x9px
   0x3c, 0x42, 0x89, 0x89, 0xb9, 0x81, 0x42, 0x3c, 0x3c
 };
-const unsigned char clock_select_BM[] PROGMEM = {
-  // 'clock_select, 10x11px
-  0xfe, 0x01, 0x87, 0x03, 0x7b, 0x03, 0xed, 0x02, 0xed, 0x02, 0x8d, 0x02, 0xfd, 0x02, 0x7b, 0x03,
-  0x87, 0x03, 0x87, 0x03, 0xfe, 0x01
-};
 const unsigned char calendar_BM[] PROGMEM = {
   // 'calendar_BM, 8x9px
   0x42, 0xff, 0xff, 0x81, 0x81, 0x81, 0x81, 0x81, 0xff
@@ -116,6 +110,22 @@ const unsigned char volume_BM[] PROGMEM = {
 const unsigned char about_BM[] PROGMEM = {
   // 'about_BM, 8x7px
   0x66, 0xff, 0xff, 0xff, 0x7e, 0x3c, 0x18
+};
+const unsigned char settings_BM[] PROGMEM = {
+  // 'settings_BM', 8x9px
+  0x40, 0xff, 0x40, 0x02, 0xff, 0x02, 0x40, 0xff, 0x40
+};
+const unsigned char display_BM[] PROGMEM = {
+  // 'display_BM', 8x9px
+  0xff, 0x81, 0x81, 0x81, 0x81, 0xff, 0x18, 0x18, 0x7e
+};
+const unsigned char brightness_low_BM[] PROGMEM = {
+  // 'brightness_low_BM', 8x12px
+  0x3c, 0x7e, 0xfd, 0xf9, 0xf1, 0xe1, 0x42, 0x24, 0x3c, 0x34, 0x2c, 0x18
+};
+const unsigned char brightness_high_BM[] PROGMEM = {
+  // 'brightness_high_BM', 16x13px
+  0x02, 0x40, 0xc4, 0x23, 0x20, 0x04, 0x10, 0x08, 0x13, 0xc8, 0x10, 0x08, 0x10, 0x08, 0x24, 0x24, 0x42, 0x42, 0xc0, 0x03, 0x40, 0x03, 0xc0, 0x02, 0x80, 0x01
 };
 
 
@@ -131,7 +141,6 @@ const unsigned char about_BM[] PROGMEM = {
 // 'chimeOFF_BM', 8x9px
 // 'chimeOFF_select_BM', 10x11px
 // 'clock_BM, 8x9px
-// 'clock_select_BM, 10x11px
 // 'calendar_BM, 8x9px
 // 'volume_BM, 8x7px
 // 'right_arrow_BM, 4x7px
@@ -139,6 +148,10 @@ const unsigned char about_BM[] PROGMEM = {
 // 'up_arrow_BM, 8x4px
 // 'down_arrow_BM, 8x4px
 // 'about_BM, 8x7px
+// 'settings_BM', 8x9px
+// 'display_BM', 8x9px
+// 'brightness_low_BM', 8x12px
+// 'brightness_high_BM', 16x13px
 
 
 
@@ -183,6 +196,13 @@ const char* clockDateMenuTitles[] = {
   "useless",
   "Régler l'heure",
   "Régler la date",
+  "Retour"
+};
+
+const char* displayMenuTitles[] = {
+  "useless",
+  "Luminosité",
+  "Contraste",
   "Retour"
 };
 
@@ -231,17 +251,22 @@ bool chimeSetMusic_menu = false;
 
 bool volumeSettingsMenu = false;
 
-bool screenSettingsMenu = false;
+bool displaySettingsMenu = false;
+bool brightness_menu = false;
+bool contrast_menu = false;
 
 bool clockDateSettingsMenu = false;
 bool clockSet_menu = false;
 bool dateSet_menu = false;
 
 
+//brightness page
+int brightnessBarSize;
+
 //about page
 bool aboutPage = false;
 static int aboutPageSize = 150;
-static int aboutStepSize = 5;
+static int aboutStepSize = 10;
 int aboutNumberStep;
 int aboutCurrentStep;
 int text1;
@@ -285,6 +310,7 @@ unsigned int chimeLastHour;       //EEPROM adress 6
 unsigned int volumeAlarm;         //EEPROM adress 7
 unsigned int volumeChime;         //EEPROM adress 8
 unsigned int volumeNotification;  //EEPROM adress 9
+unsigned int brightness;          // EEPROM adress 10
 
 
 //variables used to set the hour
@@ -295,8 +321,11 @@ unsigned int temporarySecond;
 
 //volume variable
 unsigned int volume = 15;
+unsigned int contrast;
 
-
+unsigned long previousMillis = 0;
+const long interval = 1000;
+bool blink = false;
 
 
 
@@ -307,19 +336,18 @@ void setup() {
 
   u8g2.enableUTF8Print();
   u8g2.setContrast(130);
-  pinMode(backlight, OUTPUT);
 
   u8g2.clearBuffer();
   u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
   u8g2.sendBuffer();
   delay(200);
-  int lightning = 0;
+  /*int lightning = 0;
 
   do {
     analogWrite(backlight, lightning);
     lightning++;
     delay(5);
-  } while (lightning < 256);
+  } while (lightning < 256);*/
 
   Wire.begin();
   rtc.begin();
@@ -328,14 +356,11 @@ void setup() {
 
 
   //setting up pins
-  pinMode(2, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
-  pinMode(4, INPUT_PULLUP);
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(4, INPUT);
 
 
-  //Store states
-  CLKPrevious = digitalRead(RotaryCLK);
-  DTPrevious = digitalRead(RotaryDT);
 
   attachInterrupt((RotaryCLK), wheel_is_rotated, CHANGE);
   attachInterrupt((RotarySW), button_is_pressed, FALLING);
@@ -349,6 +374,7 @@ void setup() {
   volumeAlarm = eprom.read(7);
   volumeChime = eprom.read(8);
   volumeNotification = eprom.read(9);
+  brightness = eprom.read(10);
 
 
   TimeNow1 = millis();  //Start timer 1
@@ -378,7 +404,16 @@ void loop() {
     }
     if (volumeSettingsMenu == true) {
     }
-    if (screenSettingsMenu == true) {
+    if (displaySettingsMenu == true) {
+      if (brightness_menu == true) {
+        printBrightnessMenu();
+        updateBrightnessMenu();
+        executeBrightnessMenu();
+      } else {
+        printDisplayMenu();
+        updateDisplayMenu();
+        executeDisplayMenu();
+      }
     }
     if (clockDateSettingsMenu == true) {
       if (clockSet_menu == true) {
@@ -395,7 +430,7 @@ void loop() {
       printAboutPage();
       executeAboutPage();
     }
-    if (alarmSettingsMenu == false && chimeSettingsMenu == false && volumeSettingsMenu == false && screenSettingsMenu == false && clockDateSettingsMenu == false && aboutPage == false) {
+    if (alarmSettingsMenu == false && chimeSettingsMenu == false && volumeSettingsMenu == false && displaySettingsMenu == false && clockDateSettingsMenu == false && aboutPage == false) {
       printSettingsMenu();
       updateSettingsMenu();
       executeSettingsMenu();
@@ -413,16 +448,31 @@ void printHomePage() {
 
   DateTime now = rtc.now();
 
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+    if (blink == true) {
+      blink = false;
+    } else {
+      blink = true;
+    }
+  }
+
   u8g2.clearBuffer();
   drawHomePageBar();
-
   //u8g2.setFont(u8g2_font_logisoso24_tn);
   //u8g2.setFont(u8g2_font_maniac_tn);
   u8g2.setFont(u8g2_font_timR24_tn);
 
   u8g2.setCursor(28, 44);
   u8g2.print(twoDigit(now.hour()));
-  u8g2.print(':');
+
+  if (blink == true) {
+    u8g2.print(":");
+  } else {
+    u8g2.print(" ");
+  }
+
+  u8g2.setCursor(69, 44);
   u8g2.print(twoDigit(now.minute()));
   drawDate();
   u8g2.sendBuffer();
@@ -735,6 +785,10 @@ void executeSettingsMenu() {
         break;
 
       case 4:
+        displaySettingsMenu = true;
+        rotateCounter = 1;
+        menuItemSelect = 1;
+        settings_to_displayTransition();
         break;
 
       case 5:
@@ -1098,6 +1152,8 @@ void alarmSet_state() {
   } else {
     alarm_is_activated = true;
   }
+  delay(200);
+  buttonPressedState = false;
 }
 
 //alarm / hour
@@ -1139,6 +1195,7 @@ void updateAlarmSet_hour() {
       alarmHour = rotateCounter;
       if (buttonPressedState == true) {
         rotateCounter = alarmMinute;
+        delay(300);
         buttonPressedState = false;
         alarmSetStep = 2;
       }
@@ -1153,6 +1210,7 @@ void updateAlarmSet_hour() {
       }
       alarmMinute = rotateCounter;
       if (buttonPressedState == true) {
+        delay(300);
         buttonPressedState = false;
         alarmSetStep = 3;
       }
@@ -1271,327 +1329,8 @@ void hour_to_alarmTransition() {
   } while (pageTransition < 0);
 }
 
-//alarm / music
-/*void alarmSet_music() {
-  alarmSetMusic_page = true;
-  int alarmSetStep = 1;
-  rotateCounter = 2;
-  buttonPressedState = false;
-
-  do {
-    u8g2.firstPage();
-    do {
-      drawAlarmMenu();
-      switch (alarmSetStep) {
-        case 1:
-          if (alarmMusic == 3) {
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
-            u8g2.drawUTF8(18, 28, "Haydn : Concerto");
-            u8g2.drawStr(15, 43, "Frutiger Aero");
-            u8g2.drawStr(15, 58, "Grieg : Peer Gynt");
-          }
-          if (alarmMusic == 4) {
-            u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawUTF8(15, 28, "Haydn : Concerto");
-            u8g2.drawStr(18, 43, "Frutiger Aero");
-            u8g2.drawStr(15, 58, "Grieg : Peer Gynt");
-          }
-          if (alarmMusic == 5) {
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-            u8g2.drawUTF8(15, 28, "Frutiger Aero");
-            u8g2.drawStr(18, 43, "Grieg : Peer Gynt");
-            u8g2.drawUTF8(15, 58, "Vivaldi : Été");
-          }
-          if (alarmMusic == 6) {
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
-            u8g2.drawUTF8(15, 28, "Frutiger Aero");
-            u8g2.drawStr(15, 43, "Grieg : Peer Gynt");
-            u8g2.drawUTF8(18, 58, "Vivaldi : Été");
-          }
-          break;
-
-        case 2:
-          choice_is_OK();
-          break;
-
-        case 3:
-          u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawStr(16, 35, "Choix de musique");
-          u8g2.drawUTF8(28, 48, "enregistré !");
-          break;
-      }
-
-    } while (u8g2.nextPage());
-
-    switch (alarmSetStep) {
-
-      case 1:  //Selection of the music
-        if (rotateCounter < 3) {
-          rotateCounter = 3;
-        }
-        if (rotateCounter > 6) {
-          rotateCounter = 6;
-        }
-        alarmMusic = rotateCounter;
-        if (buttonPressedState == true) {
-          buttonPressedState = false;
-          alarmSetStep = 2;
-          rotateCounter = 1;
-        }
-        break;
-
-      case 2:  //Validate the choice
-        if (rotateCounter < 1) {
-          rotateCounter = 1;
-        }
-        if (rotateCounter > 2) {
-          rotateCounter = 2;
-        }
-        if (buttonPressedState == true && rotateCounter == 1) {
-          buttonPressedState = false;
-          alarmSetStep = 3;
-        }
-        if (buttonPressedState == true && rotateCounter == 2) {
-          buttonPressedState = false;
-          alarmSetStep = 1;
-        }
-        break;
-
-      case 3:
-        alarmSetMusic_page = false;
-        delay(500);
-        buttonPressedState = false;
-        rotateCounter = 1;
-        break;
-    }
-  } while (alarmSetMusic_page == true);
-}
-void alarmMenuTransition() {
-  int speed = 26;
-
-  int pageTransition = 128;
-
-  int arrowSet = 5;
-  int menuSet1 = 18;
-  int menuSet2 = 15;
-  int icon1 = 113;
-  int icon2 = 114;
-
-  int menuAlarm1 = 146;
-  int menuAlarm2 = 143;
-  int arrowAlarm = 133;
-
-  do {
-
-    u8g2.firstPage();
-    do {
-      u8g2.drawXBMP(arrowSet, 22, 7, 5, right_arrow_BM);
-      u8g2.drawUTF8(menuSet1, 28, "Réveil");
-      u8g2.drawXBMP(icon1, 19, 10, 11, alarmON_select_BM);
-      u8g2.drawStr(menuSet2, 43, "Carillon");
-      u8g2.drawXBMP(icon2, 35, 8, 9, chimeON_BM);
-      u8g2.drawStr(menuSet2, 58, "Horloge");
-      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
-      drawAlarmMenu();
-
-      if (alarm_is_activated == true) {
-        u8g2.drawUTF8(menuAlarm1, 28, "Désactiver");
-      } else {
-        u8g2.drawStr(menuAlarm1, 28, "Activer");
-      }
-      u8g2.drawStr(menuAlarm2, 43, "Heure");
-      u8g2.drawStr(menuAlarm2, 58, "Musique");
-      u8g2.drawXBMP(arrowAlarm, 22, 7, 5, right_arrow_BM);
 
 
-    } while (u8g2.nextPage());
-
-    u8g2.clearBuffer();
-
-    arrowSet = arrowSet - speed;
-    menuSet1 = menuSet1 - speed;
-    menuSet2 = menuSet2 - speed;
-    icon1 = icon1 - speed;
-    icon2 = icon2 - speed;
-
-    pageTransition = pageTransition - speed;
-    menuAlarm1 = menuAlarm1 - speed;
-    menuAlarm2 = menuAlarm2 - speed;
-    arrowAlarm = arrowAlarm - speed;
-  } while (pageTransition > 0);
-}
-void alarmToSettingsTransition() {
-  int speed = 26;
-  int pageTransition = -128;
-  int arrowSet = -123;
-  int menuSet1 = -110;
-  int menuSet2 = -113;
-  int icon1 = -15;
-  int icon2 = -14;
-  int menuAlarm1 = 15;
-  int menuAlarm2 = 18;
-  int arrowAlarm = 5;
-
-  do {
-
-    u8g2.firstPage();
-    do {
-
-      drawSettingsBar();
-      u8g2.drawXBMP(arrowSet, 22, 7, 5, right_arrow_BM);
-      u8g2.drawUTF8(menuSet1, 28, "Réveil");
-      u8g2.drawXBMP(icon1, 19, 10, 11, alarmON_select_BM);
-      u8g2.drawStr(menuSet2, 43, "Carillon");
-      u8g2.drawXBMP(icon2, 35, 8, 9, chimeON_BM);
-      u8g2.drawStr(menuSet2, 58, "Horloge");
-      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
-
-      u8g2.drawStr(menuAlarm1, 28, "Heure");
-      u8g2.drawStr(menuAlarm1, 43, "Musique");
-      u8g2.drawStr(menuAlarm2, 58, "Retour");
-      u8g2.drawXBMP(arrowAlarm, 52, 7, 5, right_arrow_BM);
-
-    } while (u8g2.nextPage());
-
-    arrowSet = arrowSet + speed;
-    menuSet1 = menuSet1 + speed;
-    menuSet2 = menuSet2 + speed;
-    icon1 = icon1 + speed;
-    icon2 = icon2 + speed;
-
-    pageTransition = pageTransition + speed;
-    menuAlarm1 = menuAlarm1 + speed;
-    menuAlarm2 = menuAlarm2 + speed;
-    arrowAlarm = arrowAlarm + speed;
-  } while (pageTransition < 0);
-}
-
-
-
-
-
-//   ==chime settings menu==
-
-void updateChimePage() {
-  chimeSetPage = true;
-  rotateCounter = 1;
-  buttonPressedState = false;
-  do {
-    switch (rotateCounter) {
-      case -10:
-        rotateCounter = 1;
-        break;
-      case -2:
-        rotateCounter = 1;
-        break;
-      case -1:
-        rotateCounter = 1;
-        break;
-      case 0:
-        rotateCounter = 1;
-        break;
-
-      case 1:
-
-        u8g2.firstPage();
-        do {
-          drawChimeMenu();
-          if (chime_is_activated == true) {
-            u8g2.drawUTF8(18, 28, "Désactiver");
-          } else {
-            u8g2.drawStr(18, 28, "Activer");
-          }
-          u8g2.drawUTF8(15, 43, "Heure de début/fin");
-          u8g2.drawStr(15, 58, "Musique");
-          u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
-        } while (u8g2.nextPage());
-        break;
-
-      case 2:
-        u8g2.firstPage();
-        do {
-          drawChimeMenu();
-          if (chime_is_activated == true) {
-            u8g2.drawUTF8(15, 28, "Désactiver");
-          } else {
-            u8g2.drawStr(15, 28, "Activer");
-          }
-          u8g2.drawUTF8(18, 43, "Heure de début/fin");
-          u8g2.drawStr(15, 58, "Musique");
-          u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-        } while (u8g2.nextPage());
-        break;
-
-      case 3:
-        u8g2.firstPage();
-        do {
-          drawChimeMenu();
-          u8g2.drawUTF8(15, 28, "Heure de début/fin");
-          u8g2.drawStr(18, 43, "Musique");
-          u8g2.drawStr(15, 58, "Retour");
-          u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-        } while (u8g2.nextPage());
-        break;
-
-      case 4:
-        u8g2.firstPage();
-        do {
-          drawChimeMenu();
-          u8g2.drawUTF8(15, 28, "Heure de début/fin");
-          u8g2.drawStr(15, 43, "Musique");
-          u8g2.drawStr(18, 58, "Retour");
-          u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
-        } while (u8g2.nextPage());
-        break;
-
-      case 5:
-        rotateCounter = 4;
-        break;
-      case 6:
-        rotateCounter = 4;
-        break;
-      case 7:
-        rotateCounter = 4;
-        break;
-      case 14:
-        rotateCounter = 4;
-        break;
-    }
-    executeChimeSetPage();
-  } while (chimeSetPage == true);
-}
-void executeChimeSetPage() {
-  if (buttonPressedState == true) {
-    switch (rotateCounter) {
-      case 1:
-        chimeSet_state();
-        break;
-
-      case 2:
-        chimeSet_hour();
-        chimeSetPage = false;
-        rotateCounter = 2;
-        break;
-
-      case 3:
-        chimeSet_music();
-        chimeSetPage = false;
-        rotateCounter = 2;
-        break;
-
-      case 4:
-        chimeToSettingsTransition();
-        chimeSetPage = false;
-        rotateCounter = 2;
-        break;
-    }
-    buttonPressedState = false;  //reset this variable
-  }
-}*/
 
 
 //    ==chime settings submenus==
@@ -1604,285 +1343,268 @@ void chimeSet_state() {
   } else {
     chime_is_activated = true;
   }
-  buttonPressedState = false;
-} /*
 
-//chime / hour
-void chimeSet_hour() {
-  bool chimeSetHour_page = true;
-  int chimeSetStep = 1;
-  rotateCounter = 0;
+  delay(200);
   buttonPressedState = false;
-  chimeStartHour = 0;
-  chimeLastHour = 0;
+}
 
-  do {
-    u8g2.firstPage();
-    do {
-      drawChimeMenu();
-      switch (chimeSetStep) {
-        case 1:
-          u8g2.setFont(u8g2_font_timR24_tn);
-          u8g2.setCursor(19, 44);
-          u8g2.print(twoDigit(chimeStartHour));
-          u8g2.print(" - ");
-          u8g2.print(twoDigit(chimeLastHour));
-          u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawUTF8(13, 57, "Première sonnerie");
-          break;
-        case 2:
-          u8g2.setFont(u8g2_font_timR24_tn);
-          u8g2.setCursor(19, 44);
-          u8g2.print(twoDigit(chimeStartHour));
-          u8g2.print(" - ");
-          u8g2.print(twoDigit(chimeLastHour));
-          u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawUTF8(13, 57, "Dernière sonnerie");
-          break;
-        case 3:
-          u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawUTF8(28, 41, "Enregistrées !");
-          break;
+
+
+
+
+//displayMenu
+void printDisplayMenu() {
+
+  u8g2.clearBuffer();
+  drawDisplayBar();
+  u8g2.setFontMode(2);
+  u8g2.setDrawColor(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_profont11_tf);
+  u8g2.drawUTF8(6, 27, displayMenuTitles[1]);
+  u8g2.drawUTF8(6, 43, displayMenuTitles[2]);
+  u8g2.drawStr(6, 59, displayMenuTitles[3]);
+  u8g2.setDrawColor(2);
+  switch (menuItemSelect) {
+    case 1:
+      u8g2.drawBox(0, 16, 128, 15);
+      u8g2.drawXBMP(118, 20, 4, 7, right_arrow_BM);
+      break;
+
+    case 2:
+      u8g2.drawBox(0, 32, 128, 15);
+      u8g2.drawXBMP(118, 36, 4, 7, right_arrow_BM);
+      break;
+
+    case 3:
+      u8g2.drawBox(0, 48, 128, 15);
+      u8g2.drawXBMP(118, 52, 4, 7, left_arrow_BM);
+      break;
+  }
+  u8g2.sendBuffer();
+}
+void updateDisplayMenu() {
+  switch (rotateCounter) {
+    case 1:
+      menuItemSelect = 1;
+      break;
+
+    case 2:
+      menuItemSelect = 2;
+      break;
+
+    case 3:
+      menuItemSelect = 3;
+      break;
+
+    default:
+      if (rotateCounter > 3) {
+        rotateCounter = 3;
       }
+      if (rotateCounter < 1) {
+        rotateCounter = 1;
+      }
+      break;
+  }
+}
+void executeDisplayMenu() {
+  if (buttonPressedState == true) {
+    switch (rotateCounter) {
+      case 1:
+        delay(300);
+        brightness_menu = true;
+        rotateCounter = map(brightness, 0, 255, 0, 30);
 
-    } while (u8g2.nextPage());
-
-    switch (chimeSetStep) {
-
-      case 1:  //Setting first hour
-        if (rotateCounter >= 24) {
-          rotateCounter = 0;
-        }
-        if (rotateCounter < 0) {
-          rotateCounter = 23;
-        }
-        chimeStartHour = rotateCounter;
-        if (buttonPressedState == true) {
-          rotateCounter = 0;
-          buttonPressedState = false;
-          chimeSetStep = 2;
-        }
         break;
 
-      case 2:  //Setting last hour
-        if (rotateCounter >= 24) {
-          rotateCounter = 0;
-        }
-        if (rotateCounter < 0) {
-          rotateCounter = 23;
-        }
-        chimeLastHour = rotateCounter;
-        if (buttonPressedState == true) {
-          rotateCounter = 0;
-          buttonPressedState = false;
-          chimeSetStep = 3;
-        }
+      case 2:
         break;
 
       case 3:
-        chimeSetHour_page = false;
-        delay(500);
-        buttonPressedState = false;
-        rotateCounter = 2;
+        displaySettingsMenu = false;
+        rotateCounter = 4;
+        menuItemSelect = 4;
+        display_to_settingsTransition();
         break;
     }
-  } while (chimeSetHour_page == true);
-}
-
-//chime / music
-void chimeSet_music() {
-  chimeSetMusic_page = true;
-  int chimeSetStep = 1;
-  rotateCounter = 2;
+  }
   buttonPressedState = false;
-
-  do {
-    u8g2.firstPage();
-    do {
-      drawAlarmMenu();
-      switch (chimeSetStep) {
-        case 1:
-          if (chimeMusic == 7) {
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawXBMP(5, 22, 7, 5, right_arrow_BM);
-            u8g2.drawUTF8(18, 28, "West. moderne");
-            u8g2.drawStr(15, 43, "West. ancienne");
-            u8g2.drawStr(15, 58, "Campagne chinoise");
-          }
-          if (chimeMusic == 8) {
-            u8g2.drawXBMP(5, 37, 7, 5, right_arrow_BM);
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawUTF8(15, 28, "West. moderne");
-            u8g2.drawStr(18, 43, "West. ancienne");
-            u8g2.drawStr(15, 58, "Campagne chinoise");
-          }
-          if (chimeMusic == 9) {
-            u8g2.setFont(u8g2_font_profont11_tf);
-            u8g2.drawXBMP(5, 52, 7, 5, right_arrow_BM);
-            u8g2.drawUTF8(15, 28, "West. moderne");
-            u8g2.drawStr(15, 43, "West. ancienne");
-            u8g2.drawStr(18, 58, "Campagne chinoise");
-          }
-          break;
-
-        case 2:
-          choice_is_OK();
-          break;
-
-        case 3:
-          u8g2.setFont(u8g2_font_profont11_tf);
-          u8g2.drawStr(16, 35, "Choix de musique");
-          u8g2.drawUTF8(28, 48, "enregistré !");
-          break;
-      }
-
-    } while (u8g2.nextPage());
-
-    switch (chimeSetStep) {
-
-      case 1:  //Selection of the music
-        if (rotateCounter < 7) {
-          rotateCounter = 7;
-        }
-        if (rotateCounter > 9) {
-          rotateCounter = 9;
-        }
-        chimeMusic = rotateCounter;
-        if (buttonPressedState == true) {
-          buttonPressedState = false;
-          chimeSetStep = 2;
-          rotateCounter = 1;
-        }
-        break;
-
-      case 2:  //Validate the choice
-        if (rotateCounter < 1) {
-          rotateCounter = 1;
-        }
-        if (rotateCounter > 2) {
-          rotateCounter = 2;
-        }
-        if (buttonPressedState == true && rotateCounter == 1) {
-          buttonPressedState = false;
-          chimeSetStep = 3;
-        }
-        if (buttonPressedState == true && rotateCounter == 2) {
-          buttonPressedState = false;
-          chimeSetStep = 1;
-        }
-        break;
-
-      case 3:
-        chimeSetMusic_page = false;
-        delay(500);
-        buttonPressedState = false;
-        break;
-    }
-  } while (chimeSetMusic_page == true);
 }
-void chimeMenuTransition() {
-  int speed = 26;
+void settings_to_displayTransition() {
+  int speed = 25;
 
-  int pageTransition = 128;
+  int pageTransition = 125;
+  int settingItems = 6;
+  int settingsBox = 0;
+  int settingsArrow = 112;
 
-  int arrowSet = 5;
-  int menuSet1 = 18;
-  int menuSet2 = 15;
-  int icon1 = 113;
-  int icon2 = 114;
-
-  int menuChime1 = 146;
-  int menuChime2 = 143;
-  int arrowChime = 133;
+  int displayItems = 6 + pageTransition;
+  int displayBox = 0 + pageTransition;
+  int displayArrow = 118 + pageTransition;
 
   do {
-
-    u8g2.firstPage();
-    do {
-      u8g2.drawXBMP(arrowSet, 37, 7, 5, right_arrow_BM);
-      u8g2.drawUTF8(menuSet2, 28, "Réveil");
-      u8g2.drawXBMP(icon2, 20, 8, 9, alarmON_BM);
-      u8g2.drawStr(menuSet1, 43, "Carillon");
-      u8g2.drawXBMP(icon1, 34, 10, 11, chimeON_select_BM);
-      u8g2.drawStr(menuSet2, 58, "Horloge");
-      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
-      drawChimeMenu();
-
-      if (chime_is_activated == true) {
-        u8g2.drawUTF8(menuChime1, 28, "Désactiver");
-      } else {
-        u8g2.drawStr(menuChime1, 28, "Activer");
-      }
-      u8g2.drawUTF8(menuChime2, 43, "Heure de début/fin");
-      u8g2.drawStr(menuChime2, 58, "Musique");
-      u8g2.drawXBMP(arrowChime, 22, 7, 5, right_arrow_BM);
-
-    } while (u8g2.nextPage());
-
     u8g2.clearBuffer();
+    drawDisplayBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    switch (frameSettingsMenu) {
+      case 2:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 48, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
+        break;
 
-    arrowSet = arrowSet - speed;
-    menuSet1 = menuSet1 - speed;
-    menuSet2 = menuSet2 - speed;
-    icon1 = icon1 - speed;
-    icon2 = icon2 - speed;
+      case 3:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 32, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
+        break;
+
+      case 4:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[5]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[6]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 16, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
+        break;
+    }
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
+    u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
+    u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
+    u8g2.drawBox(displayBox, 16, 128, 15);
+    u8g2.drawXBMP(displayArrow, 20, 4, 7, right_arrow_BM);
+    u8g2.sendBuffer();
 
     pageTransition = pageTransition - speed;
-    menuChime1 = menuChime1 - speed;
-    menuChime2 = menuChime2 - speed;
-    arrowChime = arrowChime - speed;
+    settingItems = settingItems - speed;
+    settingsBox = settingsBox - speed;
+    settingsArrow = settingsArrow - speed;
+
+    displayItems = displayItems - speed;
+    displayBox = displayBox - speed;
+    displayArrow = displayArrow - speed;
+
   } while (pageTransition > 0);
 }
-void chimeToSettingsTransition() {
-  int speed = 26;
-  int pageTransition = -128;
-  int arrowSet = -123;
-  int menuSet1 = -110;
-  int menuSet2 = -113;
-  int icon1 = -15;
-  int icon2 = -14;
-  int menuChime1 = 15;
-  int menuChime2 = 18;
-  int arrowChime = 5;
+void display_to_settingsTransition() {
+  int speed = 25;
+
+  int pageTransition = -125;
+  int settingItems = 6 + pageTransition;
+  int settingsBox = 0 + pageTransition;
+  int settingsArrow = 112 + pageTransition;
+
+  int displayItems = 6;
+  int displayBox = 0;
+  int displayArrow = 118;
 
   do {
+    u8g2.clearBuffer();
+    drawSettingsBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
 
-    u8g2.firstPage();
-    do {
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(displayItems, 27, clockDateMenuTitles[1]);
+    u8g2.drawUTF8(displayItems, 43, clockDateMenuTitles[2]);
+    u8g2.drawStr(displayItems, 59, clockDateMenuTitles[3]);
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(displayBox, 48, 128, 15);
+    u8g2.drawXBMP(displayArrow, 52, 4, 7, left_arrow_BM);
 
-      drawSettingsBar();
-      u8g2.drawXBMP(arrowSet, 37, 7, 5, right_arrow_BM);
-      u8g2.drawUTF8(menuSet2, 28, "Réveil");
-      u8g2.drawXBMP(icon2, 20, 8, 9, alarmON_BM);
-      u8g2.drawStr(menuSet1, 43, "Carillon");
-      u8g2.drawXBMP(icon1, 34, 10, 11, chimeON_select_BM);
-      u8g2.drawStr(menuSet2, 58, "Horloge");
-      u8g2.drawXBMP(icon2, 50, 8, 9, clock_BM);
+    switch (frameSettingsMenu) {
+      case 2:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 48, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
+        break;
 
-      u8g2.drawUTF8(menuChime1, 28, "Heure de début/fin");
-      u8g2.drawStr(menuChime1, 43, "Musique");
-      u8g2.drawStr(menuChime2, 58, "Retour");
-      u8g2.drawXBMP(arrowChime, 52, 7, 5, right_arrow_BM);
+      case 3:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 32, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
+        break;
 
-    } while (u8g2.nextPage());
-
-    arrowSet = arrowSet + speed;
-    menuSet1 = menuSet1 + speed;
-    menuSet2 = menuSet2 + speed;
-    icon1 = icon1 + speed;
-    icon2 = icon2 + speed;
+      case 4:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[5]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[6]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 16, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
+        break;
+    }
+    drawScrollbar();
+    scrollbar_5frames();
+    u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
-    menuChime1 = menuChime1 + speed;
-    menuChime2 = menuChime2 + speed;
-    arrowChime = arrowChime + speed;
+    settingItems = settingItems + speed;
+    settingsBox = settingsBox + speed;
+    settingsArrow = settingsArrow + speed;
+
+    displayItems = displayItems + speed;
+    displayBox = displayBox + speed;
+    displayArrow = displayArrow + speed;
+
   } while (pageTransition < 0);
 }
 
 
+//brightness
+void printBrightnessMenu() {
+  u8g2.clearBuffer();
+  drawDisplayBar();
+  u8g2.drawXBMP(11, 30, 8, 12, brightness_low_BM);
+  u8g2.drawXBMP(106, 29, 16, 13, brightness_high_BM);
+  u8g2.drawBox(29, 34, brightnessBarSize, 4);
+  u8g2.drawFrame(27, 32, 75, 8);
+  u8g2.sendBuffer();
+}
+void updateBrightnessMenu() {
+
+  if (rotateCounter > 30) {
+    rotateCounter = 30;
+  }
+  if (rotateCounter < 0) {
+    rotateCounter = 0;
+  }
+
+  brightnessBarSize = map(rotateCounter, 0, 30, 0, 71);
+  brightness = map(rotateCounter, 0, 30, 0, 255);
+}
+void executeBrightnessMenu() {
+  if (buttonPressedState == true) {
+    brightness_menu = false;
+    rotateCounter = 1;
+    menuItemSelect = 1;
+    eprom.update(10, brightness);
+  }
+  delay(200);
+  buttonPressedState = false;
+}
 
 
-*/
+
+
+
 //date / clock menu
 void printClockDateMenu() {
 
@@ -2454,7 +2176,7 @@ void drawSettingsBar() {
   u8g2.setDrawColor(0);
   u8g2.drawBox(0, 0, 128, 14);
   u8g2.setDrawColor(1);
-  u8g2.drawXBMP(2, 2, 7, 9, happyMenu_BM);
+  u8g2.drawXBMP(2, 2, 8, 9, settings_BM);
   u8g2.setFont(u8g2_font_profont11_tf);
   u8g2.drawUTF8(40, 10, "Réglages");
   u8g2.drawLine(0, 13, 128, 13);
@@ -2475,6 +2197,12 @@ void drawVolumeBar() {
   u8g2.drawXBMP(2, 3, 8, 7, volume_BM);
   u8g2.setFont(u8g2_font_profont11_tf);
   u8g2.drawStr(46, 10, "Volume");
+  u8g2.drawLine(0, 13, 128, 13);
+}
+void drawDisplayBar() {
+  u8g2.drawXBMP(2, 2, 8, 9, display_BM);
+  u8g2.setFont(u8g2_font_profont11_tr);
+  u8g2.drawStr(37, 10, "Affichage");
   u8g2.drawLine(0, 13, 128, 13);
 }
 void drawClockDateBar() {
@@ -2616,24 +2344,22 @@ void drawDate() {
 }
 //   ==buttons control==
 void button_is_pressed() {
-  TimeNow2 = millis();
-  if (TimeNow2 - TimeNow1 > 200) {
-    buttonPressedState = true;
-  }
-  TimeNow1 = millis();  //"reset" timer; the next 500 ms is counted from this moment
+  buttonPressedState = true;
 }
 void wheel_is_rotated() {
-
+  //Store states
   CLKNow = digitalRead(RotaryCLK);  //Read the state of the CLK pin
+
+
 
   // If last and current state of CLK are different, then a pulse occurred
   if (CLKNow != CLKPrevious && CLKNow == 1) {
     // If the DT state is different than the CLK state then
     // the encoder is rotating CCW so increase
     if (digitalRead(RotaryDT) != CLKNow) {
-      rotateCounter = rotateCounter + 1;
+      rotateCounter++;
     } else {
-      rotateCounter = rotateCounter - 1;
+      rotateCounter--;
     }
   }
 
