@@ -127,6 +127,14 @@ const unsigned char brightness_high_BM[] PROGMEM = {
   // 'brightness_high_BM', 16x13px
   0x02, 0x40, 0xc4, 0x23, 0x20, 0x04, 0x10, 0x08, 0x13, 0xc8, 0x10, 0x08, 0x10, 0x08, 0x24, 0x24, 0x42, 0x42, 0xc0, 0x03, 0x40, 0x03, 0xc0, 0x02, 0x80, 0x01
 };
+const unsigned char contrast_low_BM[] PROGMEM = {
+  // 'contrast_low_BM', 8x8px
+  0x3c, 0x7e, 0xff, 0xff, 0xff, 0xff, 0x7e, 0x3c
+};
+const unsigned char contrast_high_BM[] PROGMEM = {
+  // 'contrast_high_BM', 8x8px
+  0x3c, 0x4e, 0x8f, 0x8f, 0x8f, 0x8f, 0x4e, 0x3c
+};
 
 
 // 'bigHappy_BM', 14x18px
@@ -152,6 +160,8 @@ const unsigned char brightness_high_BM[] PROGMEM = {
 // 'display_BM', 8x9px
 // 'brightness_low_BM', 8x12px
 // 'brightness_high_BM', 16x13px
+// 'contrast_low_BM', 8x8px
+// 'contrast_high_BM', 8x8px
 
 
 
@@ -260,8 +270,9 @@ bool clockSet_menu = false;
 bool dateSet_menu = false;
 
 
-//brightness page
+//brightness/contrast page
 int brightnessBarSize;
+int contrastBarSize;
 
 //about page
 bool aboutPage = false;
@@ -310,7 +321,8 @@ unsigned int chimeLastHour;       //EEPROM adress 6
 unsigned int volumeAlarm;         //EEPROM adress 7
 unsigned int volumeChime;         //EEPROM adress 8
 unsigned int volumeNotification;  //EEPROM adress 9
-unsigned int brightness;          // EEPROM adress 10
+unsigned int brightness;          //EEPROM adress 10
+unsigned int contrast;            //EEPROM adress 11
 
 
 //variables used to set the hour
@@ -321,11 +333,12 @@ unsigned int temporarySecond;
 
 //volume variable
 unsigned int volume = 15;
-unsigned int contrast;
 
 unsigned long previousMillis = 0;
 const long interval = 1000;
 bool blink = false;
+
+unsigned long previousMillisRotary = 0;
 
 
 
@@ -341,14 +354,6 @@ void setup() {
   u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
   u8g2.sendBuffer();
   delay(200);
-  /*int lightning = 0;
-
-  do {
-    analogWrite(backlight, lightning);
-    lightning++;
-    delay(5);
-  } while (lightning < 256);*/
-
   Wire.begin();
   rtc.begin();
   soundSystem.sendCommand(CMD_SEL_DEV, 0, 2);
@@ -375,8 +380,9 @@ void setup() {
   volumeChime = eprom.read(8);
   volumeNotification = eprom.read(9);
   brightness = eprom.read(10);
+  contrast = eprom.read(11);
 
-
+  u8g2.setContrast(contrast);
   TimeNow1 = millis();  //Start timer 1
   soundSystem.play(1);
 }
@@ -395,8 +401,8 @@ void loop() {
         printAlarmSet_hour();
         updateAlarmSet_hour();
       } else {
-        printAlarmMenu();
         updateAlarmMenu();
+        printAlarmMenu();
         executeAlarmMenu();
       }
     }
@@ -406,12 +412,16 @@ void loop() {
     }
     if (displaySettingsMenu == true) {
       if (brightness_menu == true) {
-        printBrightnessMenu();
         updateBrightnessMenu();
+        printBrightnessMenu();
         executeBrightnessMenu();
+      } else if (contrast_menu == true) {
+        updateContrastMenu();
+        printContrastMenu();
+        executeContrastMenu();
       } else {
-        printDisplayMenu();
         updateDisplayMenu();
+        printDisplayMenu();
         executeDisplayMenu();
       }
     }
@@ -420,8 +430,8 @@ void loop() {
       } else if (dateSet_menu == true) {
 
       } else {
-        printClockDateMenu();
         updateClockDateMenu();
+        printClockDateMenu();
         executeClockDateMenu();
       }
     }
@@ -431,8 +441,8 @@ void loop() {
       executeAboutPage();
     }
     if (alarmSettingsMenu == false && chimeSettingsMenu == false && volumeSettingsMenu == false && displaySettingsMenu == false && clockDateSettingsMenu == false && aboutPage == false) {
-      printSettingsMenu();
       updateSettingsMenu();
+      printSettingsMenu();
       executeSettingsMenu();
     }
   }
@@ -818,7 +828,7 @@ void executeSettingsMenu() {
 }
 
 void homePage_to_settingsTransition() {
-  int speed = 10;
+  int speed = 16;
   int pageTransition = 50;
 
   int background = 64;
@@ -865,7 +875,7 @@ void homePage_to_settingsTransition() {
   } while (pageTransition > 0);
 }
 void settings_to_homePageTransition() {
-  int speed = 10;
+  int speed = 12;
   int pageTransition = 50;
 
   int background = 14;
@@ -1195,9 +1205,9 @@ void updateAlarmSet_hour() {
       alarmHour = rotateCounter;
       if (buttonPressedState == true) {
         rotateCounter = alarmMinute;
-        delay(300);
-        buttonPressedState = false;
         alarmSetStep = 2;
+        hour_to_minuteTransition();
+        buttonPressedState = false;
       }
       break;
 
@@ -1210,7 +1220,6 @@ void updateAlarmSet_hour() {
       }
       alarmMinute = rotateCounter;
       if (buttonPressedState == true) {
-        delay(300);
         buttonPressedState = false;
         alarmSetStep = 3;
       }
@@ -1275,6 +1284,7 @@ void alarm_to_hourTransition() {
     hourCursor = hourCursor - speed;
     arrow = arrow - speed;
   } while (pageTransition > 0);
+  buttonPressedState = false;
 }
 void hour_to_alarmTransition() {
   int speed = 25;
@@ -1327,8 +1337,29 @@ void hour_to_alarmTransition() {
     alarmArrow = alarmArrow + speed;
     clock = clock + speed;
   } while (pageTransition < 0);
+  buttonPressedState = false;
 }
+void hour_to_minuteTransition() {
+  int speed = 10;
+  int transition = 0;
+  int arrow = 45;
 
+  do {
+    u8g2.clearBuffer();
+    drawAlarmBar();
+    u8g2.setFont(u8g2_font_timR18_tr);
+    u8g2.setCursor(37, 46);
+    u8g2.print(twoDigit(alarmHour));
+    u8g2.print(':');
+    u8g2.print(twoDigit(alarmMinute));
+    u8g2.drawXBMP(arrow, 21, 8, 4, up_arrow_BM);
+    u8g2.drawXBMP(arrow, 50, 8, 4, down_arrow_BM);
+    u8g2.sendBuffer();
+
+    transition = transition + speed;
+    arrow = arrow + speed;
+  } while (transition < 30);
+}
 
 
 
@@ -1418,6 +1449,9 @@ void executeDisplayMenu() {
         break;
 
       case 2:
+        contrast_menu = true;
+        rotateCounter = map(contrast, 80, 180, 0, 50);
+        display_to_contrastTransition();
         break;
 
       case 3:
@@ -1595,10 +1629,135 @@ void executeBrightnessMenu() {
     brightness_menu = false;
     rotateCounter = 1;
     menuItemSelect = 1;
-    eprom.update(10, brightness);
+    //eprom.update(10, brightness);
+    delay(200);
+    buttonPressedState = false;
   }
-  delay(200);
-  buttonPressedState = false;
+}
+
+//contrast
+void printContrastMenu() {
+  u8g2.clearBuffer();
+  drawDisplayBar();
+  u8g2.drawXBM(110, 32, 8, 8, contrast_high_BM);
+  u8g2.drawXBM(11, 32, 8, 8, contrast_low_BM);
+  u8g2.drawFrame(27, 32, 75, 8);
+  u8g2.drawBox(29, 34, contrastBarSize, 4);
+  u8g2.sendBuffer();
+}
+void updateContrastMenu() {
+
+  if (rotateCounter > 50) {
+    rotateCounter = 50;
+  }
+  if (rotateCounter < 0) {
+    rotateCounter = 0;
+  }
+
+  contrastBarSize = map(rotateCounter, 0, 50, 0, 71);
+  contrast = map(rotateCounter, 0, 50, 80, 180);
+  u8g2.setContrast(contrast);
+}
+void executeContrastMenu() {
+  if (buttonPressedState == true) {
+    contrast_menu = false;
+    rotateCounter = 2;
+    menuItemSelect = 2;
+    eprom.update(11, contrast);
+    contrast_to_displayTransition();
+    buttonPressedState = false;
+  }
+}
+void display_to_contrastTransition() {
+  int speed = 25;
+
+  int pageTransition = 125;
+  int displayItems = 6;
+  int displayBox = 0;
+  int displayArrow = 118;
+
+  int contrastIcon1 = 11 + pageTransition;
+  int contrastIcon2 = 110 + pageTransition;
+  int contrastFrame = 27 + pageTransition;
+  int contrastBox = 29 + pageTransition;
+
+  do {
+    u8g2.clearBuffer();
+    drawDisplayBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
+    u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
+    u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
+
+    u8g2.drawXBM(contrastIcon1, 32, 8, 8, contrast_low_BM);
+    u8g2.drawXBM(contrastIcon2, 32, 8, 8, contrast_high_BM);
+    u8g2.drawFrame(contrastFrame, 32, 75, 8);
+    u8g2.drawBox(contrastBox, 34, contrastBarSize, 4);
+
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(displayBox, 32, 128, 15);
+    u8g2.drawXBMP(displayArrow, 36, 4, 7, right_arrow_BM);
+    u8g2.sendBuffer();
+
+    pageTransition = pageTransition - speed;
+    displayItems = displayItems - speed;
+    displayBox = displayBox - speed;
+    displayArrow = displayArrow - speed;
+
+    contrastIcon1 = contrastIcon1 - speed;
+    contrastIcon2 = contrastIcon2 - speed;
+    contrastFrame = contrastFrame - speed;
+    contrastBox = contrastBox - speed;
+
+  } while (pageTransition > 0);
+}
+void contrast_to_displayTransition() {
+  int speed = 25;
+
+  int pageTransition = -125;
+  int contrastIcon1 = 11;
+  int contrastIcon2 = 110;
+  int contrastFrame = 27;
+  int contrastBox = 29;
+
+  int displayItems = 6 + pageTransition;
+  int displayBox = 0 + pageTransition;
+  int displayArrow = 118 + pageTransition;
+
+  do {
+    u8g2.clearBuffer();
+    drawDisplayBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+
+    u8g2.drawXBM(contrastIcon1, 32, 8, 8, contrast_low_BM);
+    u8g2.drawXBM(contrastIcon2, 32, 8, 8, contrast_high_BM);
+    u8g2.drawFrame(contrastFrame, 32, 75, 8);
+    u8g2.drawBox(contrastBox, 34, contrastBarSize, 4);
+
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
+    u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
+    u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
+
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(displayBox, 32, 128, 15);
+    u8g2.drawXBMP(displayArrow, 36, 4, 7, right_arrow_BM);
+    u8g2.sendBuffer();
+
+    pageTransition = pageTransition + speed;
+    displayItems = displayItems + speed;
+    displayBox = displayBox + speed;
+    displayArrow = displayArrow + speed;
+
+    contrastIcon1 = contrastIcon1 + speed;
+    contrastIcon2 = contrastIcon2 + speed;
+    contrastFrame = contrastFrame + speed;
+    contrastBox = contrastBox + speed;
+
+  } while (pageTransition < 0);
 }
 
 
@@ -2362,7 +2521,6 @@ void wheel_is_rotated() {
       rotateCounter--;
     }
   }
-
   CLKPrevious = CLKNow;  // Store last CLK state
 }
 
