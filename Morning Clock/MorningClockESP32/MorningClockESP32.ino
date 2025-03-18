@@ -5,7 +5,16 @@
 #include <GD3300.h>
 #include <SoftwareSerial.h>
 #include <at24c32.h>
+#include <MCP4131.h>
+#include <HotButton.h>
+#include <ESP32Encoder.h>  // https://github.com/madhephaestus/ESP32Encoder.git
 
+#define CLK 16  // CLK ENCODER
+#define DT 15   // DT ENCODER
+
+HotButton mainButton(14, true, LOW);
+
+ESP32Encoder rotaryEncoder;
 
 AT24C32 eprom(AT24C_ADDRESS_7);
 
@@ -15,14 +24,14 @@ GD3300 soundSystem;
 
 RTC_DS3231 rtc;
 
-U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/12, /* data=*/13, /* cs=*/14, /* dc=*/15, /* reset=*/16);
+//U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/1, /* data=*/2, /* cs=*/3, /* dc=*/4, /* reset=*/5);
+U8G2_ST7567_JLX12864_F_4W_HW_SPI u8g2(U8G2_R2, 3, 4, 5);
 
+const int chipSelect = 10;
 
+// Create MCP4131 object nominating digital pin used for Chip Select
+MCP4131 Potentiometer(chipSelect);
 
-//Defining pins for buttons
-const int RotaryCLK = 2;  //CLK
-const int RotaryDT = 3;   //DT
-const int RotarySW = 4;   //SW (Button function)
 
 
 
@@ -143,6 +152,19 @@ const unsigned char contrast_high_BM[] PROGMEM = {
   // 'contrast_high_BM', 8x8px
   0x3c, 0x4e, 0x8f, 0x8f, 0x8f, 0x8f, 0x4e, 0x3c
 };
+const unsigned char big_alarm_BM[] PROGMEM = {
+  // 'big_alarm_BM', 17x18px
+  0xc0, 0x07, 0x00, 0x30, 0x18, 0x00, 0x08, 0x21, 0x00, 0x04, 0x40, 0x00, 0x12, 0x91, 0x00, 0x02, 0x81, 0x00, 0x01, 0x01, 0x01, 0x81, 0x03, 0x01, 0x85, 0x4f, 0x01, 0x81, 0x03, 0x01, 0x01, 0x00, 0x01, 0x02, 0x80, 0x00, 0x12, 0x90, 0x00, 0x04, 0x40, 0x00, 0x08, 0x21, 0x00, 0x38, 0x38, 0x00, 0xc4, 0x47, 0x00, 0x02, 0x80, 0x00
+};
+const unsigned char big_alarm_left_BM[] PROGMEM = {
+  // 'big_alarm_left_BM', 6x6px
+  0x1c, 0x22, 0x11, 0x09, 0x05, 0x02
+};
+const unsigned char big_alarm_right_BM[] PROGMEM = {
+  // 'big_alarm_right_BM', 6x6px
+  0x0e, 0x11, 0x22, 0x24, 0x28, 0x10
+};
+
 
 
 // 'bigHappy_BM', 14x18px
@@ -172,6 +194,9 @@ const unsigned char contrast_high_BM[] PROGMEM = {
 // 'contrast_high_BM', 8x8px
 // 'up_arrow_small_BM, 7x4px
 // 'down_arrow_small_BM, 7x4px
+// 'big_alarm_BM', 17x18px
+// 'big_alarm_left_BM', 6x6px
+// 'big_alarm_right_BM', 6x6px
 
 
 
@@ -247,20 +272,7 @@ const char* shortMonths[] = {
 //   ==Variables==
 
 //rotary encoder and button
-int rotateCounter = 0;            //counts the rotation clicks
-bool buttonPressedState = false;  //info of the button
-
-
-//Statuses (rotary encoder)
-int CLKNow;
-int CLKPrevious;
-int DTNow;
-int DTPrevious;
-
-
-// Timers (rotary encoder)
-float TimeNow1;
-float TimeNow2;
+int rotateCounter = 0;  //counts the rotation clicks
 
 
 //Defining variables for the state of the homePage
@@ -304,7 +316,7 @@ int contrastBarSize;
 //about page
 bool aboutPage = false;
 static int aboutPageSize = 150;
-static int aboutStepSize = 10;
+static int aboutStepSize = 5;
 int aboutNumberStep;
 int aboutCurrentStep;
 int text1;
@@ -373,12 +385,23 @@ bool blink = false;
 unsigned long previousMillisHomePage = 0;
 const long intervalHomePage = 30000;
 
-unsigned long previousMillisRotary = 0;
+const long rotaryInterval = 2;
+unsigned long rotaryPreviousMillis = 0;
 
+//variables notifications
+
+bool alarmNotification = true;
+int alarmNotificationMSG = 118;
+int clockBIG;
+bool clockBIG_state;
+
+bool chimeNotification = false;
 
 
 void setup() {
+  Potentiometer.writeWiper(128);
   mp3Serial.begin(9600);
+  delay(200);
   soundSystem.begin(mp3Serial);
   u8g2.begin();
 
@@ -388,22 +411,12 @@ void setup() {
   u8g2.clearBuffer();
   u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
   u8g2.sendBuffer();
-  delay(200);
+  delay(300);
   Wire.begin();
   rtc.begin();
   soundSystem.sendCommand(CMD_SEL_DEV, 0, 2);
-
-
-
-  //setting up pins
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
-  pinMode(4, INPUT);
-
-
-
-  attachInterrupt((RotaryCLK), wheel_is_rotated, CHANGE);
-  attachInterrupt((RotarySW), button_is_pressed, FALLING);
+  rotaryEncoder.attachHalfQuad(DT, CLK);
+  rotaryEncoder.setCount(0);
 
   alarmMusic = eprom.read(1);
   chimeMusic = eprom.read(2);
@@ -416,21 +429,25 @@ void setup() {
   volumeNotification = eprom.read(9);
   brightness = eprom.read(10);
   contrast = eprom.read(11);
-
+  Potentiometer.writeWiper(brightness);
+  delay(300);
   u8g2.setContrast(contrast);
-  TimeNow1 = millis();  //Start timer 1
   soundSystem.play(1);
+  delay(750);
 }
 
 void loop() {
-
-  if (homePage == true && mainSettingsMenu == false) {
+  mainButton.update();
+  rotateCounter = rotaryEncoder.getCount() / 2;
+  if (alarmNotification == true) {
+    updateAlarmNotification();
+    printAlarmNotification();
+    executeAlarmNotification();
+  } else if (homePage == true && mainSettingsMenu == false) {
     updateHomePage();
     printHomePage();
     executeHomePage();
-  }
-
-  if (homePage == false && mainSettingsMenu == true) {
+  } else if (homePage == false && mainSettingsMenu == true) {
     if (alarmSettingsMenu == true) {
       if (alarmSetHour_menu == true) {
         printAlarmSet_hour();
@@ -532,7 +549,7 @@ void printHomePage() {
 void updateHomePage() {
   if (millis() - previousMillisHomePage >= intervalHomePage) {
     previousMillisHomePage = millis();
-    rotateCounter = 0;
+    setRotary(0);
   }
   switch (rotateCounter) {
     case 0:
@@ -561,15 +578,16 @@ void updateHomePage() {
 
     default:
       if (rotateCounter > 0) {
-        rotateCounter = -3;
+        setRotary(-3);
       }
       if (rotateCounter < -3) {
-        rotateCounter = 0;
+        setRotary(0);
       }
   }
 }
 void executeHomePage() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
+
     switch (rotateCounter) {
       case 0:
         break;
@@ -590,17 +608,17 @@ void executeHomePage() {
       case -3:
         homePage = false;
         mainSettingsMenu = true;
-        rotateCounter = 1;
+        setRotary(1);
         frameSettingsMenu = 1;
         menuItemSelect = 1;
+        soundSystem.play(2);
         homePage_to_settingsTransition();
         break;
     }
   }
-  buttonPressedState = false;  //reset this variable
 }
 void alarmHomePageTransitionIN() {
-  int speed = 4;
+  int speed = 1;
   int transition = -12;
   int Yposition = 10 + transition;
 
@@ -641,10 +659,11 @@ void alarmHomePageTransitionIN() {
     u8g2.sendBuffer();
     transition = transition + speed;
     Yposition = Yposition + speed;
+    delayMicroseconds(5000);
   } while (transition < 0);
 }
 void alarmHomePageTransitionOUT() {
-  int speed = 4;
+  int speed = 1;
   int transition = 12;
   int Yposition = 10;
 
@@ -685,6 +704,7 @@ void alarmHomePageTransitionOUT() {
     u8g2.sendBuffer();
     transition = transition - speed;
     Yposition = Yposition - speed;
+    delayMicroseconds(5000);
   } while (transition > 0);
 }
 
@@ -826,7 +846,7 @@ void printSettingsMenu() {
   u8g2.sendBuffer();
 }
 void updateSettingsMenu() {
-  switch (rotateCounter) {
+  switch (rotaryEncoder.getCount() / 2) {
     case 1:
       menuItemSelect = 1;
       frameSettingsMenu = 1;
@@ -907,20 +927,20 @@ void updateSettingsMenu() {
 
     default:
       if (rotateCounter > 7) {
-        rotateCounter = 7;
+        setRotary(7);
       }
       if (rotateCounter < 1) {
-        rotateCounter = 1;
+        setRotary(1);
       }
       break;
   }
 }
 void executeSettingsMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     switch (rotateCounter) {
       case 1:
         alarmSettingsMenu = true;
-        rotateCounter = 1;
+        setRotary(1);
         menuItemSelect = 1;
         frameAlarmMenu = 1;
         settings_to_alarmTransition();
@@ -934,21 +954,21 @@ void executeSettingsMenu() {
 
       case 4:
         displaySettingsMenu = true;
-        rotateCounter = 1;
+        setRotary(1);
         menuItemSelect = 1;
         settings_to_displayTransition();
         break;
 
       case 5:
         clockDateSettingsMenu = true;
-        rotateCounter = 1;
+        setRotary(1);
         menuItemSelect = 1;
         settings_to_clockDateTransition();
         break;
 
       case 6:
         aboutPage = true;
-        rotateCounter = 0;
+        setRotary(0);
         aboutCurrentStep = 0;
         settings_to_aboutTransition();
         break;
@@ -956,17 +976,17 @@ void executeSettingsMenu() {
       case 7:
         mainSettingsMenu = false;
         homePage = true;
-        rotateCounter = 0;
+        setRotary(0);
         happyMenuSelect = false;
+        soundSystem.play(3);
         settings_to_homePageTransition();
         break;
     }
   }
-  buttonPressedState = false;  //reset this variable
 }
 
 void homePage_to_settingsTransition() {
-  int speed = 16;
+  int speed = 2;
   int pageTransition = 50;
 
   int background = 64;
@@ -1010,10 +1030,11 @@ void homePage_to_settingsTransition() {
     menuItem3 = menuItem3 - speed;
     menuItemBox = menuItemBox - speed;
     arrow = arrow - speed;
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void settings_to_homePageTransition() {
-  int speed = 12;
+  int speed = 2;
   int pageTransition = 50;
 
   int background = 14;
@@ -1062,7 +1083,7 @@ void settings_to_homePageTransition() {
     arrow = arrow + speed;
     scrollbar = scrollbar + speed;
     elevator = elevator + speed;
-
+    delayMicroseconds(3500);
   } while (pageTransition > 0);
 }
 
@@ -1160,25 +1181,29 @@ void updateAlarmMenu() {
 
     default:
       if (rotateCounter > 4) {
-        rotateCounter = 4;
+        setRotary(4);
       }
       if (rotateCounter < 1) {
-        rotateCounter = 1;
+        setRotary(1);
       }
   }
 }
 void executeAlarmMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     switch (rotateCounter) {
       case 1:
         alarmSet_state();
-        delay(200);
+        if (alarm_is_activated == false) {
+          alarmTrue_to_false();
+        } else {
+          alarmFalse_to_true();
+        }
         break;
 
       case 2:
         alarmSetHour_menu = true;
         alarmSetStep = 1;
-        rotateCounter = alarmHour;
+        setRotary(alarmHour);
         alarm_to_hourTransition();
         break;
 
@@ -1187,19 +1212,73 @@ void executeAlarmMenu() {
 
       case 4:
         alarmSettingsMenu = false;
-        rotateCounter = 1;
+        setRotary(1);
         menuItemSelect = 1;
         alarm_to_settingsTransition();
         break;
     }
   }
-  buttonPressedState = false;
+}
+
+void alarmTrue_to_false() {
+  int transition = 128;
+  int oldItem = 6;
+  int newItem = 6 + transition;
+  int speed = 2;
+  do {
+    u8g2.clearBuffer();
+    drawAlarmBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(oldItem, 27, alarmSettingsMenuTitles[1]);
+    u8g2.drawUTF8(newItem, 27, alarmSettingsMenuTitles[0]);
+    u8g2.drawStr(6, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(0, 16, 122, 15);
+    drawScrollbar();
+    scrollbar_2frames();
+    u8g2.sendBuffer();
+
+    oldItem = oldItem - speed;
+    newItem = newItem - speed;
+    transition = transition - speed;
+    delayMicroseconds(100);
+  } while (transition > 0);
+}
+void alarmFalse_to_true() {
+  int transition = 128;
+  int oldItem = 6;
+  int newItem = 6 + transition;
+  int speed = 2;
+  do {
+    u8g2.clearBuffer();
+    drawAlarmBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(oldItem, 27, alarmSettingsMenuTitles[0]);
+    u8g2.drawUTF8(newItem, 27, alarmSettingsMenuTitles[1]);
+    u8g2.drawStr(6, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(0, 16, 122, 15);
+    drawScrollbar();
+    scrollbar_2frames();
+    u8g2.sendBuffer();
+
+    oldItem = oldItem - speed;
+    newItem = newItem - speed;
+    transition = transition - speed;
+    delayMicroseconds(100);
+  } while (transition > 0);
 }
 
 void settings_to_alarmTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
   int settingItems = 6;
   int settingsBox = 0;
   int settingsArrow = 112;
@@ -1241,13 +1320,13 @@ void settings_to_alarmTransition() {
 
     alarmItems = alarmItems - speed;
     alarmBox = alarmBox - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void alarm_to_settingsTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
   int settingItems = 6 + pageTransition;
   int settingsBox = 0 + pageTransition;
   int settingsArrow = 118 + pageTransition;
@@ -1287,7 +1366,7 @@ void alarm_to_settingsTransition() {
     alarmItems = alarmItems + speed;
     alarmBox = alarmBox + speed;
     alarmArrow = alarmArrow + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 
@@ -1298,10 +1377,11 @@ void alarm_to_settingsTransition() {
 void alarmSet_state() {
   if (alarm_is_activated == true) {
     alarm_is_activated = false;
+    soundSystem.play(5);
   } else {
     alarm_is_activated = true;
+    soundSystem.play(4);
   }
-  buttonPressedState = false;
 }
 
 //alarm / hour
@@ -1335,30 +1415,29 @@ void updateAlarmSet_hour() {
 
     case 1:  //Setting hour
       if (rotateCounter >= 24) {
-        rotateCounter = 0;
+        setRotary(0);
       }
       if (rotateCounter < 0) {
-        rotateCounter = 23;
+        setRotary(23);
       }
       alarmHour = rotateCounter;
-      if (buttonPressedState == true) {
-        rotateCounter = alarmMinute;
+      if (mainButton.pressed()) {
+        setRotary(alarmMinute);
         alarmSetStep = 2;
+
         hour_to_minuteTransition();
-        buttonPressedState = false;
       }
       break;
 
     case 2:  //Setting minutes
       if (rotateCounter >= 60) {
-        rotateCounter = 0;
+        setRotary(0);
       }
       if (rotateCounter < 0) {
-        rotateCounter = 59;
+        setRotary(59);
       }
       alarmMinute = rotateCounter;
-      if (buttonPressedState == true) {
-        buttonPressedState = false;
+      if (mainButton.pressed()) {
         alarmSetStep = 3;
       }
       break;
@@ -1366,23 +1445,21 @@ void updateAlarmSet_hour() {
     case 3:
       eprom.update(3, alarmHour);
       eprom.update(4, alarmMinute);
+      soundSystem.play(6);
       alarmSetHour_menu = false;
-      buttonPressedState = false;
-      rotateCounter = 2;
+      setRotary(2);
       hour_to_alarmTransition();
       break;
   }
 }
 void alarm_to_hourTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
   int alarmItems = 6;
   int alarmBox = 0;
   int alarmArrow = 118;
-
-  int arrow = 45 + pageTransition;
-  int hourCursor = 37 + pageTransition;
+  int clock = 37 + pageTransition;
 
   do {
 
@@ -1410,24 +1487,24 @@ void alarm_to_hourTransition() {
     }
 
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.drawStr(hourCursor, 46, "00:00");
-    u8g2.drawXBMP(arrow, 21, 8, 4, up_arrow_BM);
-    u8g2.drawXBMP(arrow, 50, 8, 4, down_arrow_BM);
+    u8g2.setCursor(clock, 46);
+    u8g2.print(twoDigit(alarmHour));
+    u8g2.print(':');
+    u8g2.print(twoDigit(alarmMinute));
     u8g2.sendBuffer();
 
     pageTransition = pageTransition - speed;
     alarmItems = alarmItems - speed;
     alarmBox = alarmBox - speed;
     alarmArrow = alarmArrow - speed;
-    hourCursor = hourCursor - speed;
-    arrow = arrow - speed;
+    clock = clock - speed;
+    delayMicroseconds(100);
   } while (pageTransition > 0);
-  buttonPressedState = false;
 }
 void hour_to_alarmTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
   int alarmItems = 6 + pageTransition;
   int alarmBox = 0 + pageTransition;
   int alarmArrow = 118 + pageTransition;
@@ -1474,11 +1551,11 @@ void hour_to_alarmTransition() {
     alarmBox = alarmBox + speed;
     alarmArrow = alarmArrow + speed;
     clock = clock + speed;
+    delayMicroseconds(100);
   } while (pageTransition < 0);
-  buttonPressedState = false;
 }
 void hour_to_minuteTransition() {
-  int speed = 10;
+  int speed = 1;
   int transition = 0;
   int arrow = 45;
 
@@ -1496,6 +1573,7 @@ void hour_to_minuteTransition() {
 
     transition = transition + speed;
     arrow = arrow + speed;
+    delayMicroseconds(1000);
   } while (transition < 30);
 }
 
@@ -1508,13 +1586,11 @@ void hour_to_minuteTransition() {
 void chimeSet_state() {
   if (chime_is_activated == true) {
     chime_is_activated = false;
-    soundSystem.stop();
+    soundSystem.play(5);
   } else {
     chime_is_activated = true;
+    soundSystem.play(4);
   }
-
-  delay(200);
-  buttonPressedState = false;
 }
 
 
@@ -1568,44 +1644,42 @@ void updateDisplayMenu() {
 
     default:
       if (rotateCounter > 3) {
-        rotateCounter = 3;
+        setRotary(3);
       }
       if (rotateCounter < 1) {
-        rotateCounter = 1;
+        setRotary(1);
       }
       break;
   }
 }
 void executeDisplayMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     switch (rotateCounter) {
       case 1:
-        delay(300);
         brightness_menu = true;
-        rotateCounter = map(brightness, 0, 255, 0, 30);
-
+        setRotary(map(brightness, 10, 0, 0, 10));
+        display_to_brightnessTransition();
         break;
 
       case 2:
         contrast_menu = true;
-        rotateCounter = map(contrast, 80, 180, 0, 50);
+        setRotary(map(contrast, 80, 180, 0, 50));
         display_to_contrastTransition();
         break;
 
       case 3:
         displaySettingsMenu = false;
-        rotateCounter = 4;
+        setRotary(4);
         menuItemSelect = 4;
         display_to_settingsTransition();
         break;
     }
   }
-  buttonPressedState = false;
 }
 void settings_to_displayTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
   int settingItems = 6;
   int settingsBox = 0;
   int settingsArrow = 112;
@@ -1666,13 +1740,13 @@ void settings_to_displayTransition() {
     displayItems = displayItems - speed;
     displayBox = displayBox - speed;
     displayArrow = displayArrow - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void display_to_settingsTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
   int settingItems = 6 + pageTransition;
   int settingsBox = 0 + pageTransition;
   int settingsArrow = 112 + pageTransition;
@@ -1735,7 +1809,7 @@ void display_to_settingsTransition() {
     displayItems = displayItems + speed;
     displayBox = displayBox + speed;
     displayArrow = displayArrow + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 
@@ -1752,25 +1826,118 @@ void printBrightnessMenu() {
 }
 void updateBrightnessMenu() {
 
-  if (rotateCounter > 30) {
-    rotateCounter = 30;
+  if (rotateCounter > 10) {
+    setRotary(10);
   }
   if (rotateCounter < 0) {
-    rotateCounter = 0;
+    setRotary(0);
   }
 
-  brightnessBarSize = map(rotateCounter, 0, 30, 0, 71);
-  brightness = map(rotateCounter, 0, 30, 0, 255);
+  brightnessBarSize = map(rotateCounter, 0, 10, 0, 71);
+  brightness = map(rotateCounter, 0, 10, 10, 0);
+  Potentiometer.writeWiper(brightness);
 }
 void executeBrightnessMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     brightness_menu = false;
-    rotateCounter = 1;
+    setRotary(1);
     menuItemSelect = 1;
-    //eprom.update(10, brightness);
-    delay(200);
-    buttonPressedState = false;
+    eprom.update(10, brightness);
+    soundSystem.play(6);
+    brightness_to_displayTransition();
   }
+}
+void display_to_brightnessTransition() {
+  int speed = 2;
+
+  int pageTransition = 128;
+  int displayItems = 6;
+  int displayBox = 0;
+  int displayArrow = 118;
+
+  int brightnessIcon1 = 11 + pageTransition;
+  int brightnessIcon2 = 106 + pageTransition;
+  int brightnessFrame = 27 + pageTransition;
+  int brightnessBox = 29 + pageTransition;
+
+  do {
+    u8g2.clearBuffer();
+    drawDisplayBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
+    u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
+    u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
+
+    u8g2.drawXBMP(brightnessIcon1, 30, 8, 12, brightness_low_BM);
+    u8g2.drawXBMP(brightnessIcon2, 29, 16, 13, brightness_high_BM);
+    u8g2.drawBox(brightnessBox, 34, brightnessBarSize, 4);
+    u8g2.drawFrame(brightnessFrame, 32, 75, 8);
+
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(displayBox, 16, 128, 15);
+    u8g2.drawXBMP(displayArrow, 20, 4, 7, right_arrow_BM);
+
+    u8g2.sendBuffer();
+
+    pageTransition = pageTransition - speed;
+    displayItems = displayItems - speed;
+    displayBox = displayBox - speed;
+    displayArrow = displayArrow - speed;
+
+    brightnessIcon1 = brightnessIcon1 - speed;
+    brightnessIcon2 = brightnessIcon2 - speed;
+    brightnessFrame = brightnessFrame - speed;
+    brightnessBox = brightnessBox - speed;
+    delayMicroseconds(100);
+  } while (pageTransition > 0);
+}
+void brightness_to_displayTransition() {
+  int speed = 2;
+
+  int pageTransition = -128;
+  int brightnessIcon1 = 11;
+  int brightnessIcon2 = 110;
+  int brightnessFrame = 27;
+  int brightnessBox = 29;
+
+  int displayItems = 6 + pageTransition;
+  int displayBox = 0 + pageTransition;
+  int displayArrow = 118 + pageTransition;
+
+  do {
+    u8g2.clearBuffer();
+    drawDisplayBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+
+    u8g2.drawXBMP(brightnessIcon1, 30, 8, 12, brightness_low_BM);
+    u8g2.drawXBMP(brightnessIcon2, 29, 16, 13, brightness_high_BM);
+    u8g2.drawBox(brightnessBox, 34, brightnessBarSize, 4);
+    u8g2.drawFrame(brightnessFrame, 32, 75, 8);
+
+    u8g2.setFont(u8g2_font_profont11_tf);
+    u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
+    u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
+    u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
+
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(displayBox, 16, 128, 15);
+    u8g2.drawXBMP(displayArrow, 20, 4, 7, right_arrow_BM);
+    u8g2.sendBuffer();
+
+    pageTransition = pageTransition + speed;
+    displayItems = displayItems + speed;
+    displayBox = displayBox + speed;
+    displayArrow = displayArrow + speed;
+
+    brightnessIcon1 = brightnessIcon1 + speed;
+    brightnessIcon2 = brightnessIcon2 + speed;
+    brightnessFrame = brightnessFrame + speed;
+    brightnessBox = brightnessBox + speed;
+    delayMicroseconds(100);
+  } while (pageTransition < 0);
 }
 
 //contrast
@@ -1786,10 +1953,10 @@ void printContrastMenu() {
 void updateContrastMenu() {
 
   if (rotateCounter > 50) {
-    rotateCounter = 50;
+    setRotary(50);
   }
   if (rotateCounter < 0) {
-    rotateCounter = 0;
+    setRotary(0);
   }
 
   contrastBarSize = map(rotateCounter, 0, 50, 0, 71);
@@ -1797,19 +1964,19 @@ void updateContrastMenu() {
   u8g2.setContrast(contrast);
 }
 void executeContrastMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     contrast_menu = false;
-    rotateCounter = 2;
+    setRotary(2);
     menuItemSelect = 2;
     eprom.update(11, contrast);
+    soundSystem.play(6);
     contrast_to_displayTransition();
-    buttonPressedState = false;
   }
 }
 void display_to_contrastTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
   int displayItems = 6;
   int displayBox = 0;
   int displayArrow = 118;
@@ -1848,13 +2015,13 @@ void display_to_contrastTransition() {
     contrastIcon2 = contrastIcon2 - speed;
     contrastFrame = contrastFrame - speed;
     contrastBox = contrastBox - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void contrast_to_displayTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
   int contrastIcon1 = 11;
   int contrastIcon2 = 110;
   int contrastFrame = 27;
@@ -1894,7 +2061,7 @@ void contrast_to_displayTransition() {
     contrastIcon2 = contrastIcon2 + speed;
     contrastFrame = contrastFrame + speed;
     contrastBox = contrastBox + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 
@@ -1949,16 +2116,16 @@ void updateClockDateMenu() {
 
     default:
       if (rotateCounter > 3) {
-        rotateCounter = 3;
+        setRotary(3);
       }
       if (rotateCounter < 1) {
-        rotateCounter = 1;
+        setRotary(1);
       }
       break;
   }
 }
 void executeClockDateMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     DateTime now = rtc.now();
     switch (rotateCounter) {
       case 1:
@@ -1967,7 +2134,7 @@ void executeClockDateMenu() {
         temporaryHour = now.hour();
         temporaryMinute = now.minute();
         temporarySecond = now.second();
-        rotateCounter = temporaryHour;
+        setRotary(temporaryHour);
         clockDate_to_clockTransition();
         break;
 
@@ -1977,22 +2144,21 @@ void executeClockDateMenu() {
         temporaryDay = now.day();
         temporaryMonth = now.month();
         temporaryYear = now.year();
-        rotateCounter = temporaryDay;
+        setRotary(temporaryDay);
         clockDate_to_dateTransition();
         break;
 
       case 3:
         clockDateSettingsMenu = false;
-        rotateCounter = 5;
+        setRotary(5);
         menuItemSelect = 5;
         clockDate_to_settingsTransition();
         break;
     }
   }
-  buttonPressedState = false;
 }
 void settings_to_clockDateTransition() {
-  int speed = 25;
+  int speed = 2;
 
   int pageTransition = 125;
   int settingItems = 6;
@@ -2055,11 +2221,11 @@ void settings_to_clockDateTransition() {
     clockDateItems = clockDateItems - speed;
     clockDateBox = clockDateBox - speed;
     clockDateArrow = clockDateArrow - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void clockDate_to_settingsTransition() {
-  int speed = 25;
+  int speed = 2;
 
   int pageTransition = -125;
   int settingItems = 6 + pageTransition;
@@ -2124,7 +2290,7 @@ void clockDate_to_settingsTransition() {
     clockDateItems = clockDateItems + speed;
     clockDateBox = clockDateBox + speed;
     clockDateArrow = clockDateArrow + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 
@@ -2164,68 +2330,66 @@ void updateClockMenu() {
   switch (clockSetStep) {
     case 1:
       if (rotateCounter > 23) {
-        rotateCounter = 0;
+        setRotary(0);
       }
       if (rotateCounter < 0) {
-        rotateCounter = 23;
+        setRotary(23);
       }
       temporaryHour = rotateCounter;
       break;
 
     case 2:
       if (rotateCounter > 59) {
-        rotateCounter = 0;
+        setRotary(0);
       }
       if (rotateCounter < 0) {
-        rotateCounter = 59;
+        setRotary(59);
       }
       temporaryMinute = rotateCounter;
       break;
 
     case 3:
       if (rotateCounter > 59) {
-        rotateCounter = 0;
+        setRotary(0);
       }
       if (rotateCounter < 0) {
-        rotateCounter = 59;
+        setRotary(59);
       }
       temporarySecond = rotateCounter;
       break;
   }
 }
 void executeClockMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     switch (clockSetStep) {
       case 1:
-        rotateCounter = temporaryMinute;
+        setRotary(temporaryMinute);
         clockSetStep = 2;
         ClockHour_to_minuteTransition();
         break;
 
       case 2:
-        rotateCounter = temporarySecond;
+        setRotary(temporarySecond);
         clockSetStep = 3;
         ClockMinute_to_secondTransition();
         break;
 
       case 3:
         clockSet_menu = false;
-        rotateCounter = 1;
+        setRotary(1);
         DateTime now = rtc.now();
         rtc.adjust(DateTime(now.year(), now.month(), now.day(), temporaryHour, temporaryMinute, temporarySecond));
+        soundSystem.play(6);
         clock_to_clockDateTransition();
         break;
     }
-    buttonPressedState = false;
   }
 }
 void clockDate_to_clockTransition() {
-  int speed = 25;
-
-  int pageTransition = 125;
+  int speed = 2;
+  int pageTransition = 128;
 
   int cursor = 22 + pageTransition;
-  int arrow = 30 + pageTransition;
 
   int menus = 6;
   int box = 0;
@@ -2255,29 +2419,21 @@ void clockDate_to_clockTransition() {
     u8g2.print(twoDigit(temporaryMinute));
     u8g2.print(':');
     u8g2.print(twoDigit(temporarySecond));
-
-    u8g2.drawXBM(arrow, 22, 8, 4, up_arrow_BM);
-    u8g2.drawXBM(arrow, 50, 8, 4, down_arrow_BM);
-
     u8g2.sendBuffer();
 
     pageTransition = pageTransition - speed;
     cursor = cursor - speed;
-    arrow = arrow - speed;
     menus = menus - speed;
     box = box - speed;
     arrowMenus = arrowMenus - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void clock_to_clockDateTransition() {
-  int speed = 25;
-
-  int pageTransition = -125;
-
+  int speed = 2;
+  int pageTransition = -128;
 
   int cursor = 22;
-  int arrow = 90;
 
   int menus = 6 + pageTransition;
   int box = 0 + pageTransition;
@@ -2307,21 +2463,18 @@ void clock_to_clockDateTransition() {
     u8g2.print(twoDigit(temporaryMinute));
     u8g2.print(':');
     u8g2.print(twoDigit(temporarySecond));
-    u8g2.drawXBM(arrow, 22, 8, 4, up_arrow_BM);
-    u8g2.drawXBM(arrow, 50, 8, 4, down_arrow_BM);
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
     cursor = cursor + speed;
-    arrow = arrow + speed;
     menus = menus + speed;
     box = box + speed;
     arrowMenus = arrowMenus + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 void ClockHour_to_minuteTransition() {
-  int speed = 8;
+  int speed = 1;
   int transition = 0;
   int arrow = 30;
 
@@ -2344,11 +2497,11 @@ void ClockHour_to_minuteTransition() {
 
     arrow = arrow + speed;
     transition = transition + speed;
-
+    delayMicroseconds(1000);
   } while (transition < 30);
 }
 void ClockMinute_to_secondTransition() {
-  int speed = 8;
+  int speed = 1;
   int transition = 0;
   int arrow = 60;
 
@@ -2370,7 +2523,7 @@ void ClockMinute_to_secondTransition() {
 
     arrow = arrow + speed;
     transition = transition + speed;
-
+    delayMicroseconds(1000);
   } while (transition < 30);
 }
 
@@ -2418,40 +2571,40 @@ void updateDateMenu() {
   switch (dateSetStep) {
     case 1:
       if (rotateCounter > 31) {
-        rotateCounter = 1;
+        setRotary(1);
       }
       if (rotateCounter < 1) {
-        rotateCounter = 31;
+        setRotary(31);
       }
       temporaryDay = rotateCounter;
       break;
 
     case 2:
       if (rotateCounter > 12) {
-        rotateCounter = 1;
+        setRotary(1);
       }
       if (rotateCounter < 1) {
-        rotateCounter = 12;
+        setRotary(12);
       }
       temporaryMonth = rotateCounter;
       break;
 
     case 3:
       if (rotateCounter > 2099) {
-        rotateCounter = 2000;
+        setRotary(2000);
       }
       if (rotateCounter < 2000) {
-        rotateCounter = 2099;
+        setRotary(2099);
       }
       temporaryYear = rotateCounter;
       break;
   }
 }
 void executeDateMenu() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     switch (dateSetStep) {
       case 1:
-        rotateCounter = temporaryMonth;
+        setRotary(temporaryMonth);
         dateSetStep = 2;
         day_to_monthTransition();
         break;
@@ -2463,7 +2616,7 @@ void executeDateMenu() {
           temporaryDay = 29;
         }
 
-        rotateCounter = temporaryYear;
+        setRotary(temporaryYear);
         dateSetStep = 3;
         month_to_yearTransition();
         break;
@@ -2480,26 +2633,25 @@ void executeDateMenu() {
         }
 
         dateSet_menu = false;
-        rotateCounter = 2;
+        setRotary(2);
         DateTime now = rtc.now();
         rtc.adjust(DateTime(temporaryYear, temporaryMonth, temporaryDay, now.hour(), now.minute(), now.second()));
+        soundSystem.play(6);
         date_to_clockDateTransition();
         break;
     }
-    buttonPressedState = false;
   }
 }
 void clockDate_to_dateTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
 
 
   int day = 10 + pageTransition;
   int month1 = 41 + pageTransition;
   int month2 = 37 + pageTransition;
   int year = 82 + pageTransition;
-  int arrow = 15 + pageTransition;
 
   int menus = 6;
   int box = 0;
@@ -2518,7 +2670,7 @@ void clockDate_to_dateTransition() {
     u8g2.drawStr(menus, 59, clockDateMenuTitles[3]);
     u8g2.setDrawColor(2);
     u8g2.drawBox(box, 32, 128, 15);
-    u8g2.drawXBMP(arrow, 36, 4, 7, right_arrow_BM);
+    u8g2.drawXBMP(arrowMenus, 36, 4, 7, right_arrow_BM);
 
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
@@ -2537,9 +2689,6 @@ void clockDate_to_dateTransition() {
     u8g2.setCursor(year, 43);
     u8g2.print(temporaryYear);
 
-    u8g2.drawXBM(arrow, 23, 7, 4, up_arrow_small_BM);
-    u8g2.drawXBM(arrow, 48, 7, 4, down_arrow_small_BM);
-
     u8g2.sendBuffer();
 
     pageTransition = pageTransition - speed;
@@ -2547,24 +2696,22 @@ void clockDate_to_dateTransition() {
     month1 = month1 - speed;
     month2 = month2 - speed;
     year = year - speed;
-    arrow = arrow - speed;
     menus = menus - speed;
     box = box - speed;
     arrowMenus = arrowMenus - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void date_to_clockDateTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
 
 
   int day = 10;
   int month1 = 41;
   int month2 = 37;
   int year = 82;
-  int arrow = 96;
 
   int menus = 6 + pageTransition;
   int box = 0 + pageTransition;
@@ -2583,7 +2730,7 @@ void date_to_clockDateTransition() {
     u8g2.drawStr(menus, 59, clockDateMenuTitles[3]);
     u8g2.setDrawColor(2);
     u8g2.drawBox(box, 32, 128, 15);
-    u8g2.drawXBMP(arrow, 36, 4, 7, right_arrow_BM);
+    u8g2.drawXBMP(arrowMenus, 36, 4, 7, right_arrow_BM);
 
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
@@ -2602,9 +2749,6 @@ void date_to_clockDateTransition() {
     u8g2.setCursor(year, 43);
     u8g2.print(temporaryYear);
 
-    u8g2.drawXBM(arrow, 23, 7, 4, up_arrow_small_BM);
-    u8g2.drawXBM(arrow, 48, 7, 4, down_arrow_small_BM);
-
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
@@ -2612,15 +2756,14 @@ void date_to_clockDateTransition() {
     month1 = month1 + speed;
     month2 = month2 + speed;
     year = year + speed;
-    arrow = arrow + speed;
     menus = menus + speed;
     box = box + speed;
     arrowMenus = arrowMenus + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 void day_to_monthTransition() {
-  int speed = 10;
+  int speed = 1;
   int transition = 0;
   int arrow = 15;
 
@@ -2649,11 +2792,11 @@ void day_to_monthTransition() {
 
     arrow = arrow + speed;
     transition = transition + speed;
-
+    delayMicroseconds(1000);
   } while (transition < 35);
 }
 void month_to_yearTransition() {
-  int speed = 12;
+  int speed = 1;
   int transition = 0;
   int arrow = 50;
 
@@ -2682,7 +2825,7 @@ void month_to_yearTransition() {
 
     arrow = arrow + speed;
     transition = transition + speed;
-
+    delayMicroseconds(1000);
   } while (transition < 46);
 }
 /*
@@ -2792,7 +2935,7 @@ void printAboutPage() {
 
   u8g2.setFont(u8g2_font_profont15_tf);
   u8g2.drawStr(30, text10, "Version :");
-  u8g2.drawStr(32, text11, "BETA 2.0");
+  u8g2.drawStr(32, text11, "BETA 2.2");
   u8g2.drawUTF8(33, text12, "Baptiste");
 
   drawAboutBar();
@@ -2805,10 +2948,10 @@ void updateAboutPage() {
   aboutNumberStep = aboutPageSize / aboutStepSize;
 
   if (rotateCounter < 0) {
-    rotateCounter = 0;
+    setRotary(0);
   }
   if (rotateCounter > aboutNumberStep) {
-    rotateCounter = aboutNumberStep;
+    setRotary(aboutNumberStep);
   }
 
   aboutCurrentStep = map(rotateCounter, 0, aboutNumberStep, 0, aboutPageSize);
@@ -2827,19 +2970,18 @@ void updateAboutPage() {
   text12 = 198 - aboutCurrentStep;
 }
 void executeAboutPage() {
-  if (buttonPressedState == true) {
+  if (mainButton.pressed()) {
     aboutPage = false;
-    rotateCounter = 6;
+    setRotary(6);
     menuItemSelect = 6;
     about_to_settingsTransition();
   }
-  buttonPressedState = false;
 }
 void settings_to_aboutTransition() {
 
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
 
   int settingsItems = 6;
   int settingsBox = 0;
@@ -2893,13 +3035,13 @@ void settings_to_aboutTransition() {
     textTransition2 = textTransition2 - speed;
     textTransition3 = textTransition3 - speed;
     pageTransition = pageTransition - speed;
-
+    delayMicroseconds(100);
   } while (pageTransition > 0);
 }
 void about_to_settingsTransition() {
-  int speed = 25;
+  int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
 
   int settingsItems = 6 + pageTransition;
   int settingsBox = 0 + pageTransition;
@@ -2987,12 +3129,58 @@ void about_to_settingsTransition() {
     textScroll9 = textScroll9 + speed;
     textScroll10 = textScroll10 + speed;
     textScroll11 = textScroll11 + speed;
-
+    delayMicroseconds(100);
   } while (pageTransition < 0);
 }
 
-
-
+//AlarmNotification message set
+void updateAlarmNotification() {
+  alarmNotificationMSG = alarmNotificationMSG - 6;
+  clockBIG = clockBIG + 1;
+  delay(150);
+  if (alarmNotificationMSG < -166) {
+    alarmNotificationMSG = 128;
+  }
+  if (clockBIG > 7) {
+    clockBIG = 0;
+    if (clockBIG_state == true) {
+      clockBIG_state = false;
+    } else {
+      clockBIG_state = true;
+    }
+  }
+}
+void printAlarmNotification() {
+  u8g2.clearBuffer();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setDrawColor(1);
+  u8g2.drawXBMP(56, 19, 17, 18, big_alarm_BM);
+  if (clockBIG_state == true) {
+    u8g2.drawXBMP(53, 15, 6, 6, big_alarm_left_BM);
+    u8g2.drawXBMP(70, 15, 6, 6, big_alarm_right_BM);
+  } else {
+    u8g2.drawXBMP(54, 16, 6, 6, big_alarm_left_BM);
+    u8g2.drawXBMP(69, 16, 6, 6, big_alarm_right_BM);
+  }
+  u8g2.setFont(u8g2_font_profont11_tf);
+  u8g2.drawUTF8(alarmNotificationMSG, 51, "Il est l'heure de se réveiller !");
+  u8g2.drawFrame(24, 5, 80, 54);
+  u8g2.setDrawColor(0);
+  u8g2.drawBox(104, 0, 24, 64);
+  u8g2.drawBox(0, 0, 24, 64);
+  u8g2.setDrawColor(2);
+  u8g2.drawPixel(103, 5);
+  u8g2.drawPixel(24, 5);
+  u8g2.drawPixel(103, 58);
+  u8g2.drawPixel(24, 58);
+  u8g2.sendBuffer();
+}
+void executeAlarmNotification() {
+  if (mainButton.pressed()) {
+    alarmNotification = false;
+  }
+}
 
 //   ==draw menus bar==
 
@@ -3224,29 +3412,6 @@ void drawDate() {
   u8g2.print(' ');
   u8g2.print(now.year());
 }
-//   ==buttons control==
-void button_is_pressed() {
-  buttonPressedState = true;
-}
-void wheel_is_rotated() {
-  //Store states
-  CLKNow = digitalRead(RotaryCLK);  //Read the state of the CLK pin
-
-
-
-  // If last and current state of CLK are different, then a pulse occurred
-  if (CLKNow != CLKPrevious && CLKNow == 1) {
-    // If the DT state is different than the CLK state then
-    // the encoder is rotating CCW so increase
-    if (digitalRead(RotaryDT) != CLKNow) {
-      rotateCounter++;
-    } else {
-      rotateCounter--;
-    }
-  }
-  CLKPrevious = CLKNow;  // Store last CLK state
-}
-
 
 
 
@@ -3257,4 +3422,8 @@ String twoDigit(int number) {
   } else {
     return String(number);  // Otherwise, just return the number as is
   }
+}
+
+void setRotary(int number) {
+  rotaryEncoder.setCount(number * 2);
 }
