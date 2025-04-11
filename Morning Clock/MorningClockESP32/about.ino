@@ -16,14 +16,14 @@ void printAboutPage() {
   u8g2.setFont(u8g2_font_profont12_tf);
   u8g2.drawStr(45, text4, "WILD-CARUANA");
   u8g2.drawUTF8(9, text5, " et fabriqué par ");
-  u8g2.drawUTF8(4, text6, "Février");
-  u8g2.drawStr(4, text7, "et Mars 2025");
+  u8g2.drawUTF8(4, text6, "De février");
+  u8g2.drawStr(4, text7, "à avril 2025");
   u8g2.drawStr(6, text8, "Exemplaire de test");
   u8g2.drawUTF8(25, text9, "attribué à :");
 
   u8g2.setFont(u8g2_font_profont15_tf);
   u8g2.drawStr(30, text10, "Version :");
-  u8g2.drawStr(32, text11, "BETA 2.2");
+  u8g2.drawStr(32, text11, "BETA 3.0");
   u8g2.drawUTF8(33, text12, "Baptiste");
 
   drawAboutBar();

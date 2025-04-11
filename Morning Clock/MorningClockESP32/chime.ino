@@ -14,9 +14,11 @@
 void chimeSet_state() {
   if (chime_is_activated == true) {
     chime_is_activated = false;
+    eprom.write(13, false);
     soundSystem.play(5);
   } else {
     chime_is_activated = true;
+    eprom.write(13, true);
     soundSystem.play(4);
   }
 }

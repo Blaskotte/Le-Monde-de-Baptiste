@@ -21,7 +21,7 @@ void printHomePage() {
   u8g2.setFont(u8g2_font_timR24_tn);
   //u8g2.setFont(u8g2_font_helvB24_tn);
   //u8g2.setFont(u8g2_font_luBIS24_te);
-  u8g2.setCursor(28, 44);
+  u8g2.setCursor(28, 58);
   u8g2.print(twoDigit(now.hour()));
 
   if (blink == true) {
@@ -30,9 +30,12 @@ void printHomePage() {
     u8g2.print(" ");
   }
 
-  u8g2.setCursor(69, 44);
+  u8g2.setCursor(69, 58);
   u8g2.print(twoDigit(now.minute()));
   drawDate();
+  if (alarmNotification == true) {
+  printAlarmNotification();
+  }
   u8g2.sendBuffer();
 }
 
@@ -129,7 +132,7 @@ void alarmHomePageTransitionIN() {
     u8g2.clearBuffer();
     drawHomePageBar();
     u8g2.setFont(u8g2_font_timR24_tn);
-    u8g2.setCursor(28, 44);
+    u8g2.setCursor(28, 58);
     u8g2.print(twoDigit(now.hour()));
 
     if (blink == true) {
@@ -138,7 +141,7 @@ void alarmHomePageTransitionIN() {
       u8g2.print(" ");
     }
 
-    u8g2.setCursor(69, 44);
+    u8g2.setCursor(69, 58);
     u8g2.print(twoDigit(now.minute()));
     drawDate();
 
@@ -175,7 +178,7 @@ void alarmHomePageTransitionOUT() {
     u8g2.clearBuffer();
     drawHomePageBar();
     u8g2.setFont(u8g2_font_timR24_tn);
-    u8g2.setCursor(28, 44);
+    u8g2.setCursor(28, 58);
     u8g2.print(twoDigit(now.hour()));
 
     if (blink == true) {
@@ -184,7 +187,7 @@ void alarmHomePageTransitionOUT() {
       u8g2.print(" ");
     }
 
-    u8g2.setCursor(69, 44);
+    u8g2.setCursor(69, 58);
     u8g2.print(twoDigit(now.minute()));
     drawDate();
 

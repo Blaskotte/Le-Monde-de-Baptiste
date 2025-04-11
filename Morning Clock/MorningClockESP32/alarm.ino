@@ -5,60 +5,35 @@ void printAlarmMenu() {
 
   u8g2.clearBuffer();
   drawAlarmBar();
-  drawScrollbar();
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
   u8g2.setFont(u8g2_font_profont11_tf);
-  switch (frameAlarmMenu) {
+  if (alarm_is_activated == true) {
+    u8g2.drawUTF8(6, 27, alarmSettingsMenuTitles[1]);
+  } else {
+    u8g2.drawUTF8(6, 27, alarmSettingsMenuTitles[0]);
+  }
+  u8g2.drawStr(6, 43, alarmSettingsMenuTitles[2]);
+  u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
+  u8g2.drawStr(6, 75, alarmSettingsMenuTitles[4]);
+  u8g2.setDrawColor(2);
+  switch (menuItemSelect) {
     case 1:
-      if (alarm_is_activated == true) {
-        u8g2.drawUTF8(6, 27, alarmSettingsMenuTitles[1]);
-      } else {
-        u8g2.drawUTF8(6, 27, alarmSettingsMenuTitles[0]);
-      }
-      u8g2.drawStr(6, 43, alarmSettingsMenuTitles[2]);
-      u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
-      u8g2.setDrawColor(2);
-      scrollbar_2frames();
-      switch (menuItemSelect) {
-        case 1:
-          u8g2.drawBox(0, 16, 122, 15);
-          break;
-
-        case 2:
-          u8g2.drawBox(0, 32, 122, 15);
-          u8g2.drawXBMP(112, 36, 4, 7, right_arrow_BM);
-          break;
-
-        case 3:
-          u8g2.drawBox(0, 48, 122, 15);
-          u8g2.drawXBMP(112, 52, 4, 7, right_arrow_BM);
-          break;
-      }
+      u8g2.drawBox(0, 16, 128, 15);
       break;
 
     case 2:
-      u8g2.drawStr(6, 27, alarmSettingsMenuTitles[2]);
-      u8g2.drawStr(6, 43, alarmSettingsMenuTitles[3]);
-      u8g2.drawStr(6, 59, alarmSettingsMenuTitles[4]);
-      u8g2.setDrawColor(2);
-      scrollbar_2frames();
-      switch (menuItemSelect) {
-        case 2:
-          u8g2.drawBox(0, 16, 122, 15);
-          u8g2.drawXBMP(112, 20, 4, 7, right_arrow_BM);
-          break;
+      u8g2.drawBox(0, 32, 128, 15);
+      u8g2.drawXBMP(118, 36, 4, 7, right_arrow_BM);
+      break;
 
-        case 3:
-          u8g2.drawBox(0, 32, 122, 15);
-          u8g2.drawXBMP(112, 36, 4, 7, right_arrow_BM);
-          break;
-
-        case 4:
-          u8g2.drawBox(0, 48, 122, 15);
-          u8g2.drawXBMP(112, 52, 4, 7, left_arrow_BM);
-          break;
-      }
+    case 3:
+      u8g2.drawBox(0, 48, 128, 15);
+      u8g2.drawXBMP(118, 52, 4, 7, right_arrow_BM);
+      break;
+    case 4:
+      u8g2.drawBox(0, 64, 128, 15);
+      u8g2.drawXBMP(118, 68, 4, 7, left_arrow_BM);
       break;
   }
   u8g2.sendBuffer();
@@ -68,9 +43,6 @@ void updateAlarmMenu() {
   switch (rotateCounter) {
     case 1:
       menuItemSelect = 1;
-      if (frameAlarmMenu > 1) {
-        frameAlarmMenu = 1;
-      }
       break;
 
     case 2:
@@ -83,9 +55,6 @@ void updateAlarmMenu() {
 
     case 4:
       menuItemSelect = 4;
-      if (frameAlarmMenu < 2) {
-        frameAlarmMenu = 2;
-      }
       break;
 
     default:
@@ -145,10 +114,9 @@ void alarmTrue_to_false() {
     u8g2.drawUTF8(newItem, 27, alarmSettingsMenuTitles[0]);
     u8g2.drawStr(6, 43, alarmSettingsMenuTitles[2]);
     u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawStr(6, 75, alarmSettingsMenuTitles[4]);
     u8g2.setDrawColor(2);
-    u8g2.drawBox(0, 16, 122, 15);
-    drawScrollbar();
-    scrollbar_2frames();
+    u8g2.drawBox(0, 16, 128, 15);
     u8g2.sendBuffer();
 
     oldItem = oldItem - speed;
@@ -173,10 +141,9 @@ void alarmFalse_to_true() {
     u8g2.drawUTF8(newItem, 27, alarmSettingsMenuTitles[1]);
     u8g2.drawStr(6, 43, alarmSettingsMenuTitles[2]);
     u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawStr(6, 75, alarmSettingsMenuTitles[4]);
     u8g2.setDrawColor(2);
-    u8g2.drawBox(0, 16, 122, 15);
-    drawScrollbar();
-    scrollbar_2frames();
+    u8g2.drawBox(0, 16, 128, 15);
     u8g2.sendBuffer();
 
     oldItem = oldItem - speed;
@@ -190,7 +157,7 @@ void settings_to_alarmTransition() {
   int speed = 2;
 
   int pageTransition = 128;
-  int settingItems = 6;
+  int settingsItems = 6;
   int settingsBox = 0;
   int settingsArrow = 112;
 
@@ -203,9 +170,11 @@ void settings_to_alarmTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
-    u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[1]);
-    u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[2]);
-    u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[3]);
+    u8g2.drawUTF8(settingsItems, 27, mainSettingsMenuTitles[1]);
+    u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[2]);
+    u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[3]);
+    u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[4]);
+    u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[5]);
     u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
 
     if (alarm_is_activated == true) {
@@ -215,17 +184,16 @@ void settings_to_alarmTransition() {
     }
     u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[2]);
     u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawStr(alarmItems, 75, alarmSettingsMenuTitles[4]);
 
 
     u8g2.setDrawColor(2);
     u8g2.drawBox(settingsBox, 16, 122, 15);
-    u8g2.drawBox(alarmBox, 16, 122, 15);
-    drawScrollbar();
-    scrollbar_2frames();
+    u8g2.drawBox(alarmBox, 16, 128, 15);
     u8g2.sendBuffer();
 
     pageTransition = pageTransition - speed;
-    settingItems = settingItems - speed;
+    settingsItems = settingsItems - speed;
     settingsBox = settingsBox - speed;
     settingsArrow = settingsArrow - speed;
 
@@ -239,13 +207,13 @@ void alarm_to_settingsTransition() {
   int speed = 2;
 
   int pageTransition = -128;
-  int settingItems = 6 + pageTransition;
+  int settingsItems = 6 + pageTransition;
   int settingsBox = 0 + pageTransition;
-  int settingsArrow = 118 + pageTransition;
+  int settingsArrow = 112 + pageTransition;
 
   int alarmItems = 6;
   int alarmBox = 0;
-  int alarmArrow = 112;
+  int alarmArrow = 118;
 
   do {
     u8g2.clearBuffer();
@@ -253,25 +221,32 @@ void alarm_to_settingsTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
-    u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[1]);
-    u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[2]);
-    u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[3]);
+    u8g2.drawStr(settingsItems, 27, mainSettingsMenuTitles[1]);
+    u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[2]);
+    u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[3]);
+    u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[4]);
+    u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[5]);
     u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
 
-    u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[2]);
-    u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[3]);
-    u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[4]);
-    u8g2.drawXBMP(alarmArrow, 52, 4, 7, left_arrow_BM);
+    if (alarm_is_activated == true) {
+      u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
+    } else {
+      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
+    }
+    u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawStr(alarmItems, 75, alarmSettingsMenuTitles[4]);
+    u8g2.drawXBMP(alarmArrow, 68, 4, 7, left_arrow_BM);
 
     u8g2.setDrawColor(2);
     u8g2.drawBox(settingsBox, 16, 122, 15);
-    u8g2.drawBox(alarmBox, 48, 122, 15);
+    u8g2.drawBox(alarmBox, 64, 128, 15);
     drawScrollbar();
-    scrollbar_5frames();
+    drawSettingsScrollbar();
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
-    settingItems = settingItems + speed;
+    settingsItems = settingsItems + speed;
     settingsBox = settingsBox + speed;
     settingsArrow = settingsArrow + speed;
 
@@ -293,9 +268,11 @@ void alarm_to_settingsTransition() {
 void alarmSet_state() {
   if (alarm_is_activated == true) {
     alarm_is_activated = false;
+    eprom.write(12, false);
     soundSystem.play(5);
   } else {
     alarm_is_activated = true;
+    eprom.write(12, true);
     soundSystem.play(4);
   }
 }
@@ -307,19 +284,19 @@ void printAlarmSet_hour() {
   u8g2.clearBuffer();
   drawAlarmBar();
   u8g2.setFont(u8g2_font_timR18_tr);
-  u8g2.setCursor(37, 46);
+  u8g2.setCursor(37, 61);
   u8g2.print(twoDigit(alarmHour));
   u8g2.print(':');
   u8g2.print(twoDigit(alarmMinute));
   switch (alarmSetStep) {
     case 1:
-      u8g2.drawXBMP(45, 21, 8, 4, up_arrow_BM);
-      u8g2.drawXBMP(45, 50, 8, 4, down_arrow_BM);
+      u8g2.drawXBMP(45, 36, 8, 4, up_arrow_BM);
+      u8g2.drawXBMP(45, 65, 8, 4, down_arrow_BM);
       break;
 
     case 2:
-      u8g2.drawXBM(75, 21, 8, 4, up_arrow_BM);
-      u8g2.drawXBM(75, 50, 8, 4, down_arrow_BM);
+      u8g2.drawXBM(75, 36, 8, 4, up_arrow_BM);
+      u8g2.drawXBM(75, 66, 8, 4, down_arrow_BM);
       break;
 
     case 3:
@@ -387,26 +364,18 @@ void alarm_to_hourTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
-    if (frameAlarmMenu == 1) {
-      if (alarm_is_activated == true) {
-        u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
-      } else {
-        u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
-      }
-      u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[2]);
-      u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[3]);
-      u8g2.drawBox(alarmBox, 32, 122, 15);
-      u8g2.drawXBMP(alarmArrow, 36, 4, 7, right_arrow_BM);
+    if (alarm_is_activated == true) {
+      u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
+    } else {
+      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
     }
-    if (frameAlarmMenu == 2) {
-      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[2]);
-      u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[3]);
-      u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[4]);
-      u8g2.drawBox(alarmBox, 16, 122, 15);
-    }
-
+    u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawStr(alarmItems, 75, alarmSettingsMenuTitles[4]);
+    u8g2.drawBox(alarmBox, 32, 128, 15);
+    u8g2.drawXBMP(alarmArrow, 36, 4, 7, right_arrow_BM);
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(clock, 46);
+    u8g2.setCursor(clock, 61);
     u8g2.print(twoDigit(alarmHour));
     u8g2.print(':');
     u8g2.print(twoDigit(alarmMinute));
@@ -438,32 +407,22 @@ void hour_to_alarmTransition() {
     u8g2.setBitmapMode(1);
 
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(clock, 46);
+    u8g2.setCursor(clock, 61);
     u8g2.print(twoDigit(alarmHour));
     u8g2.print(':');
     u8g2.print(twoDigit(alarmMinute));
 
     u8g2.setFont(u8g2_font_profont11_tf);
-
-    if (frameAlarmMenu == 1) {
-      if (alarm_is_activated == true) {
-        u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
-      } else {
-        u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
-      }
-      u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[2]);
-      u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[3]);
-      u8g2.drawBox(alarmBox, 32, 122, 15);
-      u8g2.drawXBMP(alarmArrow, 36, 4, 7, right_arrow_BM);
+    if (alarm_is_activated == true) {
+      u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
+    } else {
+      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
     }
-    if (frameAlarmMenu == 2) {
-      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[2]);
-      u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[3]);
-      u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[4]);
-      u8g2.drawBox(alarmBox, 16, 122, 15);
-    }
-    drawScrollbar();
-    scrollbar_2frames();
+    u8g2.drawStr(alarmItems, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawStr(alarmItems, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawStr(alarmItems, 75, alarmSettingsMenuTitles[4]);
+    u8g2.drawBox(alarmBox, 32, 128, 15);
+    u8g2.drawXBMP(alarmArrow, 36, 4, 7, right_arrow_BM);
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
@@ -484,17 +443,17 @@ void hour_to_minuteTransition() {
     u8g2.clearBuffer();
     drawAlarmBar();
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(37, 46);
+    u8g2.setCursor(37, 61);
     u8g2.print(twoDigit(alarmHour));
     u8g2.print(':');
     u8g2.print(twoDigit(alarmMinute));
-    u8g2.drawXBMP(arrow, 21, 8, 4, up_arrow_BM);
-    u8g2.drawXBMP(arrow, 50, 8, 4, down_arrow_BM);
+    u8g2.drawXBMP(arrow, 36, 8, 4, up_arrow_BM);
+    u8g2.drawXBMP(arrow, 65, 8, 4, down_arrow_BM);
     u8g2.sendBuffer();
 
     transition = transition + speed;
     arrow = arrow + speed;
-    delayMicroseconds(1000);
+    delay(6);
   } while (transition < 30);
 }
 
@@ -506,47 +465,29 @@ void hour_to_minuteTransition() {
 ////////////////////////////////////////////////////////////////////////////
 
 void updateAlarmNotification() {
-  alarmNotificationMSG = alarmNotificationMSG - 6;
   clockBIG = clockBIG + 1;
-  delay(150);
-  if (alarmNotificationMSG < -166) {
-    alarmNotificationMSG = 128;
-  }
-  if (clockBIG > 7) {
+  delay(70);
+  if (clockBIG > 20) {
     clockBIG = 0;
-    if (clockBIG_state == true) {
-      clockBIG_state = false;
-    } else {
-      clockBIG_state = true;
-    }
   }
 }
 
 void printAlarmNotification() {
-  u8g2.clearBuffer();
+  u8g2.setDrawColor(0);
+  u8g2.drawRBox(35, 20, 58, 58, 9);
+  u8g2.setDrawColor(1);
+  u8g2.drawRFrame(35, 20, 58, 58, 9);
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
-  u8g2.setDrawColor(1);
-  u8g2.drawXBMP(56, 19, 17, 18, big_alarm_BM);
-  if (clockBIG_state == true) {
-    u8g2.drawXBMP(53, 15, 6, 6, big_alarm_left_BM);
-    u8g2.drawXBMP(70, 15, 6, 6, big_alarm_right_BM);
-  } else {
-    u8g2.drawXBMP(54, 16, 6, 6, big_alarm_left_BM);
-    u8g2.drawXBMP(69, 16, 6, 6, big_alarm_right_BM);
+  u8g2.drawXBMP(53, 38, 22, 25, big_alarm_BM);
+  if (clockBIG > 0 && clockBIG < 10) {
+    u8g2.drawXBM(51, 36, 8, 8, big_alarm_left_BM);
+    u8g2.drawXBM(69, 36, 8, 8, big_alarm_right_BM);
   }
-  u8g2.setFont(u8g2_font_profont11_tf);
-  u8g2.drawUTF8(alarmNotificationMSG, 51, "Il est l'heure de se réveiller !");
-  u8g2.drawFrame(24, 5, 80, 54);
-  u8g2.setDrawColor(0);
-  u8g2.drawBox(104, 0, 24, 64);
-  u8g2.drawBox(0, 0, 24, 64);
-  u8g2.setDrawColor(2);
-  u8g2.drawPixel(103, 5);
-  u8g2.drawPixel(24, 5);
-  u8g2.drawPixel(103, 58);
-  u8g2.drawPixel(24, 58);
-  u8g2.sendBuffer();
+  if (clockBIG > 10 && clockBIG < 21) {
+    u8g2.drawXBM(50, 35, 8, 8, big_alarm_left_BM);
+    u8g2.drawXBM(70, 35, 8, 8, big_alarm_right_BM);
+  }
 }
 
 void executeAlarmNotification() {

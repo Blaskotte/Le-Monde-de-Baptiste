@@ -25,7 +25,8 @@ GD3300 soundSystem;
 RTC_DS3231 rtc;
 
 //U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2, /* clock=*/1, /* data=*/2, /* cs=*/3, /* dc=*/4, /* reset=*/5);
-U8G2_ST7567_JLX12864_F_4W_HW_SPI u8g2(U8G2_R2, 3, 4, 5);
+//U8G2_ST7567_JLX12864_F_4W_HW_SPI u8g2(U8G2_R2, 3, 4, 5);
+U8G2_ST7571_128X96_F_4W_HW_SPI u8g2(U8G2_R0, 3, 4, 5);
 
 const int chipSelect = 10;
 
@@ -179,18 +180,18 @@ const unsigned char contrast_high_BM[] PROGMEM = {
 };
 
 const unsigned char big_alarm_BM[] PROGMEM = {
-  // 'big_alarm_BM', 17x18px
-  0xc0, 0x07, 0x00, 0x30, 0x18, 0x00, 0x08, 0x21, 0x00, 0x04, 0x40, 0x00, 0x12, 0x91, 0x00, 0x02, 0x81, 0x00, 0x01, 0x01, 0x01, 0x81, 0x03, 0x01, 0x85, 0x4f, 0x01, 0x81, 0x03, 0x01, 0x01, 0x00, 0x01, 0x02, 0x80, 0x00, 0x12, 0x90, 0x00, 0x04, 0x40, 0x00, 0x08, 0x21, 0x00, 0x38, 0x38, 0x00, 0xc4, 0x47, 0x00, 0x02, 0x80, 0x00
+  // 'big_alarm_BM', 22x25px
+  0x00,0x3f,0x00,0xc0,0xc0,0x00,0x30,0x00,0x03,0x08,0x04,0x04,0x04,0x04,0x08,0x04,0x04,0x08,0x02,0x04,0x10,0x02,0x04,0x10,0x01,0x04,0x20,0x01,0x04,0x20,0x01,0x04,0x20,0x01,0xfc,0x20,0x01,0x00,0x20,0x01,0x00,0x20,0x02,0x00,0x10,0x02,0x00,0x10,0x04,0x00,0x08,0x04,0x00,0x08,0x08,0x00,0x04,0x30,0x00,0x03,0xf8,0xc0,0x07,0x1c,0x3f,0x0e,0x0c,0x00,0x0c,0x06,0x00,0x18,0x03,0x00,0x30
 };
 
 const unsigned char big_alarm_left_BM[] PROGMEM = {
-  // 'big_alarm_left_BM', 6x6px
-  0x1c, 0x22, 0x11, 0x09, 0x05, 0x02
+  // 'big_alarm_left_BM', 8x8px
+  0x78,0x86,0x42,0x31,0x09,0x09,0x05,0x02
 };
 
 const unsigned char big_alarm_right_BM[] PROGMEM = {
-  // 'big_alarm_right_BM', 6x6px
-  0x0e, 0x11, 0x22, 0x24, 0x28, 0x10
+  // 'big_alarm_right_BM', 8x8px
+  0x1e,0x61,0x42,0x8c,0x90,0x90,0xa0,0x40
 };
 
 
@@ -222,9 +223,9 @@ const unsigned char big_alarm_right_BM[] PROGMEM = {
 // 'contrast_high_BM', 8x8px
 // 'up_arrow_small_BM, 7x4px
 // 'down_arrow_small_BM, 7x4px
-// 'big_alarm_BM', 17x18px
-// 'big_alarm_left_BM', 6x6px
-// 'big_alarm_right_BM', 6x6px
+// 'big_alarm_BM', 22x25px
+// 'big_alarm_left_BM', 8x8px
+// 'big_alarm_right_BM', 8x8px
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -308,9 +309,7 @@ const char* shortMonths[] = {
 int rotateCounter = 0;  //counts the rotation clicks
 
 
-//Defining variables for the state of the homePage
-bool chime_is_activated = false;
-bool alarm_is_activated = false;
+
 
 bool chimeSelect = false;
 bool alarmSelect = false;
@@ -348,7 +347,7 @@ int contrastBarSize;
 
 //about page
 bool aboutPage = false;
-static int aboutPageSize = 150;
+static int aboutPageSize = 115;
 static int aboutStepSize = 5;
 int aboutNumberStep;
 int aboutCurrentStep;
@@ -368,9 +367,9 @@ int text12;
 
 //variables for the scrollbar
 static int startScrollbar = 15;
-static int endScrollbar = 62;
+static int endScrollbar = 94;
 static int scrollbarTotalSize = 47;
-static int screenSize = 50;
+static int screenSize = 82;
 
 int elevatorSize;
 int scrollCurrentPosition;
@@ -395,6 +394,9 @@ unsigned int volumeChime;         //EEPROM adress 8
 unsigned int volumeNotification;  //EEPROM adress 9
 unsigned int brightness;          //EEPROM adress 10
 unsigned int contrast;            //EEPROM adress 11
+
+bool chime_is_activated;  //EEPROM adress 12
+bool alarm_is_activated;  //EEPROM adress 13
 
 
 //variables used to set the hour
@@ -426,7 +428,6 @@ unsigned long rotaryPreviousMillis = 0;
 bool alarmNotification = true;
 int alarmNotificationMSG = 118;
 int clockBIG;
-bool clockBIG_state;
 
 bool chimeNotification = false;
 
@@ -444,7 +445,7 @@ void setup() {
   u8g2.setContrast(130);
 
   u8g2.clearBuffer();
-  u8g2.drawXBMP(57, 23, 14, 18, bigHappy_BM);
+  u8g2.drawXBMP(57, 39, 14, 18, bigHappy_BM);
   u8g2.sendBuffer();
   delay(300);
   Wire.begin();
@@ -464,6 +465,8 @@ void setup() {
   volumeNotification = eprom.read(9);
   brightness = eprom.read(10);
   contrast = eprom.read(11);
+  alarm_is_activated = eprom.read(12);
+  chime_is_activated = eprom.read(13);
   Potentiometer.writeWiper(brightness);
   delay(300);
   u8g2.setContrast(contrast);
@@ -476,7 +479,7 @@ void loop() {
   rotateCounter = rotaryEncoder.getCount() / 2;
   if (alarmNotification == true) {
     updateAlarmNotification();
-    printAlarmNotification();
+    printHomePage();
     executeAlarmNotification();
   } else if (homePage == true && mainSettingsMenu == false) {
     updateHomePage();
@@ -550,9 +553,25 @@ void loop() {
 
 void drawScrollbar() {
   u8g2.setDrawColor(0);
-  u8g2.drawBox(122, 13, 6, 51);
+  u8g2.drawBox(122, 13, 6, 83);
   u8g2.setDrawColor(1);
-  u8g2.drawFrame(122, 13, 6, 51);
+  u8g2.drawFrame(122, 13, 6, 83);
+}
+
+void drawSettingsScrollbar() {
+  switch (frameSettingsMenu) {
+    case 1:
+      u8g2.drawFrame(124, 15, 2, 55);
+      break;
+
+    case 2:
+      u8g2.drawFrame(124, 27, 2, 55);
+      break;
+
+    case 3:
+      u8g2.drawFrame(124, 39, 2, 55);
+      break;
+  }
 }
 
 void scrollbar_2frames() {
@@ -613,7 +632,7 @@ void scrollbarAbout() {
 
 void drawDate() {
   DateTime now = rtc.now();
-  int dateY = 58;
+  int dateY = 75;
   u8g2.setFont(u8g2_font_profont11_tf);
 
   switch (now.month()) {
