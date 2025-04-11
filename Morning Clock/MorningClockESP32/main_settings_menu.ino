@@ -225,8 +225,8 @@ void executeSettingsMenu() {
       case 7:
         mainSettingsMenu = false;
         homePage = true;
-        setRotary(0);
-        happyMenuSelect = false;
+        setRotary(-3);
+        happyMenuSelect = true;
         soundSystem.play(3);
         settings_to_homePageTransition();
         break;
@@ -235,7 +235,93 @@ void executeSettingsMenu() {
 }
 
 void homePage_to_settingsTransition() {
-  int speed = 2;
+  DateTime now = rtc.now();
+  int transitionDelay = 60;
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(5, 5, 10, 7);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(4, 4, 30, 23);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(3, 3, 55, 41);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(2, 2, 80, 61);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(1, 1, 108, 80);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(0, 0, 128, 96);
+  u8g2.sendBuffer();
+
+  /*int speed = 2;
   int pageTransition = 82;
 
   int background = 96;
@@ -286,11 +372,106 @@ void homePage_to_settingsTransition() {
     menuItemBox = menuItemBox - speed;
     arrow = arrow - speed;
     delay(1);
-  } while (pageTransition > 0);
+  } while (pageTransition > 0);*/
 }
 
 void settings_to_homePageTransition() {
-  int speed = 2;
+  DateTime now = rtc.now();
+  int transitionDelay = 60;
+    u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(0, 0, 128, 96);
+  u8g2.sendBuffer();
+    delay(transitionDelay);
+
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(1, 1, 108, 80);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(2, 2, 80, 61);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(3, 3, 55, 41);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(4, 4, 30, 23);
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+
+    u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+  u8g2.drawFrame(5, 5, 10, 7);
+  u8g2.sendBuffer();
+
+
+
+
+
+  /*int speed = 2;
   int pageTransition = 82;
 
   int background = 14;
@@ -346,7 +527,7 @@ void settings_to_homePageTransition() {
     scrollbar = scrollbar + speed;
     elevator = elevator + speed;
     delay(3);
-  } while (pageTransition > 0);
+  } while (pageTransition > 0);*/
 }
 
 ////////////////////////////////////////////////////////////////////////////
