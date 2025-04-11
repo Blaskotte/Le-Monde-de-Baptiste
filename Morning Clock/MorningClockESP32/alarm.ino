@@ -465,34 +465,72 @@ void hour_to_minuteTransition() {
 ////////////////////////////////////////////////////////////////////////////
 
 void updateAlarmNotification() {
-  clockBIG = clockBIG + 1;
-  delay(70);
-  if (clockBIG > 20) {
-    clockBIG = 0;
+  if (millis() - previousMillis >= 500) {
+    previousMillis = millis();
+    if (clockBig == true) {
+      clockBig = false;
+    } else {
+      clockBig = true;
+    }
+  }
+
+  if (rotateCounter > 2) {
+    setRotary(2);
+  }
+  if (rotateCounter < 1) {
+    setRotary(1);
   }
 }
 
 void printAlarmNotification() {
+  DateTime now = rtc.now();
   u8g2.setDrawColor(0);
-  u8g2.drawRBox(35, 20, 58, 58, 9);
+  u8g2.drawRBox(21, 19, 86, 58, 9);
   u8g2.setDrawColor(1);
-  u8g2.drawRFrame(35, 20, 58, 58, 9);
+  u8g2.drawRFrame(21, 19, 86, 58, 9);
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
-  u8g2.drawXBMP(53, 38, 22, 25, big_alarm_BM);
-  if (clockBIG > 0 && clockBIG < 10) {
-    u8g2.drawXBM(51, 36, 8, 8, big_alarm_left_BM);
-    u8g2.drawXBM(69, 36, 8, 8, big_alarm_right_BM);
+  u8g2.drawXBMP(53, 30, 22, 25, big_alarm_BM);
+
+  if (clockBig == true) {
+    u8g2.drawXBM(51, 28, 8, 8, big_alarm_left_BM);
+    u8g2.drawXBM(69, 28, 8, 8, big_alarm_right_BM);
   }
-  if (clockBIG > 10 && clockBIG < 21) {
-    u8g2.drawXBM(50, 35, 8, 8, big_alarm_left_BM);
-    u8g2.drawXBM(70, 35, 8, 8, big_alarm_right_BM);
+  if (clockBig == false) {
+    u8g2.drawXBM(50, 27, 8, 8, big_alarm_left_BM);
+    u8g2.drawXBM(70, 27, 8, 8, big_alarm_right_BM);
   }
+  u8g2.setFont(u8g2_font_profont10_tf);
+  u8g2.drawStr(31, 69, "Snooze");
+  u8g2.drawUTF8(73, 69, "Arrêt");
+  u8g2.setDrawColor(2);
+  if (rotateCounter == 1) {
+    u8g2.drawRBox(28, 61, 35, 10, 0);
+  }
+  if (rotateCounter == 2) {
+    u8g2.drawRBox(70, 61, 30, 10, 0);
+  }
+  u8g2.setFont(u8g2_font_profont11_tf);
+
+  u8g2.setCursor(49, 10);
+  u8g2.print(twoDigit(now.hour()));
+
+  if (blink == true) {
+    u8g2.print(":");
+  } else {
+    u8g2.print(" ");
+  }
+
+  u8g2.setCursor(67, 10);
+  u8g2.print(twoDigit(now.minute()));
 }
 
 void executeAlarmNotification() {
-  if (mainButton.pressed()) {
+  if (rotateCounter == 2 && mainButton.pressed()) {
     alarmNotification = false;
+    setRotary(0);
+  }
+  if (rotateCounter == 1 && mainButton.pressed()) {
   }
 }
 
