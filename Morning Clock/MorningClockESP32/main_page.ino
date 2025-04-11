@@ -34,7 +34,7 @@ void printHomePage() {
   u8g2.print(twoDigit(now.minute()));
   drawDate();
   if (alarmNotification == true) {
-  printAlarmNotification();
+    printAlarmNotification();
   }
   u8g2.sendBuffer();
 }
