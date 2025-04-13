@@ -194,6 +194,11 @@ const unsigned char big_alarm_right_BM[] PROGMEM = {
   0x1e, 0x61, 0x42, 0x8c, 0x90, 0x90, 0xa0, 0x40
 };
 
+const unsigned char validate_BM[] PROGMEM = {
+  // 'validate_BM', 7x9px
+  0x40, 0x40, 0x20, 0x20, 0x10, 0x11, 0x0b, 0x0e, 0x04
+};
+
 
 
 // 'bigHappy_BM', 14x18px
@@ -226,6 +231,7 @@ const unsigned char big_alarm_right_BM[] PROGMEM = {
 // 'big_alarm_BM', 22x25px
 // 'big_alarm_left_BM', 8x8px
 // 'big_alarm_right_BM', 8x8px
+// 'validate_BM', 7x9px
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -251,6 +257,14 @@ const char* alarmSettingsMenuTitles[] = {
   /*2*/ "Heure",
   /*3*/ "Son",
   /*4*/ "Retour",
+};
+
+const char* alarmSoundTitles[5] = {
+  /*0*/ "Concerto, Haydn",
+  /*1*/ "Suite, Peer Gynt",
+  /*2*/ "Printemps, Vivaldi",
+  /*3*/ "Frutiger Aero",
+  /*4*/ "Retour"
 };
 
 const char* monthsOfTheYear[] = {
@@ -323,7 +337,8 @@ bool mainSettingsMenu = false;
 
 bool alarmSettingsMenu = false;
 bool alarmSetHour_menu = false;
-int alarmSetStep;
+bool alarmSetMusic_menu = false;
+
 
 bool chimeSettingsMenu = false;
 bool chimeSetMusic_menu = false;
@@ -375,10 +390,15 @@ int elevatorSize;
 int scrollCurrentPosition;
 
 
+//varibales alarm
+int alarmSelectNumber;
+int alarmSetStep;
+
+
+
 //variables for the adaptatives menus
 int rotatePrevious;
 int frameSettingsMenu = 1;
-int frameAlarmMenu = 1;
 int menuItemSelect = 1;
 
 
@@ -490,6 +510,11 @@ void loop() {
       if (alarmSetHour_menu == true) {
         printAlarmSet_hour();
         updateAlarmSet_hour();
+
+      } else if (alarmSetMusic_menu == true) {
+        updateAlarmSet_music();
+        printAlarmSet_music();
+        executeAlarmSet_music();
       } else {
         updateAlarmMenu();
         printAlarmMenu();
@@ -570,42 +595,6 @@ void drawSettingsScrollbar() {
 
     case 3:
       u8g2.drawFrame(124, 39, 2, 55);
-      break;
-  }
-}
-
-void scrollbar_2frames() {
-  switch (frameAlarmMenu) {
-    case 1:
-      u8g2.drawFrame(124, 15, 2, 36);
-      break;
-
-    case 2:
-      u8g2.drawFrame(124, 26, 2, 36);
-      break;
-  }
-}
-
-void scrollbar_5frames() {
-  switch (frameSettingsMenu) {
-    case 1:
-      u8g2.drawFrame(124, 15, 2, 20);
-      break;
-
-    case 2:
-      u8g2.drawFrame(124, 21, 2, 20);
-      break;
-
-    case 3:
-      u8g2.drawFrame(124, 28, 2, 20);
-      break;
-
-    case 4:
-      u8g2.drawFrame(124, 35, 2, 20);
-      break;
-
-    case 5:
-      u8g2.drawFrame(124, 42, 2, 20);
       break;
   }
 }

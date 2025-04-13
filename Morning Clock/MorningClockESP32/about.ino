@@ -17,7 +17,7 @@ void printAboutPage() {
   u8g2.drawStr(45, text4, "WILD-CARUANA");
   u8g2.drawUTF8(9, text5, " et fabriqué par ");
   u8g2.drawUTF8(4, text6, "De février");
-  u8g2.drawStr(4, text7, "à avril 2025");
+  u8g2.drawUTF8(4, text7, "à avril 2025");
   u8g2.drawStr(6, text8, "Exemplaire de test");
   u8g2.drawUTF8(25, text9, "attribué à :");
 
@@ -74,7 +74,7 @@ void settings_to_aboutTransition() {
 
   int pageTransition = 128;
 
-  int settingsItems = 6;
+  int settingItems = 6;
   int settingsBox = 0;
   int settingsArrow = 112;
 
@@ -88,22 +88,26 @@ void settings_to_aboutTransition() {
     u8g2.setDrawColor(1);
     u8g2.setBitmapMode(1);
     switch (frameSettingsMenu) {
-      case 4:
-        u8g2.drawStr(settingsItems, 27, mainSettingsMenuTitles[4]);
-        u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingsItems, 59, mainSettingsMenuTitles[6]);
+      case 2:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[6]);
         u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 48, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
+        u8g2.drawBox(settingsBox, 80, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 84, 4, 7, right_arrow_BM);
         break;
 
-      case 5:
-        u8g2.drawStr(settingsItems, 27, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingsItems, 43, mainSettingsMenuTitles[6]);
-        u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[7]);
+      case 3:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[6]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[7]);
         u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 32, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
+        u8g2.drawBox(settingsBox, 64, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 68, 4, 7, right_arrow_BM);
         break;
     }
     u8g2.setFontMode(2);
@@ -112,13 +116,13 @@ void settings_to_aboutTransition() {
     u8g2.drawStr(textTransition1, 34, "Morning Clock");
     u8g2.setFont(u8g2_font_profont15_tf);
     u8g2.drawStr(textTransition2, 51, "Version :");
-    u8g2.drawStr(textTransition3, 66, "BETA 2.0");
+    u8g2.drawStr(textTransition3, 66, "BETA 3.0");
     drawAboutBar();
     drawScrollbar();
     scrollbarAbout();
     u8g2.sendBuffer();
 
-    settingsItems = settingsItems - speed;
+    settingItems = settingItems - speed;
     settingsBox = settingsBox - speed;
     settingsArrow = settingsArrow - speed;
 
@@ -135,7 +139,7 @@ void about_to_settingsTransition() {
 
   int pageTransition = -128;
 
-  int settingsItems = 6 + pageTransition;
+  int settingItems = 6 + pageTransition;
   int settingsBox = 0 + pageTransition;
   int settingsArrow = 112 + pageTransition;
 
@@ -157,22 +161,26 @@ void about_to_settingsTransition() {
     u8g2.setDrawColor(1);
     u8g2.setBitmapMode(1);
     switch (frameSettingsMenu) {
-      case 4:
-        u8g2.drawStr(settingsItems, 27, mainSettingsMenuTitles[4]);
-        u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingsItems, 59, mainSettingsMenuTitles[6]);
+      case 2:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[6]);
         u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 48, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
+        u8g2.drawBox(settingsBox, 80, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 84, 4, 7, right_arrow_BM);
         break;
 
-      case 5:
-        u8g2.drawStr(settingsItems, 27, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingsItems, 43, mainSettingsMenuTitles[6]);
-        u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[7]);
+      case 3:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[6]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[7]);
         u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 32, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
+        u8g2.drawBox(settingsBox, 64, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 68, 4, 7, right_arrow_BM);
         break;
     }
     u8g2.setFontMode(2);
@@ -190,7 +198,7 @@ void about_to_settingsTransition() {
     u8g2.drawStr(textScroll4, text4, "WILD-CARUANA");
     u8g2.drawUTF8(textScroll5, text5, " et fabriqué par ");
     u8g2.drawUTF8(textScroll6, text6, "Février");
-    u8g2.drawStr(textScroll6, text7, "et Mars 2025");
+    u8g2.drawUTF8(textScroll6, text7, "à Mars 2025");
     u8g2.drawStr(textScroll7, text8, "Exemplaire de test");
     u8g2.drawUTF8(textScroll8, text9, "attribué à :");
 
@@ -201,12 +209,12 @@ void about_to_settingsTransition() {
 
     drawSettingsBar();
     drawScrollbar();
-    scrollbar_5frames();
+    drawSettingsScrollbar();
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
 
-    settingsItems = settingsItems + speed;
+    settingItems = settingItems + speed;
     settingsBox = settingsBox + speed;
     settingsArrow = settingsArrow + speed;
 

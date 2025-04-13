@@ -29,7 +29,7 @@ void drawHomePageBar() {
     } else {
       u8g2.drawXBMP(13, 2, 8, 9, alarmON_BM);
     }
-        // Display the time of the alarm
+    // Display the time of the alarm
     u8g2.setFont(u8g2_font_profont11_tf);
     u8g2.setCursor(96, 10);
     u8g2.print(twoDigit(alarmHour));
@@ -60,7 +60,13 @@ void drawSettingsBar() {
 }
 
 void drawAlarmBar() {
-  u8g2.drawXBMP(2, 2, 8, 9, alarmON_BM);
+
+  if (alarm_is_activated == true) {
+    u8g2.drawXBMP(2, 2, 8, 9, alarmON_BM);
+  } else {
+    u8g2.drawXBM(2, 1, 8, 11, alarmOFF_BM);
+  }
+
   u8g2.setFont(u8g2_font_profont11_tf);
   u8g2.drawUTF8(46, 10, "Réveil");
   u8g2.drawLine(0, 13, 128, 13);

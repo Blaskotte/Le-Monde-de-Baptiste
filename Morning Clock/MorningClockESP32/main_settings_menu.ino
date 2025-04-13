@@ -191,7 +191,6 @@ void executeSettingsMenu() {
         alarmSettingsMenu = true;
         setRotary(1);
         menuItemSelect = 1;
-        frameAlarmMenu = 1;
         settings_to_alarmTransition();
         break;
 
@@ -225,7 +224,7 @@ void executeSettingsMenu() {
       case 7:
         mainSettingsMenu = false;
         homePage = true;
-        setRotary(-3);
+        setRotary(0);
         happyMenuSelect = true;
         soundSystem.play(3);
         settings_to_homePageTransition();
@@ -380,6 +379,10 @@ void settings_to_homePageTransition() {
   int transitionDelay = 60;
     u8g2.clearBuffer();
   drawHomePageBar();
+  u8g2.setDrawColor(0);
+  u8g2.drawBox(0, 0, 10, 13);
+  u8g2.setDrawColor(1);
+  u8g2.drawXBMP(2, 1, 9, 11, happyMenu_select_BM);
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
   u8g2.setFont(u8g2_font_timR24_tn);

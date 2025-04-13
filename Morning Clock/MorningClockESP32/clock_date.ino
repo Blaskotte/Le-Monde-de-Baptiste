@@ -94,7 +94,7 @@ void executeClockDateMenu() {
 void settings_to_clockDateTransition() {
   int speed = 2;
 
-  int pageTransition = 125;
+  int pageTransition = 128;
   int settingItems = 6;
   int settingsBox = 0;
   int settingsArrow = 112;
@@ -110,31 +110,37 @@ void settings_to_clockDateTransition() {
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
     switch (frameSettingsMenu) {
+      case 1:
+        u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[1]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[2]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[5]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 80, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 84, 4, 7, right_arrow_BM);
+        break;
+
+      case 2:
+        u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[6]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 64, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 68, 4, 7, right_arrow_BM);
+        break;
+
       case 3:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
-        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
-        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[6]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[7]);
         u8g2.setDrawColor(2);
         u8g2.drawBox(settingsBox, 48, 122, 15);
         u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
-        break;
-
-      case 4:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[4]);
-        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[6]);
-        u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 32, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
-        break;
-
-      case 5:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[6]);
-        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[7]);
-        u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 16, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
         break;
     }
     u8g2.setFontMode(1);
@@ -162,7 +168,7 @@ void settings_to_clockDateTransition() {
 void clockDate_to_settingsTransition() {
   int speed = 2;
 
-  int pageTransition = -125;
+  int pageTransition = -128;
   int settingItems = 6 + pageTransition;
   int settingsBox = 0 + pageTransition;
   int settingsArrow = 112 + pageTransition;
@@ -186,35 +192,41 @@ void clockDate_to_settingsTransition() {
     u8g2.drawXBMP(clockDateArrow, 52, 4, 7, left_arrow_BM);
 
     switch (frameSettingsMenu) {
+      case 1:
+        u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[1]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[2]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[5]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 80, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 84, 4, 7, right_arrow_BM);
+        break;
+
+      case 2:
+        u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[6]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 64, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 68, 4, 7, right_arrow_BM);
+        break;
+
       case 3:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
-        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
-        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 27, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[6]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[7]);
         u8g2.setDrawColor(2);
         u8g2.drawBox(settingsBox, 48, 122, 15);
         u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
         break;
-
-      case 4:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[4]);
-        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[6]);
-        u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 32, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
-        break;
-
-      case 5:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[5]);
-        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[6]);
-        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[7]);
-        u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 16, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
-        break;
     }
     drawScrollbar();
-    scrollbar_5frames();
+    drawSettingsScrollbar();
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
@@ -242,7 +254,7 @@ void printClockMenu() {
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
   u8g2.setFont(u8g2_font_timR18_tr);
-  u8g2.setCursor(22, 46);
+  u8g2.setCursor(22, 61);
   u8g2.print(twoDigit(temporaryHour));
   u8g2.print(':');
   u8g2.print(twoDigit(temporaryMinute));
@@ -251,18 +263,18 @@ void printClockMenu() {
 
   switch (clockSetStep) {
     case 1:
-      u8g2.drawXBM(30, 22, 8, 4, up_arrow_BM);
-      u8g2.drawXBM(30, 50, 8, 4, down_arrow_BM);
+      u8g2.drawXBM(30, 36, 8, 4, up_arrow_BM);
+      u8g2.drawXBM(30, 65, 8, 4, down_arrow_BM);
       break;
 
     case 2:
-      u8g2.drawXBM(60, 22, 8, 4, up_arrow_BM);
-      u8g2.drawXBM(60, 50, 8, 4, down_arrow_BM);
+      u8g2.drawXBM(60, 36, 8, 4, up_arrow_BM);
+      u8g2.drawXBM(60, 65, 8, 4, down_arrow_BM);
       break;
 
     case 3:
-      u8g2.drawXBM(90, 22, 8, 4, up_arrow_BM);
-      u8g2.drawXBM(90, 50, 8, 4, down_arrow_BM);
+      u8g2.drawXBM(90, 36, 8, 4, up_arrow_BM);
+      u8g2.drawXBM(90, 65, 8, 4, down_arrow_BM);
       break;
   }
   u8g2.sendBuffer();
@@ -357,7 +369,7 @@ void clockDate_to_clockTransition() {
     u8g2.setBitmapMode(1);
 
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(cursor, 46);
+    u8g2.setCursor(cursor, 61);
     u8g2.print(twoDigit(temporaryHour));
     u8g2.print(':');
     u8g2.print(twoDigit(temporaryMinute));
@@ -402,7 +414,7 @@ void clock_to_clockDateTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(cursor, 46);
+    u8g2.setCursor(cursor, 61);
     u8g2.print(twoDigit(temporaryHour));
     u8g2.print(':');
     u8g2.print(twoDigit(temporaryMinute));
@@ -430,20 +442,20 @@ void ClockHour_to_minuteTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(22, 46);
+    u8g2.setCursor(22, 61);
     u8g2.print(twoDigit(temporaryHour));
     u8g2.print(':');
     u8g2.print(twoDigit(temporaryMinute));
     u8g2.print(':');
     u8g2.print(twoDigit(temporarySecond));
-    u8g2.drawXBM(arrow, 22, 8, 4, up_arrow_BM);
-    u8g2.drawXBM(arrow, 50, 8, 4, down_arrow_BM);
+    u8g2.drawXBM(arrow, 36, 8, 4, up_arrow_BM);
+    u8g2.drawXBM(arrow, 65, 8, 4, down_arrow_BM);
 
     u8g2.sendBuffer();
 
     arrow = arrow + speed;
     transition = transition + speed;
-    delayMicroseconds(1000);
+    delay(6);
   } while (transition < 30);
 }
 
@@ -458,19 +470,19 @@ void ClockMinute_to_secondTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_timR18_tr);
-    u8g2.setCursor(22, 46);
+    u8g2.setCursor(22, 61);
     u8g2.print(twoDigit(temporaryHour));
     u8g2.print(':');
     u8g2.print(twoDigit(temporaryMinute));
     u8g2.print(':');
     u8g2.print(twoDigit(temporarySecond));
-    u8g2.drawXBM(arrow, 22, 8, 4, up_arrow_BM);
-    u8g2.drawXBM(arrow, 50, 8, 4, down_arrow_BM);
+    u8g2.drawXBM(arrow, 36, 8, 4, up_arrow_BM);
+    u8g2.drawXBM(arrow, 65, 8, 4, down_arrow_BM);
     u8g2.sendBuffer();
 
     arrow = arrow + speed;
     transition = transition + speed;
-    delayMicroseconds(1000);
+    delay(6);
   } while (transition < 30);
 }
 
@@ -487,35 +499,35 @@ void printDateMenu() {
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
   u8g2.setFont(u8g2_font_profont17_tf);
-  u8g2.setCursor(10, 43);
+  u8g2.setCursor(10, 56);
   u8g2.print(twoDigit(temporaryDay));
 
   if (temporaryMonth == 4 || temporaryMonth == 5 || temporaryMonth == 10 || temporaryMonth == 11 || temporaryMonth == 12) {
-    u8g2.setCursor(41, 43);
+    u8g2.setCursor(41, 56);
   } else {
-    u8g2.setCursor(37, 43);
+    u8g2.setCursor(37, 56);
   }
 
   u8g2.print(shortMonths[temporaryMonth]);
 
-  u8g2.setCursor(82, 43);
+  u8g2.setCursor(82, 56);
   u8g2.print(temporaryYear);
 
 
   switch (dateSetStep) {
     case 1:
-      u8g2.drawXBM(15, 23, 7, 4, up_arrow_small_BM);
-      u8g2.drawXBM(15, 48, 7, 4, down_arrow_small_BM);
+      u8g2.drawXBM(15, 37, 7, 4, up_arrow_small_BM);
+      u8g2.drawXBM(15, 60, 7, 4, down_arrow_small_BM);
       break;
 
     case 2:
-      u8g2.drawXBM(50, 23, 7, 4, up_arrow_small_BM);
-      u8g2.drawXBM(50, 48, 7, 4, down_arrow_small_BM);
+      u8g2.drawXBM(50, 37, 7, 4, up_arrow_small_BM);
+      u8g2.drawXBM(50, 60, 7, 4, down_arrow_small_BM);
       break;
 
     case 3:
-      u8g2.drawXBM(96, 23, 7, 4, up_arrow_small_BM);
-      u8g2.drawXBM(96, 48, 7, 4, down_arrow_small_BM);
+      u8g2.drawXBM(96, 37, 7, 4, up_arrow_small_BM);
+      u8g2.drawXBM(96, 60, 7, 4, down_arrow_small_BM);
       break;
   }
   u8g2.sendBuffer();
@@ -632,17 +644,17 @@ void clockDate_to_dateTransition() {
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont17_tf);
 
-    u8g2.setCursor(day, 43);
+    u8g2.setCursor(day, 56);
     u8g2.print(twoDigit(temporaryDay));
 
     if (temporaryMonth == 4 || temporaryMonth == 5 || temporaryMonth == 10 || temporaryMonth == 11 || temporaryMonth == 12) {
-      u8g2.setCursor(month1, 43);
+      u8g2.setCursor(month1, 56);
     } else {
-      u8g2.setCursor(month2, 43);
+      u8g2.setCursor(month2, 56);
     }
     u8g2.print(shortMonths[temporaryMonth]);
 
-    u8g2.setCursor(year, 43);
+    u8g2.setCursor(year, 56);
     u8g2.print(temporaryYear);
 
     u8g2.sendBuffer();
@@ -693,17 +705,17 @@ void date_to_clockDateTransition() {
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont17_tf);
 
-    u8g2.setCursor(day, 43);
+    u8g2.setCursor(day, 56);
     u8g2.print(twoDigit(temporaryDay));
 
     if (temporaryMonth == 4 || temporaryMonth == 5 || temporaryMonth == 10 || temporaryMonth == 11 || temporaryMonth == 12) {
-      u8g2.setCursor(month1, 43);
+      u8g2.setCursor(month1, 56);
     } else {
-      u8g2.setCursor(month2, 43);
+      u8g2.setCursor(month2, 56);
     }
     u8g2.print(shortMonths[temporaryMonth]);
 
-    u8g2.setCursor(year, 43);
+    u8g2.setCursor(year, 56);
     u8g2.print(temporaryYear);
 
     u8g2.sendBuffer();
@@ -731,26 +743,26 @@ void day_to_monthTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont17_tf);
-    u8g2.setCursor(10, 43);
+    u8g2.setCursor(10, 56);
     u8g2.print(twoDigit(temporaryDay));
 
     if (temporaryMonth == 4 || temporaryMonth == 5 || temporaryMonth == 10 || temporaryMonth == 11 || temporaryMonth == 12) {
-      u8g2.setCursor(41, 43);
+      u8g2.setCursor(41, 56);
     } else {
-      u8g2.setCursor(37, 43);
+      u8g2.setCursor(37, 56);
     }
 
     u8g2.print(shortMonths[temporaryMonth]);
 
-    u8g2.setCursor(82, 43);
+    u8g2.setCursor(82, 56);
     u8g2.print(temporaryYear);
-    u8g2.drawXBM(arrow, 23, 7, 4, up_arrow_small_BM);
-    u8g2.drawXBM(arrow, 48, 7, 4, down_arrow_small_BM);
+    u8g2.drawXBM(arrow, 37, 7, 4, up_arrow_small_BM);
+    u8g2.drawXBM(arrow, 60, 7, 4, down_arrow_small_BM);
     u8g2.sendBuffer();
 
     arrow = arrow + speed;
     transition = transition + speed;
-    delayMicroseconds(1000);
+    delay(5);
   } while (transition < 35);
 }
 
@@ -765,26 +777,26 @@ void month_to_yearTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont17_tf);
-    u8g2.setCursor(10, 43);
+    u8g2.setCursor(10, 56);
     u8g2.print(twoDigit(temporaryDay));
 
     if (temporaryMonth == 4 || temporaryMonth == 5 || temporaryMonth == 10 || temporaryMonth == 11 || temporaryMonth == 12) {
-      u8g2.setCursor(41, 43);
+      u8g2.setCursor(41, 56);
     } else {
-      u8g2.setCursor(37, 43);
+      u8g2.setCursor(37, 56);
     }
 
     u8g2.print(shortMonths[temporaryMonth]);
 
-    u8g2.setCursor(82, 43);
+    u8g2.setCursor(82, 56);
     u8g2.print(temporaryYear);
-    u8g2.drawXBM(arrow, 23, 7, 4, up_arrow_small_BM);
-    u8g2.drawXBM(arrow, 48, 7, 4, down_arrow_small_BM);
+    u8g2.drawXBM(arrow, 37, 7, 4, up_arrow_small_BM);
+    u8g2.drawXBM(arrow, 60, 7, 4, down_arrow_small_BM);
     u8g2.sendBuffer();
 
     arrow = arrow + speed;
     transition = transition + speed;
-    delayMicroseconds(1000);
+    delay(4);
   } while (transition < 46);
 }
 

@@ -17,7 +17,7 @@ void printAlarmMenu() {
   u8g2.drawStr(6, 59, alarmSettingsMenuTitles[3]);
   u8g2.drawStr(6, 75, alarmSettingsMenuTitles[4]);
   u8g2.setDrawColor(2);
-  switch (menuItemSelect) {
+  switch (rotateCounter) {
     case 1:
       u8g2.drawBox(0, 16, 128, 15);
       break;
@@ -40,30 +40,11 @@ void printAlarmMenu() {
 }
 
 void updateAlarmMenu() {
-  switch (rotateCounter) {
-    case 1:
-      menuItemSelect = 1;
-      break;
-
-    case 2:
-      menuItemSelect = 2;
-      break;
-
-    case 3:
-      menuItemSelect = 3;
-      break;
-
-    case 4:
-      menuItemSelect = 4;
-      break;
-
-    default:
-      if (rotateCounter > 4) {
-        setRotary(4);
-      }
-      if (rotateCounter < 1) {
-        setRotary(1);
-      }
+  if (rotateCounter > 4) {
+    setRotary(4);
+  }
+  if (rotateCounter < 1) {
+    setRotary(1);
   }
 }
 
@@ -87,6 +68,9 @@ void executeAlarmMenu() {
         break;
 
       case 3:
+        alarmSetMusic_menu = true;
+        setRotary(1);
+        alarm_to_musicTransition();
         break;
 
       case 4:
@@ -459,6 +443,251 @@ void hour_to_minuteTransition() {
 
 ////////////////////////////////////////////////////////////////////////////
 
+//alarm / music
+void printAlarmSet_music() {
+  u8g2.clearBuffer();
+  drawAlarmBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_profont11_tf);
+  u8g2.drawUTF8(6, 27, alarmSoundTitles[0]);
+  u8g2.drawStr(6, 43, alarmSoundTitles[1]);
+  u8g2.drawStr(6, 59, alarmSoundTitles[2]);
+  u8g2.drawStr(6, 75, alarmSoundTitles[3]);
+  u8g2.drawUTF8(6, 91, alarmSoundTitles[4]);
+  switch (rotateCounter) {
+    case 1:
+      u8g2.drawBox(0, 16, 128, 15);
+      break;
+    case 2:
+      u8g2.drawBox(0, 32, 128, 15);
+      break;
+    case 3:
+      u8g2.drawBox(0, 48, 128, 15);
+      break;
+    case 4:
+      u8g2.drawBox(0, 64, 128, 15);
+      break;
+    case 5:
+      u8g2.drawBox(0, 80, 128, 15);
+      u8g2.drawXBMP(118, 84, 4, 7, left_arrow_BM);
+      break;
+  }
+  u8g2.setBitmapMode(2);
+  switch (alarmMusic) {
+    case 1:
+      u8g2.drawXBM(117, 19, 7, 9, validate_BM);
+      break;
+
+    case 2:
+      u8g2.drawXBM(117, 35, 7, 9, validate_BM);
+      break;
+
+    case 3:
+      u8g2.drawXBM(117, 51, 7, 9, validate_BM);
+      break;
+
+    case 4:
+      u8g2.drawXBM(117, 67, 7, 9, validate_BM);
+      break;
+  }
+  u8g2.sendBuffer();
+}
+
+void updateAlarmSet_music() {
+  switch (rotateCounter) {
+
+    default:
+      if (rotateCounter > 5) {
+        setRotary(5);
+      }
+      if (rotateCounter < 1) {
+        setRotary(1);
+      }
+  }
+}
+
+void executeAlarmSet_music() {
+  if (mainButton.pressed()) {
+    switch (rotateCounter) {
+      case 1:
+        alarmMusic = 1;
+        eprom.update(1, alarmMusic);
+        break;
+
+      case 2:
+        alarmMusic = 2;
+        eprom.update(1, alarmMusic);
+        break;
+
+      case 3:
+        alarmMusic = 3;
+        eprom.update(1, alarmMusic);
+        break;
+
+      case 4:
+        alarmMusic = 4;
+        eprom.update(1, alarmMusic);
+        break;
+
+      case 5:
+        alarmSetMusic_menu = false;
+        setRotary(3);
+        music_to_alarmTransition();
+        break;
+    }
+  }
+}
+
+void alarm_to_musicTransition() {
+  int speed = 2;
+
+  int pageTransition = 128;
+  int alarmItems = 6;
+  int alarmBox = 0;
+  int alarmArrow = 118;
+
+  int alarmMusicItems = 6 + pageTransition;
+  int alarmMusicBox = 0 + pageTransition;
+  int alarmMusicValidate = 117 + pageTransition;
+
+  do {
+    u8g2.clearBuffer();
+    drawAlarmBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+
+    if (alarm_is_activated == true) {
+      u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
+    } else {
+      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
+    }
+    u8g2.drawUTF8(alarmItems, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawUTF8(alarmItems, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawUTF8(alarmItems, 75, alarmSettingsMenuTitles[4]);
+    u8g2.drawXBMP(alarmArrow, 52, 4, 7, right_arrow_BM);
+
+    u8g2.drawUTF8(alarmMusicItems, 27, alarmSoundTitles[0]);
+    u8g2.drawUTF8(alarmMusicItems, 43, alarmSoundTitles[1]);
+    u8g2.drawUTF8(alarmMusicItems, 59, alarmSoundTitles[2]);
+    u8g2.drawUTF8(alarmMusicItems, 75, alarmSoundTitles[3]);
+    u8g2.drawUTF8(alarmMusicItems, 91, alarmSoundTitles[4]);
+
+
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(alarmBox, 48, 128, 15);
+
+    u8g2.drawBox(alarmMusicBox, 16, 128, 15);
+
+    switch (alarmMusic) {
+      case 1:
+        u8g2.drawXBM(alarmMusicValidate, 19, 7, 9, validate_BM);
+        break;
+
+      case 2:
+        u8g2.drawXBM(alarmMusicValidate, 35, 7, 9, validate_BM);
+        break;
+
+      case 3:
+        u8g2.drawXBM(alarmMusicValidate, 51, 7, 9, validate_BM);
+        break;
+
+      case 4:
+        u8g2.drawXBM(alarmMusicValidate, 67, 7, 9, validate_BM);
+        break;
+    }
+
+    u8g2.sendBuffer();
+
+    pageTransition = pageTransition - speed;
+    alarmItems = alarmItems - speed;
+    alarmBox = alarmBox - speed;
+    alarmArrow = alarmArrow - speed;
+
+    alarmMusicItems = alarmMusicItems - speed;
+    alarmMusicBox = alarmMusicBox - speed;
+    alarmMusicValidate = alarmMusicValidate - speed;
+    delayMicroseconds(100);
+  } while (pageTransition > 0);
+}
+
+void music_to_alarmTransition() {
+  int speed = 2;
+
+  int pageTransition = -128;
+  int alarmItems = 6 + pageTransition;
+  int alarmBox = 0 + pageTransition;
+  int alarmArrow = 118 + pageTransition;
+
+  int alarmMusicItems = 6;
+  int alarmMusicBox = 0;
+  int alarmMusicValidate = 117;
+  int alarmMusicArrow = 118;
+
+
+  do {
+    u8g2.clearBuffer();
+    drawAlarmBar();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    u8g2.setFont(u8g2_font_profont11_tf);
+
+    if (alarm_is_activated == true) {
+      u8g2.drawUTF8(alarmItems, 27, alarmSettingsMenuTitles[1]);
+    } else {
+      u8g2.drawStr(alarmItems, 27, alarmSettingsMenuTitles[0]);
+    }
+    u8g2.drawUTF8(alarmItems, 43, alarmSettingsMenuTitles[2]);
+    u8g2.drawUTF8(alarmItems, 59, alarmSettingsMenuTitles[3]);
+    u8g2.drawUTF8(alarmItems, 75, alarmSettingsMenuTitles[4]);
+    u8g2.drawXBMP(alarmArrow, 52, 4, 7, right_arrow_BM);
+
+    u8g2.drawUTF8(alarmMusicItems, 27, alarmSoundTitles[0]);
+    u8g2.drawUTF8(alarmMusicItems, 43, alarmSoundTitles[1]);
+    u8g2.drawUTF8(alarmMusicItems, 59, alarmSoundTitles[2]);
+    u8g2.drawUTF8(alarmMusicItems, 75, alarmSoundTitles[3]);
+    u8g2.drawUTF8(alarmMusicItems, 91, alarmSoundTitles[4]);
+    u8g2.drawXBMP(alarmMusicArrow, 84, 4, 7, left_arrow_BM);
+
+
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(alarmBox, 48, 128, 15);
+
+    u8g2.drawBox(alarmMusicBox, 80, 128, 15);
+
+    switch (alarmMusic) {
+      case 1:
+        u8g2.drawXBM(alarmMusicValidate, 19, 7, 9, validate_BM);
+        break;
+
+      case 2:
+        u8g2.drawXBM(alarmMusicValidate, 35, 7, 9, validate_BM);
+        break;
+
+      case 3:
+        u8g2.drawXBM(alarmMusicValidate, 51, 7, 9, validate_BM);
+        break;
+
+      case 4:
+        u8g2.drawXBM(alarmMusicValidate, 67, 7, 9, validate_BM);
+        break;
+    }
+
+    u8g2.sendBuffer();
+
+    pageTransition = pageTransition + speed;
+    alarmItems = alarmItems + speed;
+    alarmBox = alarmBox + speed;
+    alarmArrow = alarmArrow + speed;
+
+    alarmMusicItems = alarmMusicItems + speed;
+    alarmMusicBox = alarmMusicBox + speed;
+    alarmMusicValidate = alarmMusicValidate + speed;
+    alarmMusicArrow = alarmMusicArrow + speed;
+    delayMicroseconds(100);
+  } while (pageTransition < 0);
+}
 
 
 //AlarmNotification message set

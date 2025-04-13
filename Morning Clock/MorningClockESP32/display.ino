@@ -101,10 +101,23 @@ void settings_to_displayTransition() {
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
     switch (frameSettingsMenu) {
+      case 1:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[1]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[5]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 64, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 68, 4, 7, right_arrow_BM);
+        break;
+
       case 2:
         u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[2]);
         u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[3]);
         u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[6]);
         u8g2.setDrawColor(2);
         u8g2.drawBox(settingsBox, 48, 122, 15);
         u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
@@ -113,19 +126,12 @@ void settings_to_displayTransition() {
       case 3:
         u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
         u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
-        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[6]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[7]);
         u8g2.setDrawColor(2);
         u8g2.drawBox(settingsBox, 32, 122, 15);
         u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
-        break;
-
-      case 4:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[4]);
-        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[5]);
-        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[6]);
-        u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 16, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
         break;
     }
     u8g2.setFontMode(1);
@@ -177,10 +183,23 @@ void display_to_settingsTransition() {
     u8g2.drawXBMP(displayArrow, 52, 4, 7, left_arrow_BM);
 
     switch (frameSettingsMenu) {
+      case 1:
+        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[1]);
+        u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[3]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[5]);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 64, 122, 15);
+        u8g2.drawXBMP(settingsArrow, 68, 4, 7, right_arrow_BM);
+        break;
+
       case 2:
         u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[2]);
         u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[3]);
         u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[6]);
         u8g2.setDrawColor(2);
         u8g2.drawBox(settingsBox, 48, 122, 15);
         u8g2.drawXBMP(settingsArrow, 52, 4, 7, right_arrow_BM);
@@ -189,23 +208,16 @@ void display_to_settingsTransition() {
       case 3:
         u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[3]);
         u8g2.drawStr(settingItems, 43, mainSettingsMenuTitles[4]);
-        u8g2.drawUTF8(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingItems, 75, mainSettingsMenuTitles[6]);
+        u8g2.drawUTF8(settingItems, 91, mainSettingsMenuTitles[7]);
         u8g2.setDrawColor(2);
         u8g2.drawBox(settingsBox, 32, 122, 15);
         u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
         break;
-
-      case 4:
-        u8g2.drawStr(settingItems, 27, mainSettingsMenuTitles[4]);
-        u8g2.drawUTF8(settingItems, 43, mainSettingsMenuTitles[5]);
-        u8g2.drawStr(settingItems, 59, mainSettingsMenuTitles[6]);
-        u8g2.setDrawColor(2);
-        u8g2.drawBox(settingsBox, 16, 122, 15);
-        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
-        break;
     }
     drawScrollbar();
-    scrollbar_5frames();
+    drawSettingsScrollbar();
     u8g2.sendBuffer();
 
     pageTransition = pageTransition + speed;
@@ -230,10 +242,10 @@ void display_to_settingsTransition() {
 void printBrightnessMenu() {
   u8g2.clearBuffer();
   drawDisplayBar();
-  u8g2.drawXBMP(11, 30, 8, 12, brightness_low_BM);
-  u8g2.drawXBMP(106, 29, 16, 13, brightness_high_BM);
-  u8g2.drawBox(29, 34, brightnessBarSize, 4);
-  u8g2.drawFrame(27, 32, 75, 8);
+  u8g2.drawXBMP(11, 48, 8, 12, brightness_low_BM);
+  u8g2.drawXBMP(106, 47, 16, 13, brightness_high_BM);
+  u8g2.drawBox(29, 52, brightnessBarSize, 4);
+  u8g2.drawFrame(27, 50, 75, 8);
   u8g2.sendBuffer();
 }
 
@@ -285,10 +297,10 @@ void display_to_brightnessTransition() {
     u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
     u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
 
-    u8g2.drawXBMP(brightnessIcon1, 30, 8, 12, brightness_low_BM);
-    u8g2.drawXBMP(brightnessIcon2, 29, 16, 13, brightness_high_BM);
-    u8g2.drawBox(brightnessBox, 34, brightnessBarSize, 4);
-    u8g2.drawFrame(brightnessFrame, 32, 75, 8);
+    u8g2.drawXBMP(brightnessIcon1, 48, 8, 12, brightness_low_BM);
+    u8g2.drawXBMP(brightnessIcon2, 47, 16, 13, brightness_high_BM);
+    u8g2.drawBox(brightnessBox, 52, brightnessBarSize, 4);
+    u8g2.drawFrame(brightnessFrame, 50, 75, 8);
 
     u8g2.setDrawColor(2);
     u8g2.drawBox(displayBox, 16, 128, 15);
@@ -328,10 +340,10 @@ void brightness_to_displayTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
 
-    u8g2.drawXBMP(brightnessIcon1, 30, 8, 12, brightness_low_BM);
-    u8g2.drawXBMP(brightnessIcon2, 29, 16, 13, brightness_high_BM);
-    u8g2.drawBox(brightnessBox, 34, brightnessBarSize, 4);
-    u8g2.drawFrame(brightnessFrame, 32, 75, 8);
+    u8g2.drawXBMP(brightnessIcon1, 48, 8, 12, brightness_low_BM);
+    u8g2.drawXBMP(brightnessIcon2, 47, 16, 13, brightness_high_BM);
+    u8g2.drawBox(brightnessBox, 52, brightnessBarSize, 4);
+    u8g2.drawFrame(brightnessFrame, 50, 75, 8);
 
     u8g2.setFont(u8g2_font_profont11_tf);
     u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
@@ -366,10 +378,10 @@ void brightness_to_displayTransition() {
 void printContrastMenu() {
   u8g2.clearBuffer();
   drawDisplayBar();
-  u8g2.drawXBM(110, 32, 8, 8, contrast_high_BM);
-  u8g2.drawXBM(11, 32, 8, 8, contrast_low_BM);
-  u8g2.drawFrame(27, 32, 75, 8);
-  u8g2.drawBox(29, 34, contrastBarSize, 4);
+  u8g2.drawXBM(110, 50, 8, 8, contrast_high_BM);
+  u8g2.drawXBM(11, 50, 8, 8, contrast_low_BM);
+  u8g2.drawFrame(27, 50, 75, 8);
+  u8g2.drawBox(29, 52, contrastBarSize, 4);
   u8g2.sendBuffer();
 }
 
@@ -421,10 +433,10 @@ void display_to_contrastTransition() {
     u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
     u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
 
-    u8g2.drawXBM(contrastIcon1, 32, 8, 8, contrast_low_BM);
-    u8g2.drawXBM(contrastIcon2, 32, 8, 8, contrast_high_BM);
-    u8g2.drawFrame(contrastFrame, 32, 75, 8);
-    u8g2.drawBox(contrastBox, 34, contrastBarSize, 4);
+    u8g2.drawXBM(contrastIcon1, 50, 8, 8, contrast_low_BM);
+    u8g2.drawXBM(contrastIcon2, 50, 8, 8, contrast_high_BM);
+    u8g2.drawFrame(contrastFrame, 50, 75, 8);
+    u8g2.drawBox(contrastBox, 52, contrastBarSize, 4);
 
     u8g2.setDrawColor(2);
     u8g2.drawBox(displayBox, 32, 128, 15);
@@ -463,10 +475,10 @@ void contrast_to_displayTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
 
-    u8g2.drawXBM(contrastIcon1, 32, 8, 8, contrast_low_BM);
-    u8g2.drawXBM(contrastIcon2, 32, 8, 8, contrast_high_BM);
-    u8g2.drawFrame(contrastFrame, 32, 75, 8);
-    u8g2.drawBox(contrastBox, 34, contrastBarSize, 4);
+    u8g2.drawXBM(contrastIcon1, 50, 8, 8, contrast_low_BM);
+    u8g2.drawXBM(contrastIcon2, 50, 8, 8, contrast_high_BM);
+    u8g2.drawFrame(contrastFrame, 50, 75, 8);
+    u8g2.drawBox(contrastBox, 52, contrastBarSize, 4);
 
     u8g2.setFont(u8g2_font_profont11_tf);
     u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
