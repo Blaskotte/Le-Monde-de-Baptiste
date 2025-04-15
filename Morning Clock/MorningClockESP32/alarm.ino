@@ -324,7 +324,7 @@ void updateAlarmSet_hour() {
     case 3:
       eprom.update(3, alarmHour);
       eprom.update(4, alarmMinute);
-      soundSystem.play(6);
+      //soundSystem.play(6);
       alarmSetHour_menu = false;
       setRotary(2);
       hour_to_alarmTransition();

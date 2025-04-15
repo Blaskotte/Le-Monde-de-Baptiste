@@ -269,7 +269,7 @@ void executeBrightnessMenu() {
     setRotary(1);
     menuItemSelect = 1;
     eprom.update(10, brightness);
-    soundSystem.play(6);
+    //soundSystem.play(6);
     brightness_to_displayTransition();
   }
 }
@@ -405,7 +405,7 @@ void executeContrastMenu() {
     setRotary(2);
     menuItemSelect = 2;
     eprom.update(11, contrast);
-    soundSystem.play(6);
+    //soundSystem.play(6);
     contrast_to_displayTransition();
   }
 }

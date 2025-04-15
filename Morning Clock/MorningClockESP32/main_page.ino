@@ -5,14 +5,6 @@ void printHomePage() {
 
   DateTime now = rtc.now();
 
-  if (millis() - previousMillis >= interval) {
-    previousMillis = millis();
-    if (blink == true) {
-      blink = false;
-    } else {
-      blink = true;
-    }
-  }
 
   u8g2.clearBuffer();
   drawHomePageBar();
@@ -40,10 +32,6 @@ void printHomePage() {
 }
 
 void updateHomePage() {
-  if (millis() - previousMillisHomePage >= intervalHomePage) {
-    previousMillisHomePage = millis();
-    setRotary(0);
-  }
   switch (rotateCounter) {
     case 0:
       chimeSelect = false;

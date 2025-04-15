@@ -430,6 +430,14 @@ int temporaryMonth;
 int temporaryDay;
 
 
+//variables for the screen saver
+int SVX;
+int SVY;
+int xSpeed = 1;
+int ySpeed = 1;
+int screenWidth = 128;
+int screenHeight = 96;
+
 //volume variable
 unsigned int volume = 15;
 
@@ -437,7 +445,7 @@ unsigned long previousMillis = 0;
 const long interval = 500;
 bool blink = false;
 
-unsigned long previousMillisHomePage = 0;
+unsigned long millisHomePage = 0;
 const long intervalHomePage = 30000;
 
 const long rotaryInterval = 2;
@@ -445,12 +453,18 @@ unsigned long rotaryPreviousMillis = 0;
 
 //variables notifications
 
-bool alarmNotification = true;
-int alarmNotificationMSG = 118;
+bool alarmNotification = false;
 bool clockBig;
 
 bool chimeNotification = false;
 
+bool screensaver = false;
+int screensaverInterval = 600000;
+int millisScreensaver;
+int screensaverPreviousRotate;
+
+int millisNoAction;
+int noActionInterval = 120000;
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -497,10 +511,66 @@ void setup() {
 void loop() {
   mainButton.update();
   rotateCounter = rotaryEncoder.getCount() / 2;
+
+  if (noActionPerfom() && alarmNotification == false) {
+    if (millis() - millisNoAction >= noActionInterval && homePage == false) {  //if no action as been performed and the user is inside the menus
+      millisNoAction = millis();
+      homePage = true;
+      mainSettingsMenu = false;
+      alarmSettingsMenu = false;
+      alarmSetHour_menu = false;
+      alarmSetMusic_menu = false;
+      chimeSettingsMenu = false;
+      volumeSettingsMenu = false;
+      displaySettingsMenu = false;
+      brightness_menu = false;
+      contrast_menu = false;
+      clockDateSettingsMenu = false;
+      clockSet_menu = false;
+      dateSet_menu = false;
+      aboutPage = false;
+      settings_to_homePageTransition();
+      setRotary(0);
+    }
+    if (millis() - millisHomePage >= intervalHomePage && homePage == true) {
+      millisHomePage = millis();
+      setRotary(0);
+    }
+    if (millis() - millisScreensaver >= screensaverInterval && screensaver == false) {  // activate the screensaver after inactive time
+      millisScreensaver = millis();
+      screensaver = true;
+      SVX = 28;
+      SVY = 58;
+    }
+  } else {
+    millisScreensaver = millis();
+    millisNoAction = millis();
+    millisHomePage = millis();
+    screensaver = false;
+  }
+
+  screensaverPreviousRotate = rotateCounter;
+
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+    if (blink == true) {
+      blink = false;
+    } else {
+      blink = true;
+    }
+  }
+
+
   if (alarmNotification == true) {
+    screensaver = false;
     updateAlarmNotification();
     printHomePage();
     executeAlarmNotification();
+
+  } else if (screensaver == true) {
+    updateScreensaver();
+    printScreensaver();
+    executeScreenSaver();
   } else if (homePage == true && mainSettingsMenu == false) {
     updateHomePage();
     printHomePage();
@@ -520,12 +590,9 @@ void loop() {
         printAlarmMenu();
         executeAlarmMenu();
       }
-    }
-    if (chimeSettingsMenu == true) {
-    }
-    if (volumeSettingsMenu == true) {
-    }
-    if (displaySettingsMenu == true) {
+    } else if (chimeSettingsMenu == true) {
+    } else if (volumeSettingsMenu == true) {
+    } else if (displaySettingsMenu == true) {
       if (brightness_menu == true) {
         updateBrightnessMenu();
         printBrightnessMenu();
@@ -539,8 +606,7 @@ void loop() {
         printDisplayMenu();
         executeDisplayMenu();
       }
-    }
-    if (clockDateSettingsMenu == true) {
+    } else if (clockDateSettingsMenu == true) {
       if (clockSet_menu == true) {
         updateClockMenu();
         printClockMenu();
@@ -555,13 +621,11 @@ void loop() {
         printClockDateMenu();
         executeClockDateMenu();
       }
-    }
-    if (aboutPage == true) {
+    } else if (aboutPage == true) {
       updateAboutPage();
       printAboutPage();
       executeAboutPage();
-    }
-    if (alarmSettingsMenu == false && chimeSettingsMenu == false && volumeSettingsMenu == false && displaySettingsMenu == false && clockDateSettingsMenu == false && aboutPage == false) {
+    } else {
       updateSettingsMenu();
       printSettingsMenu();
       executeSettingsMenu();
@@ -682,6 +746,15 @@ void drawDate() {
 
 ////////////////////////////////////////////////////////////////////////////
 
+bool noActionPerfom() {
+  if (mainButton.pressed()) {
+    return false;
+  } else if (rotateCounter != screensaverPreviousRotate) {
+    return false;
+  } else {
+    return true;
+  }
+}
 
 String twoDigit(int number) {
   if (number < 10) {              // If it's a single-digit number

@@ -334,7 +334,7 @@ void executeClockMenu() {
         setRotary(1);
         DateTime now = rtc.now();
         rtc.adjust(DateTime(now.year(), now.month(), now.day(), temporaryHour, temporaryMinute, temporarySecond));
-        soundSystem.play(6);
+        //soundSystem.play(6);
         clock_to_clockDateTransition();
         break;
     }
@@ -603,7 +603,7 @@ void executeDateMenu() {
         setRotary(2);
         DateTime now = rtc.now();
         rtc.adjust(DateTime(temporaryYear, temporaryMonth, temporaryDay, now.hour(), now.minute(), now.second()));
-        soundSystem.play(6);
+        //soundSystem.play(6);
         date_to_clockDateTransition();
         break;
     }
