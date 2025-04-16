@@ -65,6 +65,9 @@ void executeAlarmMenu() {
         alarmSetStep = 1;
         setRotary(alarmHour);
         alarm_to_hourTransition();
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = alarmHour;
         break;
 
       case 3:
@@ -276,11 +279,25 @@ void printAlarmSet_hour() {
     case 1:
       u8g2.drawXBMP(45, 36, 8, 4, up_arrow_BM);
       u8g2.drawXBMP(45, 65, 8, 4, down_arrow_BM);
+      u8g2.setDrawColor(2);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(43, 34, 12, 8, select_hour_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(43, 63, 12, 8, select_hour_BM);
+      }
       break;
 
     case 2:
       u8g2.drawXBM(75, 36, 8, 4, up_arrow_BM);
       u8g2.drawXBM(75, 66, 8, 4, down_arrow_BM);
+      u8g2.setDrawColor(2);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(73, 34, 12, 8, select_hour_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(73, 63, 12, 8, select_hour_BM);
+      }
       break;
 
     case 3:
@@ -290,6 +307,25 @@ void printAlarmSet_hour() {
 }
 
 void updateAlarmSet_hour() {
+
+  if (rotatePreviousHour > rotateCounter) {
+    selectHourDOWN = true;
+    selectHourUP = false;
+    millisHour = millis();
+    rotatePreviousHour = rotateCounter;
+  }
+  if (rotatePreviousHour < rotateCounter) {
+    selectHourUP = true;
+    selectHourDOWN = false;
+    millisHour = millis();
+    rotatePreviousHour = rotateCounter;
+  }
+  if (millis() - millisHour > 200 && (selectHourUP == true || selectHourDOWN == true)) {
+    millisHour = millis();
+    selectHourUP = false;
+    selectHourDOWN = false;
+  }
+
   switch (alarmSetStep) {
 
     case 1:  //Setting hour
@@ -299,11 +335,15 @@ void updateAlarmSet_hour() {
       if (rotateCounter < 0) {
         setRotary(23);
       }
+
       alarmHour = rotateCounter;
+
       if (mainButton.pressed()) {
         setRotary(alarmMinute);
         alarmSetStep = 2;
-
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = alarmMinute;
         hour_to_minuteTransition();
       }
       break;
@@ -327,6 +367,8 @@ void updateAlarmSet_hour() {
       //soundSystem.play(6);
       alarmSetHour_menu = false;
       setRotary(2);
+      selectHourDOWN = false;
+      selectHourUP = false;
       hour_to_alarmTransition();
       break;
   }
