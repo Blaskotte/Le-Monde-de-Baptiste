@@ -190,11 +190,13 @@ void executeSettingsMenu() {
       case 1:
         alarmSettingsMenu = true;
         setRotary(1);
-        menuItemSelect = 1;
         settings_to_alarmTransition();
         break;
 
       case 2:
+        chimeSettingsMenu = true;
+        setRotary(1);
+        //settings_to_chimeTransition();
         break;
 
       case 3:
@@ -250,6 +252,7 @@ void homePage_to_settingsTransition() {
   u8g2.drawFrame(5, 5, 10, 7);
   u8g2.sendBuffer();
   delay(transitionDelay);
+
   u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setFontMode(1);
@@ -264,6 +267,7 @@ void homePage_to_settingsTransition() {
   u8g2.drawFrame(4, 4, 30, 23);
   u8g2.sendBuffer();
   delay(transitionDelay);
+
   u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setFontMode(1);
@@ -278,6 +282,7 @@ void homePage_to_settingsTransition() {
   u8g2.drawFrame(3, 3, 55, 41);
   u8g2.sendBuffer();
   delay(transitionDelay);
+
   u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setFontMode(1);
@@ -292,6 +297,7 @@ void homePage_to_settingsTransition() {
   u8g2.drawFrame(2, 2, 80, 61);
   u8g2.sendBuffer();
   delay(transitionDelay);
+
   u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setFontMode(1);
@@ -306,8 +312,13 @@ void homePage_to_settingsTransition() {
   u8g2.drawFrame(1, 1, 108, 80);
   u8g2.sendBuffer();
   delay(transitionDelay);
+
   u8g2.clearBuffer();
   drawHomePageBar();
+  u8g2.setDrawColor(0);
+  u8g2.drawBox(0, 0, 10, 13);
+  u8g2.setDrawColor(1);
+  u8g2.drawXBMP(2, 1, 9, 11, happyMenu_select_BM);
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
   u8g2.setFont(u8g2_font_timR24_tn);
@@ -319,6 +330,44 @@ void homePage_to_settingsTransition() {
   u8g2.setDrawColor(1);
   u8g2.drawFrame(0, 0, 128, 96);
   u8g2.sendBuffer();
+  delay(transitionDelay);
+
+  /*int transitionDelay = 60;
+  int transitionStep = 4;
+  double xBox = 6;
+  double yBox = 5;
+  int boxWidth = 0;
+  int boxHeight = 0;
+  double upperLeft = yBox / transitionStep;
+
+  int rightUP = (screenWidth)/ transitionStep;
+  int downLeft = (screenHeight)/ transitionStep;
+
+  double leftUP = xBox / transitionStep;
+
+  while ( boxWidth < 129 && boxHeight < 97) {
+  u8g2.clearBuffer();
+  drawHomePageBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setCursor(28, 58);
+  u8g2.print(twoDigit(now.hour()));
+  u8g2.print(':');
+  u8g2.print(twoDigit(now.minute()));
+  drawDate();
+  u8g2.setDrawColor(1);
+
+  u8g2.drawFrame(xBox, yBox, boxWidth, boxHeight);
+
+  xBox = xBox - leftUP;
+  yBox = yBox - upperLeft;
+  boxWidth = boxWidth + rightUP;
+  boxHeight = boxHeight + downLeft;
+
+  u8g2.sendBuffer();
+  delay(transitionDelay);
+  }*/
 
   /*int speed = 2;
   int pageTransition = 82;
@@ -377,7 +426,7 @@ void homePage_to_settingsTransition() {
 void settings_to_homePageTransition() {
   DateTime now = rtc.now();
   int transitionDelay = 60;
-    u8g2.clearBuffer();
+  u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setDrawColor(0);
   u8g2.drawBox(0, 0, 10, 13);
@@ -394,7 +443,7 @@ void settings_to_homePageTransition() {
   u8g2.setDrawColor(1);
   u8g2.drawFrame(0, 0, 128, 96);
   u8g2.sendBuffer();
-    delay(transitionDelay);
+  delay(transitionDelay);
 
   u8g2.clearBuffer();
   drawHomePageBar();
@@ -456,7 +505,7 @@ void settings_to_homePageTransition() {
   u8g2.sendBuffer();
   delay(transitionDelay);
 
-    u8g2.clearBuffer();
+  u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setFontMode(1);
   u8g2.setBitmapMode(1);
