@@ -68,6 +68,9 @@ void executeClockDateMenu() {
         temporaryMinute = now.minute();
         temporarySecond = now.second();
         setRotary(temporaryHour);
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = temporaryHour;
         clockDate_to_clockTransition();
         break;
 
@@ -78,6 +81,9 @@ void executeClockDateMenu() {
         temporaryMonth = now.month();
         temporaryYear = now.year();
         setRotary(temporaryDay);
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = temporaryDay;
         clockDate_to_dateTransition();
         break;
 
@@ -265,22 +271,61 @@ void printClockMenu() {
     case 1:
       u8g2.drawXBM(30, 36, 8, 4, up_arrow_BM);
       u8g2.drawXBM(30, 65, 8, 4, down_arrow_BM);
+      u8g2.setDrawColor(2);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(28, 34, 12, 8, select_hour_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(28, 63, 12, 8, select_hour_BM);
+      }
       break;
 
     case 2:
       u8g2.drawXBM(60, 36, 8, 4, up_arrow_BM);
       u8g2.drawXBM(60, 65, 8, 4, down_arrow_BM);
+      u8g2.setDrawColor(2);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(58, 34, 12, 8, select_hour_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(58, 63, 12, 8, select_hour_BM);
+      }
       break;
 
     case 3:
       u8g2.drawXBM(90, 36, 8, 4, up_arrow_BM);
       u8g2.drawXBM(90, 65, 8, 4, down_arrow_BM);
+      u8g2.setDrawColor(2);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(88, 34, 12, 8, select_hour_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(88, 63, 12, 8, select_hour_BM);
+      }
       break;
   }
   u8g2.sendBuffer();
 }
 
 void updateClockMenu() {
+  if (rotatePreviousHour > rotateCounter) {
+    selectHourDOWN = true;
+    selectHourUP = false;
+    millisHour = millis();
+    rotatePreviousHour = rotateCounter;
+  }
+  if (rotatePreviousHour < rotateCounter) {
+    selectHourUP = true;
+    selectHourDOWN = false;
+    millisHour = millis();
+    rotatePreviousHour = rotateCounter;
+  }
+  if (millis() - millisHour > 200 && (selectHourUP == true || selectHourDOWN == true)) {
+    millisHour = millis();
+    selectHourUP = false;
+    selectHourDOWN = false;
+  }
+
   switch (clockSetStep) {
     case 1:
       if (rotateCounter > 23) {
@@ -320,18 +365,26 @@ void executeClockMenu() {
       case 1:
         setRotary(temporaryMinute);
         clockSetStep = 2;
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = temporaryMinute;
         ClockHour_to_minuteTransition();
         break;
 
       case 2:
         setRotary(temporarySecond);
         clockSetStep = 3;
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = temporarySecond;
         ClockMinute_to_secondTransition();
         break;
 
       case 3:
         clockSet_menu = false;
         setRotary(1);
+        selectHourDOWN = false;
+        selectHourUP = false;
         DateTime now = rtc.now();
         rtc.adjust(DateTime(now.year(), now.month(), now.day(), temporaryHour, temporaryMinute, temporarySecond));
         //soundSystem.play(6);
@@ -518,22 +571,59 @@ void printDateMenu() {
     case 1:
       u8g2.drawXBM(15, 37, 7, 4, up_arrow_small_BM);
       u8g2.drawXBM(15, 60, 7, 4, down_arrow_small_BM);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(13, 35, 11, 8, select_date_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(13, 58, 11, 8, select_date_BM);
+      }
       break;
 
     case 2:
       u8g2.drawXBM(50, 37, 7, 4, up_arrow_small_BM);
       u8g2.drawXBM(50, 60, 7, 4, down_arrow_small_BM);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(48, 35, 11, 8, select_date_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(48, 58, 12, 8, select_date_BM);
+      }
       break;
 
     case 3:
       u8g2.drawXBM(96, 37, 7, 4, up_arrow_small_BM);
       u8g2.drawXBM(96, 60, 7, 4, down_arrow_small_BM);
+      if (selectHourUP == true) {
+        u8g2.drawXBM(94, 35, 11, 8, select_date_BM);
+      }
+      if (selectHourDOWN == true) {
+        u8g2.drawXBM(94, 58, 12, 8, select_date_BM);
+      }
       break;
   }
   u8g2.sendBuffer();
 }
 
 void updateDateMenu() {
+
+  if (rotatePreviousHour > rotateCounter) {
+    selectHourDOWN = true;
+    selectHourUP = false;
+    millisHour = millis();
+    rotatePreviousHour = rotateCounter;
+  }
+  if (rotatePreviousHour < rotateCounter) {
+    selectHourUP = true;
+    selectHourDOWN = false;
+    millisHour = millis();
+    rotatePreviousHour = rotateCounter;
+  }
+  if (millis() - millisHour > 200 && (selectHourUP == true || selectHourDOWN == true)) {
+    millisHour = millis();
+    selectHourUP = false;
+    selectHourDOWN = false;
+  }
+
   switch (dateSetStep) {
     case 1:
       if (rotateCounter > 31) {
@@ -573,6 +663,9 @@ void executeDateMenu() {
       case 1:
         setRotary(temporaryMonth);
         dateSetStep = 2;
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = temporaryMonth;
         day_to_monthTransition();
         break;
 
@@ -585,6 +678,9 @@ void executeDateMenu() {
 
         setRotary(temporaryYear);
         dateSetStep = 3;
+        selectHourDOWN = false;
+        selectHourUP = false;
+        rotatePreviousHour = temporaryYear;
         month_to_yearTransition();
         break;
 
@@ -601,6 +697,8 @@ void executeDateMenu() {
 
         dateSet_menu = false;
         setRotary(2);
+        selectHourDOWN = false;
+        selectHourUP = false;
         DateTime now = rtc.now();
         rtc.adjust(DateTime(temporaryYear, temporaryMonth, temporaryDay, now.hour(), now.minute(), now.second()));
         //soundSystem.play(6);
