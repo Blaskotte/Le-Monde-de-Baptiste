@@ -73,7 +73,11 @@ void drawAlarmBar() {
 }
 
 void drawChimeBar() {
-  u8g2.drawXBMP(2, 2, 8, 9, chimeON_BM);
+  if (chime_is_activated == true) {
+    u8g2.drawXBMP(2, 2, 8, 9, chimeON_BM);
+  } else {
+    u8g2.drawXBM(2, 2, 8, 9, chimeOFF_BM);
+  }
   u8g2.setFont(u8g2_font_profont11_tf);
   u8g2.drawUTF8(40, 10, "Carillon");
   u8g2.drawLine(0, 13, 128, 13);
