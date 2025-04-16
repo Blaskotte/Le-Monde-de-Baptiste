@@ -3,7 +3,7 @@ void printScreensaver() {
   u8g2.clearBuffer();
   u8g2.setDrawColor(1);
   u8g2.setBitmapMode(1);
-  u8g2.setFont(u8g2_font_timR24_tn);
+  u8g2.setFont(u8g2_font_timR24_tf);
   u8g2.setCursor(SVX, SVY);
   u8g2.print(twoDigit(now.hour()));
 
@@ -28,7 +28,7 @@ void updateScreensaver() {
   if (SVY >= screenHeight || SVY <= (0+23)) {
     ySpeed = ySpeed * -1;
   }
-  delay(100);
+  delay(80);
 }
 void executeScreenSaver() {
   if (mainButton.pressed()){
