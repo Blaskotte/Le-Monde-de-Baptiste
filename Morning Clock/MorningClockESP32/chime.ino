@@ -77,7 +77,7 @@ void executeChimeMenu() {
         chimeSettingsMenu = false;
         setRotary(2);
         menuItemSelect = 2;
-        //chime_to_settingsTransition();
+        chime_to_settingsTransition();
         break;
     }
   }
@@ -137,7 +137,7 @@ void chimeFalse_to_true() {
   } while (transition > 0);
 }
 
-/*void settings_to_chimeTransition() {
+void settings_to_chimeTransition() {
   int speed = 2;
 
   int pageTransition = 128;
@@ -154,13 +154,27 @@ void chimeFalse_to_true() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
-    u8g2.drawUTF8(settingsItems, 27, mainSettingsMenuTitles[1]);
-    u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[2]);
-    u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[3]);
-    u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[4]);
-    u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[5]);
-    u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
+    switch (frameSettingsMenu) {
+      case 1:
+        u8g2.drawUTF8(settingsItems, 27, mainSettingsMenuTitles[1]);
+        u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[5]);
+        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
+        u8g2.drawBox(settingsBox, 32, 122, 15);
+        break;
 
+      case 2:
+        u8g2.drawUTF8(settingsItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[6]);
+        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
+        u8g2.drawBox(settingsBox, 16, 122, 15);
+        break;
+    }
     if (alarm_is_activated == true) {
       u8g2.drawUTF8(chimeItems, 27, chimeSettingsMenuTitles[1]);
     } else {
@@ -169,10 +183,10 @@ void chimeFalse_to_true() {
     u8g2.drawStr(chimeItems, 43, chimeSettingsMenuTitles[2]);
     u8g2.drawStr(chimeItems, 59, chimeSettingsMenuTitles[3]);
     u8g2.drawStr(chimeItems, 75, chimeSettingsMenuTitles[4]);
+    u8g2.drawStr(chimeItems, 91, chimeSettingsMenuTitles[5]);
 
 
     u8g2.setDrawColor(2);
-    u8g2.drawBox(settingsBox, 16, 122, 15);
     u8g2.drawBox(chimeBox, 16, 128, 15);
     u8g2.sendBuffer();
 
@@ -205,13 +219,31 @@ void chime_to_settingsTransition() {
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     u8g2.setFont(u8g2_font_profont11_tf);
-    u8g2.drawStr(settingsItems, 27, mainSettingsMenuTitles[1]);
-    u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[2]);
-    u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[3]);
-    u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[4]);
-    u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[5]);
-    u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
+    switch (frameSettingsMenu) {
+      case 1:
+        u8g2.drawUTF8(settingsItems, 27, mainSettingsMenuTitles[1]);
+        u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[4]);
+        u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[5]);
+        u8g2.drawXBMP(settingsArrow, 36, 4, 7, right_arrow_BM);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 32, 122, 15);
+        break;
 
+      case 2:
+        u8g2.drawUTF8(settingsItems, 27, mainSettingsMenuTitles[2]);
+        u8g2.drawStr(settingsItems, 43, mainSettingsMenuTitles[3]);
+        u8g2.drawStr(settingsItems, 59, mainSettingsMenuTitles[4]);
+        u8g2.drawStr(settingsItems, 75, mainSettingsMenuTitles[5]);
+        u8g2.drawUTF8(settingsItems, 91, mainSettingsMenuTitles[6]);
+        u8g2.drawXBMP(settingsArrow, 20, 4, 7, right_arrow_BM);
+        u8g2.setDrawColor(2);
+        u8g2.drawBox(settingsBox, 16, 122, 15);
+        break;
+    }
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
     if (alarm_is_activated == true) {
       u8g2.drawUTF8(chimeItems, 27, chimeSettingsMenuTitles[1]);
     } else {
@@ -220,10 +252,11 @@ void chime_to_settingsTransition() {
     u8g2.drawStr(chimeItems, 43, chimeSettingsMenuTitles[2]);
     u8g2.drawStr(chimeItems, 59, chimeSettingsMenuTitles[3]);
     u8g2.drawStr(chimeItems, 75, chimeSettingsMenuTitles[4]);
+    u8g2.drawStr(chimeItems, 91, chimeSettingsMenuTitles[5]);
+
     u8g2.drawXBMP(chimeArrow, 68, 4, 7, left_arrow_BM);
 
     u8g2.setDrawColor(2);
-    u8g2.drawBox(settingsBox, 16, 122, 15);
     u8g2.drawBox(chimeBox, 64, 128, 15);
     drawScrollbar();
     drawSettingsScrollbar();
@@ -239,7 +272,7 @@ void chime_to_settingsTransition() {
     chimeArrow = chimeArrow + speed;
     delayMicroseconds(100);
   } while (pageTransition < 0);
-}*/
+}
 ////////////////////////////////////////////////////////////////////////////
 
 

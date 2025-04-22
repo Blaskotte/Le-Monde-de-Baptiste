@@ -80,6 +80,14 @@ const char* chimeSettingsMenuTitles[] = {
   /*4*/ "Retour"
 };
 
+const char* chimeSoundTitles[] = {
+  /*0*/ "Westiminster",
+  /*1*/ "",
+  /*2*/ "",
+  /*3*/ "",
+  /*4*/ "Retour"
+};
+
 const char* monthsOfTheYear[] = {
   "useless",
   "janvier",
@@ -107,7 +115,16 @@ const char* displayMenuTitles[] = {
   "useless",
   "Luminosité",
   "Contraste",
+  "Économis. d'écran",
   "Retour"
+};
+
+const char* screensaverTitles[] = {
+  /*0*/ "10 minutes",
+  /*1*/ "30 minutes",
+  /*2*/ "1 heure",
+  /*3*/ "Jamais",
+  /*4*/ "Retour"
 };
 
 const char* shortMonths[] = {
@@ -163,6 +180,7 @@ bool volumeSettingsMenu = false;
 bool displaySettingsMenu = false;
 bool brightness_menu = false;
 bool contrast_menu = false;
+bool screensaver_menu = false;
 
 bool clockDateSettingsMenu = false;
 bool clockSet_menu = false;
@@ -236,6 +254,8 @@ unsigned int contrast;            //EEPROM adress 11
 bool chime_is_activated;  //EEPROM adress 12
 bool alarm_is_activated;  //EEPROM adress 13
 
+unsigned int screensaverInterval;  // EEPROM adress 14
+
 
 //variables used to set the hour
 int temporaryHour;
@@ -276,7 +296,7 @@ bool clockBig;
 bool chimeNotification = false;
 
 bool screensaver = false;
-int screensaverInterval = 600000;
+bool screensaverState;
 int millisScreensaver;
 int screensaverPreviousRotate;
 
@@ -318,6 +338,27 @@ void setup() {
   contrast = eprom.read(11);
   alarm_is_activated = eprom.read(12);
   chime_is_activated = eprom.read(13);
+  switch (eprom.read(14)) {
+    case 6:
+      screensaverState = true;
+      screensaverInterval = eprom.read(14) * 100000;
+      break;
+
+    case 18:
+      screensaverState = true;
+      screensaverInterval = eprom.read(14) * 100000;
+      break;
+
+    case 36:
+      screensaverState = true;
+      screensaverInterval = eprom.read(14) * 100000;
+      break;
+
+    case 100:
+      screensaverState = false;
+      screensaverInterval = eprom.read(14);
+      break;
+  }
   Potentiometer.writeWiper(brightness);
   delay(300);
   u8g2.setContrast(contrast);
@@ -353,11 +394,13 @@ void loop() {
       millisHomePage = millis();
       setRotary(0);
     }
-    if (millis() - millisScreensaver >= screensaverInterval && screensaver == false) {  // activate the screensaver after inactive time
-      millisScreensaver = millis();
-      screensaver = true;
-      SVX = 28;
-      SVY = 58;
+    if (screensaverState == true) {
+      if (millis() - millisScreensaver >= screensaverInterval && screensaver == false) {  // activate the screensaver after inactive time
+        millisScreensaver = millis();
+        screensaver = true;
+        SVX = 28;
+        SVY = 58;
+      }
     }
   } else {
     millisScreensaver = millis();
@@ -431,6 +474,10 @@ void loop() {
         updateContrastMenu();
         printContrastMenu();
         executeContrastMenu();
+      } else if (screensaver_menu == true) {
+        updateScreensaverTime();
+        printScreensaverTime();
+        executeScreensaverTime();
       } else {
         updateDisplayMenu();
         printDisplayMenu();

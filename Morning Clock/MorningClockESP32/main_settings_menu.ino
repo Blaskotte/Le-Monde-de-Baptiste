@@ -196,7 +196,7 @@ void executeSettingsMenu() {
       case 2:
         chimeSettingsMenu = true;
         setRotary(1);
-        //settings_to_chimeTransition();
+        settings_to_chimeTransition();
         break;
 
       case 3:
@@ -205,14 +205,12 @@ void executeSettingsMenu() {
       case 4:
         displaySettingsMenu = true;
         setRotary(1);
-        menuItemSelect = 1;
         settings_to_displayTransition();
         break;
 
       case 5:
         clockDateSettingsMenu = true;
         setRotary(1);
-        menuItemSelect = 1;
         settings_to_clockDateTransition();
         break;
 
@@ -237,7 +235,7 @@ void executeSettingsMenu() {
 
 void homePage_to_settingsTransition() {
   DateTime now = rtc.now();
-  int transitionDelay = 60;
+  int transitionDelay = 50;
   u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setFontMode(1);
@@ -425,7 +423,7 @@ void homePage_to_settingsTransition() {
 
 void settings_to_homePageTransition() {
   DateTime now = rtc.now();
-  int transitionDelay = 60;
+  int transitionDelay = 50;
   u8g2.clearBuffer();
   drawHomePageBar();
   u8g2.setDrawColor(0);

@@ -32,6 +32,7 @@ void printHomePage() {
 }
 
 void updateHomePage() {
+
   switch (rotateCounter) {
     case 0:
       chimeSelect = false;

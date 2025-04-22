@@ -11,9 +11,10 @@ void printDisplayMenu() {
   u8g2.setFont(u8g2_font_profont11_tf);
   u8g2.drawUTF8(6, 27, displayMenuTitles[1]);
   u8g2.drawUTF8(6, 43, displayMenuTitles[2]);
-  u8g2.drawStr(6, 59, displayMenuTitles[3]);
+  u8g2.drawUTF8(6, 59, displayMenuTitles[3]);
+  u8g2.drawUTF8(6, 75, displayMenuTitles[4]);
   u8g2.setDrawColor(2);
-  switch (menuItemSelect) {
+  switch (rotateCounter) {
     case 1:
       u8g2.drawBox(0, 16, 128, 15);
       u8g2.drawXBMP(118, 20, 4, 7, right_arrow_BM);
@@ -26,34 +27,24 @@ void printDisplayMenu() {
 
     case 3:
       u8g2.drawBox(0, 48, 128, 15);
-      u8g2.drawXBMP(118, 52, 4, 7, left_arrow_BM);
+      u8g2.drawXBMP(118, 52, 4, 7, right_arrow_BM);
+      break;
+
+    case 4:
+      u8g2.drawBox(0, 64, 128, 15);
+      u8g2.drawXBMP(118, 68, 4, 7, left_arrow_BM);
       break;
   }
   u8g2.sendBuffer();
 }
 
 void updateDisplayMenu() {
-  switch (rotateCounter) {
-    case 1:
-      menuItemSelect = 1;
-      break;
 
-    case 2:
-      menuItemSelect = 2;
-      break;
-
-    case 3:
-      menuItemSelect = 3;
-      break;
-
-    default:
-      if (rotateCounter > 3) {
-        setRotary(3);
-      }
-      if (rotateCounter < 1) {
-        setRotary(1);
-      }
-      break;
+  if (rotateCounter > 4) {
+    setRotary(4);
+  }
+  if (rotateCounter < 1) {
+    setRotary(1);
   }
 }
 
@@ -73,6 +64,13 @@ void executeDisplayMenu() {
         break;
 
       case 3:
+        screensaver_menu = true;
+        setRotary(1);
+        //setRotary(map(contrast, 80, 180, 0, 50));
+        //display_to_screensaverTransition();
+        break;
+
+      case 4:
         displaySettingsMenu = false;
         setRotary(4);
         menuItemSelect = 4;
@@ -140,6 +138,7 @@ void settings_to_displayTransition() {
     u8g2.drawUTF8(displayItems, 27, displayMenuTitles[1]);
     u8g2.drawUTF8(displayItems, 43, displayMenuTitles[2]);
     u8g2.drawStr(displayItems, 59, displayMenuTitles[3]);
+    u8g2.drawStr(displayItems, 75, displayMenuTitles[4]);
     u8g2.drawBox(displayBox, 16, 128, 15);
     u8g2.drawXBMP(displayArrow, 20, 4, 7, right_arrow_BM);
     u8g2.sendBuffer();
@@ -177,10 +176,11 @@ void display_to_settingsTransition() {
     u8g2.setFont(u8g2_font_profont11_tf);
     u8g2.drawUTF8(displayItems, 27, clockDateMenuTitles[1]);
     u8g2.drawUTF8(displayItems, 43, clockDateMenuTitles[2]);
-    u8g2.drawStr(displayItems, 59, clockDateMenuTitles[3]);
+    u8g2.drawUTF8(displayItems, 59, clockDateMenuTitles[3]);
+    u8g2.drawUTF8(displayItems, 59, clockDateMenuTitles[4]);
     u8g2.setDrawColor(2);
-    u8g2.drawBox(displayBox, 48, 128, 15);
-    u8g2.drawXBMP(displayArrow, 52, 4, 7, left_arrow_BM);
+    u8g2.drawBox(displayBox, 64, 128, 15);
+    u8g2.drawXBMP(displayArrow, 68, 4, 7, left_arrow_BM);
 
     switch (frameSettingsMenu) {
       case 1:
@@ -504,3 +504,106 @@ void contrast_to_displayTransition() {
 }
 
 ////////////////////////////////////////////////////////////////////////////
+
+
+
+//Screensaver
+////////////////////////////////////////////////////////////////////////////
+void printScreensaverTime() {
+  u8g2.clearBuffer();
+  drawDisplayBar();
+  u8g2.setFontMode(1);
+  u8g2.setBitmapMode(1);
+  u8g2.setFont(u8g2_font_profont11_tf);
+  u8g2.drawUTF8(6, 27, screensaverTitles[0]);
+  u8g2.drawUTF8(6, 43, screensaverTitles[1]);
+  u8g2.drawUTF8(6, 59, screensaverTitles[2]);
+  u8g2.drawUTF8(6, 75, screensaverTitles[3]);
+  u8g2.drawUTF8(6, 91, screensaverTitles[4]);
+  switch (rotateCounter) {
+    case 1:
+      u8g2.drawBox(0, 16, 128, 15);
+      break;
+    case 2:
+      u8g2.drawBox(0, 32, 128, 15);
+      break;
+    case 3:
+      u8g2.drawBox(0, 48, 128, 15);
+      break;
+    case 4:
+      u8g2.drawBox(0, 64, 128, 15);
+      break;
+    case 5:
+      u8g2.drawBox(0, 80, 128, 15);
+      u8g2.drawXBMP(118, 84, 4, 7, left_arrow_BM);
+      break;
+  }
+  u8g2.setBitmapMode(2);
+  switch (screensaverInterval) {
+    case 600000:
+      u8g2.drawXBM(117, 19, 7, 9, validate_BM);
+      break;
+
+    case 1800000:
+      u8g2.drawXBM(117, 35, 7, 9, validate_BM);
+      break;
+
+    case 3600000:
+      u8g2.drawXBM(117, 51, 7, 9, validate_BM);
+      break;
+
+    case 100:
+      u8g2.drawXBM(117, 67, 7, 9, validate_BM);
+      break;
+  }
+  u8g2.sendBuffer();
+}
+
+void updateScreensaverTime() {
+  switch (rotateCounter) {
+
+    default:
+      if (rotateCounter > 5) {
+        setRotary(5);
+      }
+      if (rotateCounter < 1) {
+        setRotary(1);
+      }
+  }
+}
+
+void executeScreensaverTime() {
+  if (mainButton.pressed()) {
+    switch (rotateCounter) {
+      case 1:
+        screensaverState = true;
+        screensaverInterval = 600000;
+        eprom.update(14, 6);
+        break;
+
+      case 2:
+        screensaverState = true;
+        screensaverInterval = 1800000;
+        eprom.update(14, 18);
+        break;
+
+      case 3:
+        screensaverState = true;
+        screensaverInterval = 3600000;
+        eprom.update(14, 36);
+        break;
+
+      case 4:
+        screensaverState = false;
+        screensaverInterval = 100;
+        eprom.update(14, 100);
+        break;
+
+      case 5:
+        screensaver_menu = false;
+        setRotary(3);
+        //screensaver_to_DisplayTransition();
+        break;
+    }
+  }
+}
