@@ -15383,10 +15383,33 @@ Buzzer(0);
 
 
 
-int mainMenuState=0;
-int sensorsOverview=0;
-int sensorsOverviewState=0;
+char mainMenuState=0;
 
+char sensorsOverviewMode=0;
+char sensorsOverviewState=0;
+
+char calibMode =0;
+char calibModeState =0;
+
+char followLineMode = 0;
+char followLineState =0;
+
+int tempMillis=0;
+int startMillis=0;
+
+
+int CNY_black_left_max = 0;
+int CNY_black_middle_max = 0;
+int CNY_black_right_max = 0;
+
+int CNY_black_left;
+CNY_black_left = DATAEE_ReadByte(0x10);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+int CNY_black_middle = DATAEE_ReadByte(0x20);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+int CNY_black_right = DATAEE_ReadByte(0x30);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+int substractNumber = 180;
 
 
 while (1)
@@ -15406,6 +15429,15 @@ switch(mainMenuState){
 case 0:
 gotoLCD(0,0); printLCD(">Follow a Line  ");
 gotoLCD(1,0); printLCD(" Sensors Review ");
+
+if(!BP_selection()){
+followLineMode=1;
+while(!BP_selection()){
+_delay((unsigned long)((100)*(64000000/4000.0)));
+}
+followLineState=0;
+clearLCD();
+}
 break;
 
 case 1:
@@ -15413,7 +15445,7 @@ gotoLCD(0,0); printLCD(" Follow a Line  ");
 gotoLCD(1,0); printLCD(">Sensors Review ");
 
 if(!BP_selection()){
-sensorsOverview=1;
+sensorsOverviewMode=1;
 while(!BP_selection()){
 _delay((unsigned long)((100)*(64000000/4000.0)));
 }
@@ -15426,6 +15458,15 @@ break;
 case 2:
 gotoLCD(0,0); printLCD(">Calib. Mode    ");
 gotoLCD(1,0); printLCD(" 4              ");
+if(!BP_selection()){
+calibModeState=0;
+while(!BP_selection()){
+_delay((unsigned long)((100)*(64000000/4000.0)));
+}
+calibMode=1;
+calibModeState=0;
+clearLCD();
+}
 break;
 case 3:
 gotoLCD(0,0); printLCD(" Calib. Mode    ");
@@ -15435,7 +15476,38 @@ break;
 
 
 
-while(sensorsOverview==1){
+
+while(followLineMode==1){
+
+# 163
+gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
+gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
+gotoLCD(1,5); printLCD(" ");
+gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
+gotoLCD(1,11); printLCD(" ");
+if(ADCC_GetSingleConversion(31)>CNY_black_left){
+LED(0, 1);
+} else {
+LED(0, 0);
+}
+if(ADCC_GetSingleConversion(29)>CNY_black_right){
+LED(1, 1);
+}else {
+LED(1, 0);
+}
+if(!BP_selection()){
+followLineMode=0;
+while(!BP_selection()){
+_delay((unsigned long)((100)*(64000000/4000.0)));
+}
+LED(0, 0);
+LED(1, 0);
+Ecrit_Valeur_selection(mainMenuState);
+}
+}
+
+# 193
+while(sensorsOverviewMode==1){
 
 if(Valeur_selection() < 0 || Valeur_selection() > 1000){
 Ecrit_Valeur_selection(0);
@@ -15451,7 +15523,7 @@ clearLCD();
 switch(sensorsOverviewState){
 case 0:
 
-gotoLCD(0,0); printLCD("1- CNY Senso. -4");
+gotoLCD(0,0); printLCD("CNY Sensors  1-4");
 gotoLCD(1,3); LCDvalue16fp(ADCC_GetSingleConversion(31), 0);
 gotoLCD(1,9); LCDvalue16fp(ADCC_GetSingleConversion(30), 0);
 gotoLCD(1,15); LCDvalue16fp(ADCC_GetSingleConversion(29), 0);
@@ -15461,7 +15533,7 @@ break;
 
 case 1:
 
-gotoLCD(0,0); printLCD("2- CNY  Bool. -4");
+gotoLCD(0,0); printLCD("CNY Boolean  2-4");
 gotoLCD(1,0); printLCD("left:");
 gotoLCD(1,5); LCDvalue_Boolean(Digital_read(1));
 gotoLCD(1,9); printLCD("right:");
@@ -15470,7 +15542,7 @@ break;
 
 case 2:
 
-gotoLCD(0,0); printLCD("3-Laser Senso.-4");
+gotoLCD(0,0); printLCD("Laser Sensor 3-4");
 gotoLCD(1,2); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(0));
 _delay((unsigned long)((50)*(64000000/4000.0)));
 gotoLCD(1,7); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(1));
@@ -15481,7 +15553,7 @@ break;
 
 case 3:
 
-gotoLCD(0,0); printLCD("4- Microphone -4");
+gotoLCD(0,0); printLCD("Microphone   4-4");
 
 if(Digital_read(2)){
 gotoLCD(1,4); printLCD("True  :)");
@@ -15498,7 +15570,7 @@ break;
 }
 
 if(!BP_selection()){
-sensorsOverview=0;
+sensorsOverviewMode=0;
 while(!BP_selection()){
 _delay((unsigned long)((100)*(64000000/4000.0)));
 }
@@ -15507,10 +15579,111 @@ clearLCD();
 }
 _delay((unsigned long)((100)*(64000000/4000.0)));
 
-# 169
+# 271
 }
 
-# 190
+
+
+
+while(calibMode==1){
+switch(calibModeState){
+case 0:
+Motors(0);
+gotoLCD(0,0); printLCD("Set the robot on");
+gotoLCD(1,0); printLCD("a white surface ");
+if(!BP_selection()){
+calibModeState=1;
+while(!BP_selection()){
+_delay((unsigned long)((100)*(64000000/4000.0)));
+}
+Buzzer(1);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+Buzzer(0);
+clearLCD();
+CNY_black_left_max = 0;
+CNY_black_middle_max = 0;
+CNY_black_right_max = 0;
+startMillis = millis();
+
+}
+break;
+
+case 1:
+gotoLCD(0,0); printLCD(" Calibrating... ");
+gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
+gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
+gotoLCD(1,5); printLCD(" ");
+gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
+gotoLCD(1,11); printLCD(" ");
+Motors(1);
+Speed_Motors(2, -2);
+
+if(CNY_black_left_max < ADCC_GetSingleConversion(31)){
+CNY_black_left_max = ADCC_GetSingleConversion(31);
+}
+if(CNY_black_middle_max < ADCC_GetSingleConversion(30)){
+CNY_black_middle_max = ADCC_GetSingleConversion(30);
+}
+if(CNY_black_right_max < ADCC_GetSingleConversion(29)){
+CNY_black_right_max = ADCC_GetSingleConversion(29);
+}
+
+tempMillis = millis();
+
+if(tempMillis>(startMillis+2000)){
+calibModeState=2;
+Speed_Motors(0, 0);
+Motors(0);
+
+Buzzer(1);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+Buzzer(0);
+clearLCD();
+}
+_delay((unsigned long)((50)*(64000000/4000.0)));
+break;
+case 2:
+gotoLCD(0,0); printLCD("  Calib. done!  ");
+gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
+gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
+gotoLCD(1,5); printLCD(" ");
+gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
+gotoLCD(1,11); printLCD(" ");
+if(!BP_selection()){
+calibModeState=0;
+while(!BP_selection()){
+_delay((unsigned long)((100)*(64000000/4000.0)));
+}
+CNY_black_left = CNY_black_left_max - substractNumber;
+CNY_black_middle = CNY_black_middle_max - substractNumber;
+CNY_black_right = CNY_black_right_max - substractNumber;
+
+DATAEE_WriteByte(0x10, CNY_black_left);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+DATAEE_WriteByte(0x20, CNY_black_middle);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+DATAEE_WriteByte(0x30, CNY_black_right);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+Buzzer(1);
+gotoLCD(0,0); printLCD("Values saved in");
+gotoLCD(1,0); printLCD("the EEPROM ! :) ");
+for(int i=0;i<10;i++){
+_delay((unsigned long)((100)*(64000000/4000.0)));
+}
+Buzzer(0);
+calibMode=0;
+clearLCD();
+Ecrit_Valeur_selection(mainMenuState);
+}
+Speed_Motors(0, 0);
+Motors(0);
+_delay((unsigned long)((100)*(64000000/4000.0)));
+break;
+}
+}
+
+
+
 }
 
 }
