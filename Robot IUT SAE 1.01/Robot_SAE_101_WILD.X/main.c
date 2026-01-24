@@ -55,13 +55,16 @@ void main(void)//__at 0x00200
     int CNY_black_middle_max = 0;
     int CNY_black_right_max = 0;
     
-    int CNY_black_left;
-    CNY_black_left = DATAEE_ReadByte(0x10);
+    /*int CNY_black_left = DATAEE_ReadByte(1);
     __delay_ms(100);
-    int CNY_black_middle = DATAEE_ReadByte(0x20);
+    int CNY_black_middle = DATAEE_ReadByte(2);
     __delay_ms(100);
-    int CNY_black_right = DATAEE_ReadByte(0x30);
-    __delay_ms(100);
+    int CNY_black_right = DATAEE_ReadByte(3);
+    __delay_ms(100);*/
+    int CNY_black_left = 0;
+    int CNY_black_middle = 0;
+    int CNY_black_right = 0;
+    
     int substractNumber = 180; //valeur à retirer à la valeur maximale pour avoir une valeur de switch d'état logique.
     
     
@@ -129,43 +132,113 @@ while (1)
     //-----Menu principal fin-----
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     //-----Mode suivi de lignes-----
     while(followLineMode==1){
-        
-        /*switch(followLineState){
-            case 0: //robot arreté et lancé si BP pressé
-                
-                break;
-                
-            case 1:
-                
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
-        }*/
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
         gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
         gotoLCD(1,5); printLCD(" ");
         gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
         gotoLCD(1,11); printLCD(" ");
-        if(ADCC_GetSingleConversion(31)>CNY_black_left){
+        
+        switch(followLineState){
+            
+            case 0: //robot arreté et lancé micro-true, qui le mode si BP pressé
+                Motors(0);
+                Speed_Motors(0, 0);
+                if(!BP_selection()){
+                    followLineMode = 0;
+                    while(!BP_selection()){
+                        __delay_ms(100);
+
+                    }
+                    clearLCD();
+                    Ecrit_Valeur_selection(0);
+                }
+                if(Digital_read(2)){
+                    followLineState = 1;
+                    Buzzer(1);
+                    __delay_ms(100);
+                    Buzzer(0);
+
+                }
+                break;
+                
+            case 1:
+                
+                Motors(1);
+                Speed_Motors(2, -2);
+                if(ADCC_GetSingleConversion(31)<CNY_black_left)//si capteur gauche == blanc
+                {
+                    followLineState = 2;
+                }
+                if(ADCC_GetSingleConversion(29)<CNY_black_right)//si capteur droit == blanc
+                {
+                    followLineState = 3;
+                }
+                break;
+                
+                
+            case 2: //tourner vers la droite
+                
+                Motors(1);
+                Speed_Motors(2, 0);
+                if(ADCC_GetSingleConversion(31)>CNY_black_left)//si capteur gauche == noir
+                {
+                    followLineState = 1;
+                }
+                if(ADCC_GetSingleConversion(29)<CNY_black_left)//si capteur droit == blanc
+                {
+                    followLineState = 3;
+                }
+                break;
+                
+                
+            case 3: // tourner vers la gauche
+                Motors(1);
+                Speed_Motors(0, -2);
+                if(ADCC_GetSingleConversion(29)>CNY_black_left)//si capteur droit == noir
+                {
+                    followLineState = 1;
+                }
+                if(ADCC_GetSingleConversion(31)<CNY_black_left)//si capteur gauche == blanc
+                {
+                    followLineState = 2;
+                }
+                break;
+        }
+        __delay_ms(50);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        /*if(ADCC_GetSingleConversion(31)>CNY_black_left){
              LED(0, 1);
         } else {
             LED(0, 0);
@@ -183,10 +256,27 @@ while (1)
             LED(0, 0);
             LED(1, 0);
             Ecrit_Valeur_selection(mainMenuState);
-        }
+        }*/
     }
     
     //-----Mode suivi de lignes fin-----
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     //-----Aperçu des capteurs-----
@@ -346,12 +436,12 @@ while (1)
                     CNY_black_middle = CNY_black_middle_max - substractNumber;
                     CNY_black_right = CNY_black_right_max - substractNumber;
                     
-                    DATAEE_WriteByte(0x10, CNY_black_left);
+                    /*DATAEE_WriteByte(1, CNY_black_left);
                     __delay_ms(100);
-                    DATAEE_WriteByte(0x20, CNY_black_middle);
+                    DATAEE_WriteByte(2, CNY_black_middle);
                     __delay_ms(100);
-                    DATAEE_WriteByte(0x30, CNY_black_right);
-                    __delay_ms(100);
+                    DATAEE_WriteByte(3, CNY_black_right);
+                    __delay_ms(100);*/
                     Buzzer(1);
                     gotoLCD(0,0); printLCD("Values saved in");
                     gotoLCD(1,0); printLCD("the EEPROM ! :) ");
