@@ -15407,7 +15407,7 @@ int CNY_black_left = 0;
 int CNY_black_middle = 0;
 int CNY_black_right = 0;
 
-int substractNumber = 180;
+int substractNumber = 150;
 
 
 while (1)
@@ -15480,13 +15480,9 @@ gotoLCD(1,5); printLCD(" ");
 gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
 gotoLCD(1,11); printLCD(" ");
 
-switch(followLineState){
-
-case 0:
-Motors(0);
-Speed_Motors(0, 0);
 if(!BP_selection()){
 followLineMode = 0;
+followLineState = 0;
 while(!BP_selection()){
 _delay((unsigned long)((100)*(64000000/4000.0)));
 
@@ -15494,6 +15490,12 @@ _delay((unsigned long)((100)*(64000000/4000.0)));
 clearLCD();
 Ecrit_Valeur_selection(0);
 }
+
+switch(followLineState){
+
+case 0:
+Speed_Motors(0, 0);
+
 if(Digital_read(2)){
 followLineState = 1;
 Buzzer(1);
@@ -15506,27 +15508,28 @@ break;
 case 1:
 
 Motors(1);
-Speed_Motors(2, -2);
-if(ADCC_GetSingleConversion(31)<CNY_black_left)
+Speed_Motors(4, -4);
+if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)
 {
 followLineState = 2;
 }
-if(ADCC_GetSingleConversion(29)<CNY_black_right)
+else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle)
 {
 followLineState = 3;
 }
+
+# 207
 break;
 
 
 case 2:
 
 Motors(1);
-Speed_Motors(2, 0);
-if(ADCC_GetSingleConversion(31)>CNY_black_left)
+Speed_Motors(4, 0);
+if(ADCC_GetSingleConversion(30)>CNY_black_middle)
 {
 followLineState = 1;
-}
-if(ADCC_GetSingleConversion(29)<CNY_black_left)
+} else if (ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)>CNY_black_middle)
 {
 followLineState = 3;
 }
@@ -15535,12 +15538,12 @@ break;
 
 case 3:
 Motors(1);
-Speed_Motors(0, -2);
-if(ADCC_GetSingleConversion(29)>CNY_black_left)
+Speed_Motors(0, -4);
+if(ADCC_GetSingleConversion(30)>CNY_black_middle)
 {
 followLineState = 1;
 }
-if(ADCC_GetSingleConversion(31)<CNY_black_left)
+else if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)>CNY_black_middle)
 {
 followLineState = 2;
 }
@@ -15548,10 +15551,10 @@ break;
 }
 _delay((unsigned long)((50)*(64000000/4000.0)));
 
-# 260
+# 270
 }
 
-# 283
+# 293
 while(sensorsOverviewMode==1){
 
 if(Valeur_selection() < 0 || Valeur_selection() > 1000){
@@ -15624,7 +15627,7 @@ clearLCD();
 }
 _delay((unsigned long)((100)*(64000000/4000.0)));
 
-# 361
+# 371
 }
 
 
@@ -15703,7 +15706,7 @@ CNY_black_left = CNY_black_left_max - substractNumber;
 CNY_black_middle = CNY_black_middle_max - substractNumber;
 CNY_black_right = CNY_black_right_max - substractNumber;
 
-# 445
+# 455
 Buzzer(1);
 gotoLCD(0,0); printLCD("Values saved in");
 gotoLCD(1,0); printLCD("the EEPROM ! :) ");

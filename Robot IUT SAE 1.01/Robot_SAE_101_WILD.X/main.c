@@ -65,7 +65,7 @@ void main(void)//__at 0x00200
     int CNY_black_middle = 0;
     int CNY_black_right = 0;
     
-    int substractNumber = 180; //valeur à retirer à la valeur maximale pour avoir une valeur de switch d'état logique.
+    int substractNumber = 150; //valeur à retirer à la valeur maximale pour avoir une valeur de switch d'état logique.
     
     
 while (1)
@@ -158,20 +158,22 @@ while (1)
         gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
         gotoLCD(1,11); printLCD(" ");
         
+        if(!BP_selection()){
+            followLineMode = 0;
+            followLineState = 0;
+                while(!BP_selection()){
+                    __delay_ms(100);
+
+                }
+            clearLCD();
+            Ecrit_Valeur_selection(0);
+        }
+        
         switch(followLineState){
             
-            case 0: //robot arreté et lancé micro-true, qui le mode si BP pressé
-                Motors(0);
+            case 0: //robot arreté et lancé micro-true
                 Speed_Motors(0, 0);
-                if(!BP_selection()){
-                    followLineMode = 0;
-                    while(!BP_selection()){
-                        __delay_ms(100);
-
-                    }
-                    clearLCD();
-                    Ecrit_Valeur_selection(0);
-                }
+                
                 if(Digital_read(2)){
                     followLineState = 1;
                     Buzzer(1);
@@ -184,27 +186,35 @@ while (1)
             case 1:
                 
                 Motors(1);
-                Speed_Motors(2, -2);
-                if(ADCC_GetSingleConversion(31)<CNY_black_left)//si capteur gauche == blanc
+                Speed_Motors(4, -4);
+                if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)//si capteur gauche et milieu == blanc
                 {
                     followLineState = 2;
                 }
-                if(ADCC_GetSingleConversion(29)<CNY_black_right)//si capteur droit == blanc
+                else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle)//si capteur droit et  == blanc
                 {
                     followLineState = 3;
-                }
+                } 
+                /*else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle && ADCC_GetSingleConversion(31)<CNY_black_left){ // si tous les capteurs voient 0du blanc
+                    
+                    if(Digital_read(1)==1){
+                    followLineState = 3;
+                    }
+                    else if(Digital_read(0)==1){
+                    followLineState = 2;
+                    }
+                }*/
                 break;
                 
                 
             case 2: //tourner vers la droite
                 
                 Motors(1);
-                Speed_Motors(2, 0);
-                if(ADCC_GetSingleConversion(31)>CNY_black_left)//si capteur gauche == noir
+                Speed_Motors(4, 0);
+                if(ADCC_GetSingleConversion(30)>CNY_black_middle)//si capteur gauche == noir
                 {
                     followLineState = 1;
-                }
-                if(ADCC_GetSingleConversion(29)<CNY_black_left)//si capteur droit == blanc
+                } else if (ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)>CNY_black_middle)//si capteur droit == blanc et milieu == noir
                 {
                     followLineState = 3;
                 }
@@ -213,12 +223,12 @@ while (1)
                 
             case 3: // tourner vers la gauche
                 Motors(1);
-                Speed_Motors(0, -2);
-                if(ADCC_GetSingleConversion(29)>CNY_black_left)//si capteur droit == noir
+                Speed_Motors(0, -4);
+                if(ADCC_GetSingleConversion(30)>CNY_black_middle)//si capteur droit == noir
                 {
                     followLineState = 1;
                 }
-                if(ADCC_GetSingleConversion(31)<CNY_black_left)//si capteur gauche == blanc
+                else if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)>CNY_black_middle)//si capteur gauche == blanc et milieu == noir
                 {
                     followLineState = 2;
                 }
