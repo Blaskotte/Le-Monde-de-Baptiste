@@ -38,6 +38,11 @@ void main(void)//__at 0x00200
     //variabes personnelles
     char mainMenuState=0;
     
+    char lineBlackRight = 0;
+     char lineBlackLeft = 0;
+      char lineBlackMiddle = 0;
+      char turnState=0;
+    
     char sensorsOverviewMode=0;
     char sensorsOverviewState=0;
     
@@ -46,27 +51,28 @@ void main(void)//__at 0x00200
     
     char followLineMode = 0;
     char followLineState =0;
+
     
     int tempMillis=0;
     int startMillis=0;
     
     //variables calibrages
-    int CNY_black_left_max = 0;
-    int CNY_black_middle_max = 0;
-    int CNY_black_right_max = 0;
-    
-    /*int CNY_black_left = DATAEE_ReadByte(1);
+    /*int CNY_black_left_max = DATAEE_ReadByte(0x10);
     __delay_ms(100);
-    int CNY_black_middle = DATAEE_ReadByte(2);
+    int CNY_black_middle_max = DATAEE_ReadByte(0x20);
     __delay_ms(100);
-    int CNY_black_right = DATAEE_ReadByte(3);
+    int CNY_black_right_max = DATAEE_ReadByte(0x30);
     __delay_ms(100);*/
+    
+    int CNY_black_left_max;
+    int CNY_black_right_max;
+    int CNY_black_middle_max;
+    
+    int substractNumber = 200; //valeur à retirer à la valeur maximale pour avoir une valeur de switch d'état logique.
+    
     int CNY_black_left = 0;
     int CNY_black_middle = 0;
     int CNY_black_right = 0;
-    
-    int substractNumber = 150; //valeur à retirer à la valeur maximale pour avoir une valeur de switch d'état logique.
-    
     
 while (1)
     {
@@ -91,7 +97,10 @@ while (1)
                     while(!BP_selection()){
                         __delay_ms(100);
                     }
-                followLineState=0;
+                lineBlackRight = 0;
+                lineBlackLeft = 0;
+                lineBlackMiddle = 0;
+                turnState = 0;
                 clearLCD();
                 }
                 break;
@@ -139,11 +148,12 @@ while (1)
     
     
     
-    
-    
-    
-    
-    
+
+        
+
+
+        
+ 
     
     
     
@@ -152,11 +162,6 @@ while (1)
     
     //-----Mode suivi de lignes-----
     while(followLineMode==1){
-        gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
-        gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
-        gotoLCD(1,5); printLCD(" ");
-        gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
-        gotoLCD(1,11); printLCD(" ");
         
         if(!BP_selection()){
             followLineMode = 0;
@@ -186,15 +191,37 @@ while (1)
             case 1:
                 
                 Motors(1);
-                Speed_Motors(4, -4);
-                if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)//si capteur gauche et milieu == blanc
+                Speed_Motors(8, -8);
+                
+                
+                
+                
+                if(Digital_read(0)==1&&Digital_read(1)==1){
+                    lineBlackMiddle++;
+                    __delay_ms(130);
+                    
+                } else if(Digital_read(0)==1){
+                    lineBlackRight++;
+                    __delay_ms(130);
+                
+                } else if (Digital_read(1)==1){
+                    lineBlackLeft++;
+                    __delay_ms(130);
+                
+                }
+                
+                
+                
+                
+                
+                if (ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)//si capteur gauche et milieu == blanc
                 {
                     followLineState = 2;
-                }
-                else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle)//si capteur droit et  == blanc
+                }else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle)//si capteur droit et  == blanc
                 {
                     followLineState = 3;
                 } 
+
                 /*else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle && ADCC_GetSingleConversion(31)<CNY_black_left){ // si tous les capteurs voient 0du blanc
                     
                     if(Digital_read(1)==1){
@@ -210,7 +237,29 @@ while (1)
             case 2: //tourner vers la droite
                 
                 Motors(1);
-                Speed_Motors(4, 0);
+                Speed_Motors(8, 0);
+                
+                
+                
+                
+                if(Digital_read(0)==1&&Digital_read(1)==1){
+                    lineBlackMiddle++;
+                    __delay_ms(130);
+                    
+                } else if(Digital_read(0)==1){
+                    lineBlackRight++;
+                    __delay_ms(130);
+                
+                } else if (Digital_read(1)==1){
+                    lineBlackLeft++;
+                    __delay_ms(130);
+                
+                }
+                
+                
+                
+                
+                
                 if(ADCC_GetSingleConversion(30)>CNY_black_middle)//si capteur gauche == noir
                 {
                     followLineState = 1;
@@ -221,9 +270,34 @@ while (1)
                 break;
                 
                 
+                
+                
+                
             case 3: // tourner vers la gauche
                 Motors(1);
-                Speed_Motors(0, -4);
+                Speed_Motors(0, -8);
+                
+                
+                
+                
+                
+                if(Digital_read(0)==1&&Digital_read(1)==1){
+                    lineBlackMiddle++;
+                    __delay_ms(130);
+                    
+                } else if(Digital_read(0)==1){
+                    lineBlackRight++;
+                    __delay_ms(130);
+                
+                } else if (Digital_read(1)==1){
+                    lineBlackLeft++;
+                    __delay_ms(130);
+                
+                }
+                
+                
+                
+                
                 if(ADCC_GetSingleConversion(30)>CNY_black_middle)//si capteur droit == noir
                 {
                     followLineState = 1;
@@ -233,8 +307,84 @@ while (1)
                     followLineState = 2;
                 }
                 break;
+                
+                
+                
+                
+                
+                case 4: // tourner à gauche
+                __delay_ms(100);
+                Speed_Motors(-6,-6);
+                __delay_ms(600);
+                
+                
+                while(ADCC_GetSingleConversion(30)<CNY_black_middle){ //tant qu'il ne detecte pas du noir
+                
+                    Motors(1);
+                    Speed_Motors(-6, -6);
+                }
+                
+                followLineState=3;
+                break;
+                
+                
+                
+                
+                
+                case 5: // tourner à droite
+                __delay_ms(100);
+                Speed_Motors(6, 6);
+                __delay_ms(400);
+                
+                
+                while(ADCC_GetSingleConversion(30)<CNY_black_middle){ //tant qu'il ne detecte pas du noir
+                
+                    Motors(1);
+                    Speed_Motors(6, 6);
+                }
+                
+                followLineState=2;
+                break;
+
+                
         }
-        __delay_ms(50);
+        
+        switch(turnState){
+        
+            case 0:
+                if(lineBlackLeft==3){
+
+                lineBlackLeft = 0;
+                lineBlackRight = 0;
+                lineBlackMiddle = 0;
+                turnState = 1;
+                followLineState = 4;
+                }
+                break;
+                
+            case 1:
+                if(lineBlackRight==2){
+                lineBlackLeft = 0;
+                lineBlackRight = 0;
+                lineBlackMiddle = 0;
+                turnState = 2;
+                followLineState = 4;
+                //Motors(0); while(1){}
+                }
+                break;
+                
+                
+            case 2:
+                if(lineBlackMiddle==3){
+                    Motors(0);
+                }
+                break;
+        
+        
+        }
+        
+
+        
         
         
         
@@ -442,22 +592,25 @@ while (1)
                     while(!BP_selection()){
                         __delay_ms(100);
                     }
+                    
+                    
                     CNY_black_left = CNY_black_left_max - substractNumber;
                     CNY_black_middle = CNY_black_middle_max - substractNumber;
                     CNY_black_right = CNY_black_right_max - substractNumber;
                     
-                    /*DATAEE_WriteByte(1, CNY_black_left);
+                    /*DATAEE_WriteByte(0x10, CNY_black_left_max);
                     __delay_ms(100);
-                    DATAEE_WriteByte(2, CNY_black_middle);
+                    DATAEE_WriteByte(0x20, CNY_black_middle_max);
                     __delay_ms(100);
-                    DATAEE_WriteByte(3, CNY_black_right);
+                    DATAEE_WriteByte(0x30, CNY_black_right_max);
                     __delay_ms(100);*/
+                    
                     Buzzer(1);
-                    gotoLCD(0,0); printLCD("Values saved in");
+                    /*gotoLCD(0,0); printLCD("Values saved in");
                     gotoLCD(1,0); printLCD("the EEPROM ! :) ");
                     for(int i=0;i<10;i++){
                         __delay_ms(100);
-                    }
+                    }*/
                     Buzzer(0);
                     calibMode=0;
                     clearLCD();    

@@ -55,16 +55,16 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _Ecrit_Valeur_selection `(v ~T0 @X0 0 ef1`ui ]
 "43
 [v _BP_selection `(uc ~T0 @X0 0 ef ]
-"32
-[v _LCDvalue16fp `(v ~T0 @X0 0 ef2`ui`uc ]
 "35
 [v _Digital_read `(uc ~T0 @X0 0 ef1`uc ]
-"190 main.c
+"217 main.c
 [c E12088 60 61 62 63 .. ]
 [n E12088 . channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
 "248 mcc_generated_files/adcc.h
 [v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E12088 ]
-"36 commandes.h
+"32 commandes.h
+[v _LCDvalue16fp `(v ~T0 @X0 0 ef2`ui`uc ]
+"36
 [v _LCDvalue_Boolean `(v ~T0 @X0 0 ef1`uc ]
 "33
 [v _LCDvalue_laser_Range `(v ~T0 @X0 0 ef1`ui ]
@@ -11407,1095 +11407,1350 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 39: char mainMenuState=0;
 [e = _mainMenuState -> -> 0 `i `uc ]
 "41
-[v _sensorsOverviewMode `uc ~T0 @X0 1 a ]
-[; ;main.c: 41: char sensorsOverviewMode=0;
-[e = _sensorsOverviewMode -> -> 0 `i `uc ]
+[v _lineBlackRight `uc ~T0 @X0 1 a ]
+[; ;main.c: 41: char lineBlackRight = 0;
+[e = _lineBlackRight -> -> 0 `i `uc ]
 "42
-[v _sensorsOverviewState `uc ~T0 @X0 1 a ]
-[; ;main.c: 42: char sensorsOverviewState=0;
-[e = _sensorsOverviewState -> -> 0 `i `uc ]
+[v _lineBlackLeft `uc ~T0 @X0 1 a ]
+[; ;main.c: 42: char lineBlackLeft = 0;
+[e = _lineBlackLeft -> -> 0 `i `uc ]
+"43
+[v _lineBlackMiddle `uc ~T0 @X0 1 a ]
+[; ;main.c: 43: char lineBlackMiddle = 0;
+[e = _lineBlackMiddle -> -> 0 `i `uc ]
 "44
-[v _calibMode `uc ~T0 @X0 1 a ]
-[; ;main.c: 44: char calibMode =0;
-[e = _calibMode -> -> 0 `i `uc ]
-"45
-[v _calibModeState `uc ~T0 @X0 1 a ]
-[; ;main.c: 45: char calibModeState =0;
-[e = _calibModeState -> -> 0 `i `uc ]
+[v _turnState `uc ~T0 @X0 1 a ]
+[; ;main.c: 44: char turnState=0;
+[e = _turnState -> -> 0 `i `uc ]
+"46
+[v _sensorsOverviewMode `uc ~T0 @X0 1 a ]
+[; ;main.c: 46: char sensorsOverviewMode=0;
+[e = _sensorsOverviewMode -> -> 0 `i `uc ]
 "47
-[v _followLineMode `uc ~T0 @X0 1 a ]
-[; ;main.c: 47: char followLineMode = 0;
-[e = _followLineMode -> -> 0 `i `uc ]
-"48
-[v _followLineState `uc ~T0 @X0 1 a ]
-[; ;main.c: 48: char followLineState =0;
-[e = _followLineState -> -> 0 `i `uc ]
+[v _sensorsOverviewState `uc ~T0 @X0 1 a ]
+[; ;main.c: 47: char sensorsOverviewState=0;
+[e = _sensorsOverviewState -> -> 0 `i `uc ]
+"49
+[v _calibMode `uc ~T0 @X0 1 a ]
+[; ;main.c: 49: char calibMode =0;
+[e = _calibMode -> -> 0 `i `uc ]
 "50
-[v _tempMillis `i ~T0 @X0 1 a ]
-[; ;main.c: 50: int tempMillis=0;
-[e = _tempMillis -> 0 `i ]
-"51
-[v _startMillis `i ~T0 @X0 1 a ]
-[; ;main.c: 51: int startMillis=0;
-[e = _startMillis -> 0 `i ]
-"54
-[v _CNY_black_left_max `i ~T0 @X0 1 a ]
-[; ;main.c: 54: int CNY_black_left_max = 0;
-[e = _CNY_black_left_max -> 0 `i ]
-"55
-[v _CNY_black_middle_max `i ~T0 @X0 1 a ]
-[; ;main.c: 55: int CNY_black_middle_max = 0;
-[e = _CNY_black_middle_max -> 0 `i ]
+[v _calibModeState `uc ~T0 @X0 1 a ]
+[; ;main.c: 50: char calibModeState =0;
+[e = _calibModeState -> -> 0 `i `uc ]
+"52
+[v _followLineMode `uc ~T0 @X0 1 a ]
+[; ;main.c: 52: char followLineMode = 0;
+[e = _followLineMode -> -> 0 `i `uc ]
+"53
+[v _followLineState `uc ~T0 @X0 1 a ]
+[; ;main.c: 53: char followLineState =0;
+[e = _followLineState -> -> 0 `i `uc ]
 "56
-[v _CNY_black_right_max `i ~T0 @X0 1 a ]
-[; ;main.c: 56: int CNY_black_right_max = 0;
-[e = _CNY_black_right_max -> 0 `i ]
-"64
-[v _CNY_black_left `i ~T0 @X0 1 a ]
-[; ;main.c: 64: int CNY_black_left = 0;
-[e = _CNY_black_left -> 0 `i ]
-"65
-[v _CNY_black_middle `i ~T0 @X0 1 a ]
-[; ;main.c: 65: int CNY_black_middle = 0;
-[e = _CNY_black_middle -> 0 `i ]
-"66
-[v _CNY_black_right `i ~T0 @X0 1 a ]
-[; ;main.c: 66: int CNY_black_right = 0;
-[e = _CNY_black_right -> 0 `i ]
+[v _tempMillis `i ~T0 @X0 1 a ]
+[; ;main.c: 56: int tempMillis=0;
+[e = _tempMillis -> 0 `i ]
+"57
+[v _startMillis `i ~T0 @X0 1 a ]
+[; ;main.c: 57: int startMillis=0;
+[e = _startMillis -> 0 `i ]
+"67
+[v _CNY_black_left_max `i ~T0 @X0 1 a ]
 "68
-[v _substractNumber `i ~T0 @X0 1 a ]
-[; ;main.c: 68: int substractNumber = 150;
-[e = _substractNumber -> 150 `i ]
-[; ;main.c: 71: while (1)
+[v _CNY_black_right_max `i ~T0 @X0 1 a ]
+"69
+[v _CNY_black_middle_max `i ~T0 @X0 1 a ]
 "71
-[e :U 1381 ]
-[; ;main.c: 72: {
-"72
-{
-[; ;main.c: 75: if(Valeur_selection() < 0 || Valeur_selection() > 1000){
+[v _substractNumber `i ~T0 @X0 1 a ]
+[; ;main.c: 67: int CNY_black_left_max;
+[; ;main.c: 68: int CNY_black_right_max;
+[; ;main.c: 69: int CNY_black_middle_max;
+[; ;main.c: 71: int substractNumber = 200;
+[e = _substractNumber -> 200 `i ]
+"73
+[v _CNY_black_left `i ~T0 @X0 1 a ]
+[; ;main.c: 73: int CNY_black_left = 0;
+[e = _CNY_black_left -> 0 `i ]
+"74
+[v _CNY_black_middle `i ~T0 @X0 1 a ]
+[; ;main.c: 74: int CNY_black_middle = 0;
+[e = _CNY_black_middle -> 0 `i ]
 "75
+[v _CNY_black_right `i ~T0 @X0 1 a ]
+[; ;main.c: 75: int CNY_black_right = 0;
+[e = _CNY_black_right -> 0 `i ]
+[; ;main.c: 77: while (1)
+"77
+[e :U 1381 ]
+[; ;main.c: 78: {
+"78
+{
+[; ;main.c: 81: if(Valeur_selection() < 0 || Valeur_selection() > 1000){
+"81
 [e $ ! || < ( _Valeur_selection ..  -> -> 0 `i `ui > ( _Valeur_selection ..  -> -> 1000 `i `ui 1383  ]
 {
-[; ;main.c: 76: Ecrit_Valeur_selection(0);
-"76
+[; ;main.c: 82: Ecrit_Valeur_selection(0);
+"82
 [e ( _Ecrit_Valeur_selection (1 -> -> 0 `i `ui ]
-"77
+"83
 }
 [e :U 1383 ]
-[; ;main.c: 77: }
-[; ;main.c: 78: if(Valeur_selection() > 3){
-"78
+[; ;main.c: 83: }
+[; ;main.c: 84: if(Valeur_selection() > 3){
+"84
 [e $ ! > ( _Valeur_selection ..  -> -> 3 `i `ui 1384  ]
 {
-[; ;main.c: 79: Ecrit_Valeur_selection(3);
-"79
+[; ;main.c: 85: Ecrit_Valeur_selection(3);
+"85
 [e ( _Ecrit_Valeur_selection (1 -> -> 3 `i `ui ]
-"80
+"86
 }
 [e :U 1384 ]
-[; ;main.c: 80: }
-[; ;main.c: 81: mainMenuState=Valeur_selection();
-"81
+[; ;main.c: 86: }
+[; ;main.c: 87: mainMenuState=Valeur_selection();
+"87
 [e = _mainMenuState -> ( _Valeur_selection ..  `uc ]
-[; ;main.c: 84: switch(mainMenuState){
-"84
+[; ;main.c: 90: switch(mainMenuState){
+"90
 [e $U 1386  ]
 {
-[; ;main.c: 85: case 0:
-"85
+[; ;main.c: 91: case 0:
+"91
 [e :U 1387 ]
-[; ;main.c: 86: gotoLCD(0,0); printLCD(">Follow a Line  ");
-"86
+[; ;main.c: 92: gotoLCD(0,0); printLCD(">Follow a Line  ");
+"92
 [e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 2C `*uc ]
-[; ;main.c: 87: gotoLCD(1,0); printLCD(" Sensors Review ");
-"87
+[; ;main.c: 93: gotoLCD(1,0); printLCD(" Sensors Review ");
+"93
 [e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 3C `*uc ]
-[; ;main.c: 89: if(!BP_selection()){
-"89
+[; ;main.c: 95: if(!BP_selection()){
+"95
 [e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1388  ]
 {
-[; ;main.c: 90: followLineMode=1;
-"90
+[; ;main.c: 96: followLineMode=1;
+"96
 [e = _followLineMode -> -> 1 `i `uc ]
-[; ;main.c: 91: while(!BP_selection()){
-"91
+[; ;main.c: 97: while(!BP_selection()){
+"97
 [e $U 1389  ]
 [e :U 1390 ]
 {
-[; ;main.c: 92: _delay((unsigned long)((100)*(64000000/4000.0)));
-"92
+[; ;main.c: 98: _delay((unsigned long)((100)*(64000000/4000.0)));
+"98
 [e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"93
+"99
 }
 [e :U 1389 ]
-"91
+"97
 [e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1390  ]
 [e :U 1391 ]
-[; ;main.c: 93: }
-[; ;main.c: 94: followLineState=0;
-"94
-[e = _followLineState -> -> 0 `i `uc ]
-[; ;main.c: 95: clearLCD();
-"95
+[; ;main.c: 99: }
+[; ;main.c: 100: lineBlackRight = 0;
+"100
+[e = _lineBlackRight -> -> 0 `i `uc ]
+[; ;main.c: 101: lineBlackLeft = 0;
+"101
+[e = _lineBlackLeft -> -> 0 `i `uc ]
+[; ;main.c: 102: lineBlackMiddle = 0;
+"102
+[e = _lineBlackMiddle -> -> 0 `i `uc ]
+[; ;main.c: 103: turnState = 0;
+"103
+[e = _turnState -> -> 0 `i `uc ]
+[; ;main.c: 104: clearLCD();
+"104
 [e ( _clearLCD ..  ]
-"96
+"105
 }
 [e :U 1388 ]
-[; ;main.c: 96: }
-[; ;main.c: 97: break;
-"97
+[; ;main.c: 105: }
+[; ;main.c: 106: break;
+"106
 [e $U 1385  ]
-[; ;main.c: 99: case 1:
-"99
+[; ;main.c: 108: case 1:
+"108
 [e :U 1392 ]
-[; ;main.c: 100: gotoLCD(0,0); printLCD(" Follow a Line  ");
-"100
+[; ;main.c: 109: gotoLCD(0,0); printLCD(" Follow a Line  ");
+"109
 [e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 4C `*uc ]
-[; ;main.c: 101: gotoLCD(1,0); printLCD(">Sensors Review ");
-"101
+[; ;main.c: 110: gotoLCD(1,0); printLCD(">Sensors Review ");
+"110
 [e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 5C `*uc ]
-[; ;main.c: 103: if(!BP_selection()){
-"103
+[; ;main.c: 112: if(!BP_selection()){
+"112
 [e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1393  ]
 {
-[; ;main.c: 104: sensorsOverviewMode=1;
-"104
+[; ;main.c: 113: sensorsOverviewMode=1;
+"113
 [e = _sensorsOverviewMode -> -> 1 `i `uc ]
-[; ;main.c: 105: while(!BP_selection()){
-"105
+[; ;main.c: 114: while(!BP_selection()){
+"114
 [e $U 1394  ]
 [e :U 1395 ]
 {
-[; ;main.c: 106: _delay((unsigned long)((100)*(64000000/4000.0)));
-"106
+[; ;main.c: 115: _delay((unsigned long)((100)*(64000000/4000.0)));
+"115
 [e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"107
+"116
 }
 [e :U 1394 ]
-"105
+"114
 [e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1395  ]
 [e :U 1396 ]
-[; ;main.c: 107: }
-[; ;main.c: 108: Ecrit_Valeur_selection(0);
-"108
+[; ;main.c: 116: }
+[; ;main.c: 117: Ecrit_Valeur_selection(0);
+"117
 [e ( _Ecrit_Valeur_selection (1 -> -> 0 `i `ui ]
-[; ;main.c: 109: clearLCD();
-"109
+[; ;main.c: 118: clearLCD();
+"118
 [e ( _clearLCD ..  ]
-"110
+"119
 }
 [e :U 1393 ]
-[; ;main.c: 110: }
-[; ;main.c: 112: break;
-"112
+[; ;main.c: 119: }
+[; ;main.c: 121: break;
+"121
 [e $U 1385  ]
-[; ;main.c: 114: case 2:
-"114
+[; ;main.c: 123: case 2:
+"123
 [e :U 1397 ]
-[; ;main.c: 115: gotoLCD(0,0); printLCD(">Calib. Mode    ");
-"115
+[; ;main.c: 124: gotoLCD(0,0); printLCD(">Calib. Mode    ");
+"124
 [e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 6C `*uc ]
-[; ;main.c: 116: gotoLCD(1,0); printLCD(" 4              ");
-"116
+[; ;main.c: 125: gotoLCD(1,0); printLCD(" 4              ");
+"125
 [e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 7C `*uc ]
-[; ;main.c: 117: if(!BP_selection()){
-"117
+[; ;main.c: 126: if(!BP_selection()){
+"126
 [e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1398  ]
 {
-[; ;main.c: 118: calibModeState=0;
-"118
+[; ;main.c: 127: calibModeState=0;
+"127
 [e = _calibModeState -> -> 0 `i `uc ]
-[; ;main.c: 119: while(!BP_selection()){
-"119
+[; ;main.c: 128: while(!BP_selection()){
+"128
 [e $U 1399  ]
 [e :U 1400 ]
 {
-[; ;main.c: 120: _delay((unsigned long)((100)*(64000000/4000.0)));
-"120
+[; ;main.c: 129: _delay((unsigned long)((100)*(64000000/4000.0)));
+"129
 [e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"121
+"130
 }
 [e :U 1399 ]
-"119
+"128
 [e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1400  ]
 [e :U 1401 ]
-[; ;main.c: 121: }
-[; ;main.c: 122: calibMode=1;
-"122
+[; ;main.c: 130: }
+[; ;main.c: 131: calibMode=1;
+"131
 [e = _calibMode -> -> 1 `i `uc ]
-[; ;main.c: 123: calibModeState=0;
-"123
+[; ;main.c: 132: calibModeState=0;
+"132
 [e = _calibModeState -> -> 0 `i `uc ]
-[; ;main.c: 124: clearLCD();
-"124
+[; ;main.c: 133: clearLCD();
+"133
 [e ( _clearLCD ..  ]
-"125
+"134
 }
 [e :U 1398 ]
-[; ;main.c: 125: }
-[; ;main.c: 126: break;
-"126
+[; ;main.c: 134: }
+[; ;main.c: 135: break;
+"135
 [e $U 1385  ]
-[; ;main.c: 127: case 3:
-"127
+[; ;main.c: 136: case 3:
+"136
 [e :U 1402 ]
-[; ;main.c: 128: gotoLCD(0,0); printLCD(" Calib. Mode    ");
-"128
+[; ;main.c: 137: gotoLCD(0,0); printLCD(" Calib. Mode    ");
+"137
 [e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 8C `*uc ]
-[; ;main.c: 129: gotoLCD(1,0); printLCD(">4              ");
-"129
+[; ;main.c: 138: gotoLCD(1,0); printLCD(">4              ");
+"138
 [e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
 [e ( _printLCD (1 -> :s 9C `*uc ]
-[; ;main.c: 130: break;
-"130
+[; ;main.c: 139: break;
+"139
 [e $U 1385  ]
-"131
+"140
 }
-[; ;main.c: 131: }
+[; ;main.c: 140: }
 [e $U 1385  ]
-"84
+"90
 [e :U 1386 ]
 [e [\ _mainMenuState , $ -> -> 0 `i `uc 1387
  , $ -> -> 1 `i `uc 1392
  , $ -> -> 2 `i `uc 1397
  , $ -> -> 3 `i `uc 1402
  1385 ]
-"131
+"140
 [e :U 1385 ]
-[; ;main.c: 154: while(followLineMode==1){
-"154
+[; ;main.c: 164: while(followLineMode==1){
+"164
 [e $U 1403  ]
 [e :U 1404 ]
 {
-[; ;main.c: 155: gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
-"155
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_left_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 156: gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
-"156
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_middle_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 157: gotoLCD(1,5); printLCD(" ");
-"157
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
-[e ( _printLCD (1 -> :s 10C `*uc ]
-[; ;main.c: 158: gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
-"158
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_right_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 159: gotoLCD(1,11); printLCD(" ");
-"159
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
-[e ( _printLCD (1 -> :s 11C `*uc ]
-[; ;main.c: 161: if(!BP_selection()){
-"161
+[; ;main.c: 166: if(!BP_selection()){
+"166
 [e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1406  ]
 {
-[; ;main.c: 162: followLineMode = 0;
-"162
+[; ;main.c: 167: followLineMode = 0;
+"167
 [e = _followLineMode -> -> 0 `i `uc ]
-[; ;main.c: 163: followLineState = 0;
-"163
+[; ;main.c: 168: followLineState = 0;
+"168
 [e = _followLineState -> -> 0 `i `uc ]
-[; ;main.c: 164: while(!BP_selection()){
-"164
+[; ;main.c: 169: while(!BP_selection()){
+"169
 [e $U 1407  ]
 [e :U 1408 ]
 {
-[; ;main.c: 165: _delay((unsigned long)((100)*(64000000/4000.0)));
-"165
+[; ;main.c: 170: _delay((unsigned long)((100)*(64000000/4000.0)));
+"170
 [e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"167
+"172
 }
 [e :U 1407 ]
-"164
+"169
 [e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1408  ]
 [e :U 1409 ]
-[; ;main.c: 167: }
-[; ;main.c: 168: clearLCD();
-"168
+[; ;main.c: 172: }
+[; ;main.c: 173: clearLCD();
+"173
 [e ( _clearLCD ..  ]
-[; ;main.c: 169: Ecrit_Valeur_selection(0);
-"169
+[; ;main.c: 174: Ecrit_Valeur_selection(0);
+"174
 [e ( _Ecrit_Valeur_selection (1 -> -> 0 `i `ui ]
-"170
+"175
 }
 [e :U 1406 ]
-[; ;main.c: 170: }
-[; ;main.c: 172: switch(followLineState){
-"172
+[; ;main.c: 175: }
+[; ;main.c: 177: switch(followLineState){
+"177
 [e $U 1411  ]
 {
-[; ;main.c: 174: case 0:
-"174
+[; ;main.c: 179: case 0:
+"179
 [e :U 1412 ]
-[; ;main.c: 175: Speed_Motors(0, 0);
-"175
+[; ;main.c: 180: Speed_Motors(0, 0);
+"180
 [e ( _Speed_Motors (2 , -> 0 `i -> 0 `i ]
-[; ;main.c: 177: if(Digital_read(2)){
-"177
+[; ;main.c: 182: if(Digital_read(2)){
+"182
 [e $ ! != -> ( _Digital_read (1 -> -> 2 `i `uc `i -> -> -> 0 `i `uc `i 1413  ]
 {
-[; ;main.c: 178: followLineState = 1;
-"178
-[e = _followLineState -> -> 1 `i `uc ]
-[; ;main.c: 179: Buzzer(1);
-"179
-[e ( _Buzzer (1 -> -> 1 `i `uc ]
-[; ;main.c: 180: _delay((unsigned long)((100)*(64000000/4000.0)));
-"180
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 181: Buzzer(0);
-"181
-[e ( _Buzzer (1 -> -> 0 `i `uc ]
+[; ;main.c: 183: followLineState = 1;
 "183
+[e = _followLineState -> -> 1 `i `uc ]
+[; ;main.c: 184: Buzzer(1);
+"184
+[e ( _Buzzer (1 -> -> 1 `i `uc ]
+[; ;main.c: 185: _delay((unsigned long)((100)*(64000000/4000.0)));
+"185
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 186: Buzzer(0);
+"186
+[e ( _Buzzer (1 -> -> 0 `i `uc ]
+"188
 }
 [e :U 1413 ]
-[; ;main.c: 183: }
-[; ;main.c: 184: break;
-"184
-[e $U 1410  ]
-[; ;main.c: 186: case 1:
-"186
-[e :U 1414 ]
-[; ;main.c: 188: Motors(1);
-"188
-[e ( _Motors (1 -> -> 1 `i `uc ]
-[; ;main.c: 189: Speed_Motors(4, -4);
+[; ;main.c: 188: }
+[; ;main.c: 189: break;
 "189
-[e ( _Speed_Motors (2 , -> 4 `i -U -> 4 `i ]
-[; ;main.c: 190: if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)
-"190
-[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 -> _CNY_black_left `ui < ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1415  ]
-[; ;main.c: 191: {
-"191
-{
-[; ;main.c: 192: followLineState = 2;
-"192
-[e = _followLineState -> -> 2 `i `uc ]
-"193
-}
-[; ;main.c: 193: }
-[e $U 1416  ]
-"194
-[e :U 1415 ]
-[; ;main.c: 194: else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle)
-[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 -> _CNY_black_right `ui < ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1417  ]
-[; ;main.c: 195: {
-"195
-{
-[; ;main.c: 196: followLineState = 3;
-"196
-[e = _followLineState -> -> 3 `i `uc ]
-"197
-}
-[e :U 1417 ]
-"207
-[e :U 1416 ]
-[; ;main.c: 197: }
-[; ;main.c: 207: break;
 [e $U 1410  ]
-[; ;main.c: 210: case 2:
-"210
-[e :U 1418 ]
-[; ;main.c: 212: Motors(1);
-"212
+[; ;main.c: 191: case 1:
+"191
+[e :U 1414 ]
+[; ;main.c: 193: Motors(1);
+"193
 [e ( _Motors (1 -> -> 1 `i `uc ]
-[; ;main.c: 213: Speed_Motors(4, 0);
-"213
-[e ( _Speed_Motors (2 , -> 4 `i -> 0 `i ]
-[; ;main.c: 214: if(ADCC_GetSingleConversion(30)>CNY_black_middle)
-"214
-[e $ ! > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1419  ]
-[; ;main.c: 215: {
-"215
+[; ;main.c: 194: Speed_Motors(8, -8);
+"194
+[e ( _Speed_Motors (2 , -> 8 `i -U -> 8 `i ]
+[; ;main.c: 199: if(Digital_read(0)==1&&Digital_read(1)==1){
+"199
+[e $ ! && == -> ( _Digital_read (1 -> -> 0 `i `uc `i -> 1 `i == -> ( _Digital_read (1 -> -> 1 `i `uc `i -> 1 `i 1415  ]
 {
-[; ;main.c: 216: followLineState = 1;
-"216
-[e = _followLineState -> -> 1 `i `uc ]
-"217
+[; ;main.c: 200: lineBlackMiddle++;
+"200
+[e ++ _lineBlackMiddle -> -> 1 `i `uc ]
+[; ;main.c: 201: _delay((unsigned long)((130)*(64000000/4000.0)));
+"201
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"203
 }
-[; ;main.c: 217: } else if (ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)>CNY_black_middle)
-[e $U 1420  ]
+[; ;main.c: 203: } else if(Digital_read(0)==1){
+[e $U 1416  ]
+[e :U 1415 ]
+[e $ ! == -> ( _Digital_read (1 -> -> 0 `i `uc `i -> 1 `i 1417  ]
+{
+[; ;main.c: 204: lineBlackRight++;
+"204
+[e ++ _lineBlackRight -> -> 1 `i `uc ]
+[; ;main.c: 205: _delay((unsigned long)((130)*(64000000/4000.0)));
+"205
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"207
+}
+[; ;main.c: 207: } else if (Digital_read(1)==1){
+[e $U 1418  ]
+[e :U 1417 ]
+[e $ ! == -> ( _Digital_read (1 -> -> 1 `i `uc `i -> 1 `i 1419  ]
+{
+[; ;main.c: 208: lineBlackLeft++;
+"208
+[e ++ _lineBlackLeft -> -> 1 `i `uc ]
+[; ;main.c: 209: _delay((unsigned long)((130)*(64000000/4000.0)));
+"209
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"211
+}
 [e :U 1419 ]
-[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 -> _CNY_black_right `ui > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1421  ]
+"217
+[e :U 1418 ]
+[e :U 1416 ]
+[; ;main.c: 211: }
+[; ;main.c: 217: if (ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)
+[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 -> _CNY_black_left `ui < ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1420  ]
 [; ;main.c: 218: {
 "218
 {
-[; ;main.c: 219: followLineState = 3;
+[; ;main.c: 219: followLineState = 2;
 "219
-[e = _followLineState -> -> 3 `i `uc ]
+[e = _followLineState -> -> 2 `i `uc ]
 "220
 }
-[e :U 1421 ]
-"221
+[; ;main.c: 220: }else if(ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)<CNY_black_middle)
+[e $U 1421  ]
 [e :U 1420 ]
-[; ;main.c: 220: }
-[; ;main.c: 221: break;
-[e $U 1410  ]
-[; ;main.c: 224: case 3:
-"224
+[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 -> _CNY_black_right `ui < ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1422  ]
+[; ;main.c: 221: {
+"221
+{
+[; ;main.c: 222: followLineState = 3;
+"222
+[e = _followLineState -> -> 3 `i `uc ]
+"223
+}
 [e :U 1422 ]
-[; ;main.c: 225: Motors(1);
-"225
-[e ( _Motors (1 -> -> 1 `i `uc ]
-[; ;main.c: 226: Speed_Motors(0, -4);
-"226
-[e ( _Speed_Motors (2 , -> 0 `i -U -> 4 `i ]
-[; ;main.c: 227: if(ADCC_GetSingleConversion(30)>CNY_black_middle)
-"227
-[e $ ! > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1423  ]
-[; ;main.c: 228: {
-"228
-{
-[; ;main.c: 229: followLineState = 1;
-"229
-[e = _followLineState -> -> 1 `i `uc ]
-"230
-}
-[; ;main.c: 230: }
-[e $U 1424  ]
-"231
-[e :U 1423 ]
-[; ;main.c: 231: else if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)>CNY_black_middle)
-[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 -> _CNY_black_left `ui > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1425  ]
-[; ;main.c: 232: {
-"232
-{
-[; ;main.c: 233: followLineState = 2;
-"233
-[e = _followLineState -> -> 2 `i `uc ]
 "234
-}
-[e :U 1425 ]
-"235
-[e :U 1424 ]
-[; ;main.c: 234: }
-[; ;main.c: 235: break;
+[e :U 1421 ]
+[; ;main.c: 223: }
+[; ;main.c: 234: break;
 [e $U 1410  ]
-"236
-}
-[; ;main.c: 236: }
-[e $U 1410  ]
-"172
-[e :U 1411 ]
-[e [\ _followLineState , $ -> -> 0 `i `uc 1412
- , $ -> -> 1 `i `uc 1414
- , $ -> -> 2 `i `uc 1418
- , $ -> -> 3 `i `uc 1422
- 1410 ]
-"236
-[e :U 1410 ]
-[; ;main.c: 237: _delay((unsigned long)((50)*(64000000/4000.0)));
+[; ;main.c: 237: case 2:
 "237
-[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"270
+[e :U 1423 ]
+[; ;main.c: 239: Motors(1);
+"239
+[e ( _Motors (1 -> -> 1 `i `uc ]
+[; ;main.c: 240: Speed_Motors(8, 0);
+"240
+[e ( _Speed_Motors (2 , -> 8 `i -> 0 `i ]
+[; ;main.c: 245: if(Digital_read(0)==1&&Digital_read(1)==1){
+"245
+[e $ ! && == -> ( _Digital_read (1 -> -> 0 `i `uc `i -> 1 `i == -> ( _Digital_read (1 -> -> 1 `i `uc `i -> 1 `i 1424  ]
+{
+[; ;main.c: 246: lineBlackMiddle++;
+"246
+[e ++ _lineBlackMiddle -> -> 1 `i `uc ]
+[; ;main.c: 247: _delay((unsigned long)((130)*(64000000/4000.0)));
+"247
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"249
 }
-[e :U 1403 ]
-"154
-[e $ == -> _followLineMode `i -> 1 `i 1404  ]
-[e :U 1405 ]
-[; ;main.c: 270: }
-[; ;main.c: 293: while(sensorsOverviewMode==1){
-"293
-[e $U 1426  ]
+[; ;main.c: 249: } else if(Digital_read(0)==1){
+[e $U 1425  ]
+[e :U 1424 ]
+[e $ ! == -> ( _Digital_read (1 -> -> 0 `i `uc `i -> 1 `i 1426  ]
+{
+[; ;main.c: 250: lineBlackRight++;
+"250
+[e ++ _lineBlackRight -> -> 1 `i `uc ]
+[; ;main.c: 251: _delay((unsigned long)((130)*(64000000/4000.0)));
+"251
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"253
+}
+[; ;main.c: 253: } else if (Digital_read(1)==1){
+[e $U 1427  ]
+[e :U 1426 ]
+[e $ ! == -> ( _Digital_read (1 -> -> 1 `i `uc `i -> 1 `i 1428  ]
+{
+[; ;main.c: 254: lineBlackLeft++;
+"254
+[e ++ _lineBlackLeft -> -> 1 `i `uc ]
+[; ;main.c: 255: _delay((unsigned long)((130)*(64000000/4000.0)));
+"255
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"257
+}
+[e :U 1428 ]
+"263
 [e :U 1427 ]
+[e :U 1425 ]
+[; ;main.c: 257: }
+[; ;main.c: 263: if(ADCC_GetSingleConversion(30)>CNY_black_middle)
+[e $ ! > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1429  ]
+[; ;main.c: 264: {
+"264
 {
-[; ;main.c: 295: if(Valeur_selection() < 0 || Valeur_selection() > 1000){
-"295
-[e $ ! || < ( _Valeur_selection ..  -> -> 0 `i `ui > ( _Valeur_selection ..  -> -> 1000 `i `ui 1429  ]
-{
-[; ;main.c: 296: Ecrit_Valeur_selection(0);
-"296
-[e ( _Ecrit_Valeur_selection (1 -> -> 0 `i `ui ]
-"297
+[; ;main.c: 265: followLineState = 1;
+"265
+[e = _followLineState -> -> 1 `i `uc ]
+"266
 }
+[; ;main.c: 266: } else if (ADCC_GetSingleConversion(29)<CNY_black_right && ADCC_GetSingleConversion(30)>CNY_black_middle)
+[e $U 1430  ]
 [e :U 1429 ]
-[; ;main.c: 297: }
-[; ;main.c: 298: if(Valeur_selection() > 3){
-"298
-[e $ ! > ( _Valeur_selection ..  -> -> 3 `i `ui 1430  ]
+[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 -> _CNY_black_right `ui > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1431  ]
+[; ;main.c: 267: {
+"267
 {
-[; ;main.c: 299: Ecrit_Valeur_selection(3);
-"299
-[e ( _Ecrit_Valeur_selection (1 -> -> 3 `i `ui ]
-"300
-}
-[e :U 1430 ]
-[; ;main.c: 300: }
-[; ;main.c: 301: if(sensorsOverviewState!=Valeur_selection()){
-"301
-[e $ ! != -> _sensorsOverviewState `ui ( _Valeur_selection ..  1431  ]
-{
-[; ;main.c: 302: sensorsOverviewState=Valeur_selection();
-"302
-[e = _sensorsOverviewState -> ( _Valeur_selection ..  `uc ]
-[; ;main.c: 303: clearLCD();
-"303
-[e ( _clearLCD ..  ]
-"304
+[; ;main.c: 268: followLineState = 3;
+"268
+[e = _followLineState -> -> 3 `i `uc ]
+"269
 }
 [e :U 1431 ]
-[; ;main.c: 304: }
-[; ;main.c: 306: switch(sensorsOverviewState){
-"306
-[e $U 1433  ]
-{
-[; ;main.c: 307: case 0:
-"307
-[e :U 1434 ]
-[; ;main.c: 309: gotoLCD(0,0); printLCD("CNY Sensors  1-4");
-"309
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 12C `*uc ]
-[; ;main.c: 310: gotoLCD(1,3); LCDvalue16fp(ADCC_GetSingleConversion(31), 0);
-"310
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
-[e ( _LCDvalue16fp (2 , ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 -> -> 0 `i `uc ]
-[; ;main.c: 311: gotoLCD(1,9); LCDvalue16fp(ADCC_GetSingleConversion(30), 0);
-"311
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
-[e ( _LCDvalue16fp (2 , ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> -> 0 `i `uc ]
-[; ;main.c: 312: gotoLCD(1,15); LCDvalue16fp(ADCC_GetSingleConversion(29), 0);
-"312
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
-[e ( _LCDvalue16fp (2 , ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 -> -> 0 `i `uc ]
-[; ;main.c: 313: gotoLCD(1,11); printLCD(" ");
-"313
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
-[e ( _printLCD (1 -> :s 13C `*uc ]
-[; ;main.c: 314: gotoLCD(1,5); printLCD(" ");
-"314
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
-[e ( _printLCD (1 -> :s 14C `*uc ]
-[; ;main.c: 315: break;
-"315
-[e $U 1432  ]
-[; ;main.c: 317: case 1:
-"317
-[e :U 1435 ]
-[; ;main.c: 319: gotoLCD(0,0); printLCD("CNY Boolean  2-4");
-"319
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 15C `*uc ]
-[; ;main.c: 320: gotoLCD(1,0); printLCD("left:");
-"320
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 16C `*uc ]
-[; ;main.c: 321: gotoLCD(1,5); LCDvalue_Boolean(Digital_read(1));
-"321
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
-[e ( _LCDvalue_Boolean (1 ( _Digital_read (1 -> -> 1 `i `uc ]
-[; ;main.c: 322: gotoLCD(1,9); printLCD("right:");
-"322
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
-[e ( _printLCD (1 -> :s 17C `*uc ]
-[; ;main.c: 323: gotoLCD(1,15); LCDvalue_Boolean(Digital_read(0));
-"323
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
-[e ( _LCDvalue_Boolean (1 ( _Digital_read (1 -> -> 0 `i `uc ]
-[; ;main.c: 324: break;
-"324
-[e $U 1432  ]
-[; ;main.c: 326: case 2:
-"326
-[e :U 1436 ]
-[; ;main.c: 328: gotoLCD(0,0); printLCD("Laser Sensor 3-4");
-"328
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 18C `*uc ]
-[; ;main.c: 329: gotoLCD(1,2); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(0));
-"329
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 2 `i `uc ]
-[e ( _LCDvalue_laser_Range (1 ( _VL53L0X_Read_Distance_No_Wait (1 -> -> 0 `i `uc ]
-[; ;main.c: 330: _delay((unsigned long)((50)*(64000000/4000.0)));
-"330
-[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 331: gotoLCD(1,7); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(1));
-"331
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 7 `i `uc ]
-[e ( _LCDvalue_laser_Range (1 ( _VL53L0X_Read_Distance_No_Wait (1 -> -> 1 `i `uc ]
-[; ;main.c: 332: _delay((unsigned long)((50)*(64000000/4000.0)));
-"332
-[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 333: gotoLCD(1,12); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(2));
-"333
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 12 `i `uc ]
-[e ( _LCDvalue_laser_Range (1 ( _VL53L0X_Read_Distance_No_Wait (1 -> -> 2 `i `uc ]
-[; ;main.c: 334: gotoLCD(1,14); printLCD("mm");
-"334
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 14 `i `uc ]
-[e ( _printLCD (1 -> :s 19C `*uc ]
-[; ;main.c: 335: break;
-"335
-[e $U 1432  ]
-[; ;main.c: 337: case 3:
-"337
-[e :U 1437 ]
-[; ;main.c: 339: gotoLCD(0,0); printLCD("Microphone   4-4");
-"339
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 20C `*uc ]
-[; ;main.c: 341: if(Digital_read(2)){
-"341
-[e $ ! != -> ( _Digital_read (1 -> -> 2 `i `uc `i -> -> -> 0 `i `uc `i 1438  ]
-{
-[; ;main.c: 342: gotoLCD(1,4); printLCD("True  :)");
-"342
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 4 `i `uc ]
-[e ( _printLCD (1 -> :s 21C `*uc ]
-[; ;main.c: 343: Buzzer(1);
-"343
-[e ( _Buzzer (1 -> -> 1 `i `uc ]
-[; ;main.c: 344: _delay((unsigned long)((100)*(64000000/4000.0)));
-"344
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 345: Buzzer(0);
-"345
-[e ( _Buzzer (1 -> -> 0 `i `uc ]
-"347
-}
-[; ;main.c: 347: } else {
-[e $U 1439  ]
-[e :U 1438 ]
-{
-[; ;main.c: 348: gotoLCD(1,4); printLCD("False :(");
-"348
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 4 `i `uc ]
-[e ( _printLCD (1 -> :s 22C `*uc ]
-"349
-}
-[e :U 1439 ]
-[; ;main.c: 349: }
-[; ;main.c: 350: break;
-"350
-[e $U 1432  ]
-[; ;main.c: 351: case 4:
-"351
-[e :U 1440 ]
-[; ;main.c: 352: break;
-"352
-[e $U 1432  ]
-"353
-}
-[; ;main.c: 353: }
-[e $U 1432  ]
-"306
-[e :U 1433 ]
-[e [\ _sensorsOverviewState , $ -> -> 0 `i `uc 1434
- , $ -> -> 1 `i `uc 1435
- , $ -> -> 2 `i `uc 1436
- , $ -> -> 3 `i `uc 1437
- , $ -> -> 4 `i `uc 1440
- 1432 ]
-"353
+"270
+[e :U 1430 ]
+[; ;main.c: 269: }
+[; ;main.c: 270: break;
+[e $U 1410  ]
+[; ;main.c: 276: case 3:
+"276
 [e :U 1432 ]
-[; ;main.c: 355: if(!BP_selection()){
-"355
-[e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1441  ]
+[; ;main.c: 277: Motors(1);
+"277
+[e ( _Motors (1 -> -> 1 `i `uc ]
+[; ;main.c: 278: Speed_Motors(0, -8);
+"278
+[e ( _Speed_Motors (2 , -> 0 `i -U -> 8 `i ]
+[; ;main.c: 284: if(Digital_read(0)==1&&Digital_read(1)==1){
+"284
+[e $ ! && == -> ( _Digital_read (1 -> -> 0 `i `uc `i -> 1 `i == -> ( _Digital_read (1 -> -> 1 `i `uc `i -> 1 `i 1433  ]
 {
-[; ;main.c: 356: sensorsOverviewMode=0;
-"356
-[e = _sensorsOverviewMode -> -> 0 `i `uc ]
-[; ;main.c: 357: while(!BP_selection()){
-"357
+[; ;main.c: 285: lineBlackMiddle++;
+"285
+[e ++ _lineBlackMiddle -> -> 1 `i `uc ]
+[; ;main.c: 286: _delay((unsigned long)((130)*(64000000/4000.0)));
+"286
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"288
+}
+[; ;main.c: 288: } else if(Digital_read(0)==1){
+[e $U 1434  ]
+[e :U 1433 ]
+[e $ ! == -> ( _Digital_read (1 -> -> 0 `i `uc `i -> 1 `i 1435  ]
+{
+[; ;main.c: 289: lineBlackRight++;
+"289
+[e ++ _lineBlackRight -> -> 1 `i `uc ]
+[; ;main.c: 290: _delay((unsigned long)((130)*(64000000/4000.0)));
+"290
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"292
+}
+[; ;main.c: 292: } else if (Digital_read(1)==1){
+[e $U 1436  ]
+[e :U 1435 ]
+[e $ ! == -> ( _Digital_read (1 -> -> 1 `i `uc `i -> 1 `i 1437  ]
+{
+[; ;main.c: 293: lineBlackLeft++;
+"293
+[e ++ _lineBlackLeft -> -> 1 `i `uc ]
+[; ;main.c: 294: _delay((unsigned long)((130)*(64000000/4000.0)));
+"294
+[e ( __delay (1 -> * -> -> 130 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"296
+}
+[e :U 1437 ]
+"301
+[e :U 1436 ]
+[e :U 1434 ]
+[; ;main.c: 296: }
+[; ;main.c: 301: if(ADCC_GetSingleConversion(30)>CNY_black_middle)
+[e $ ! > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1438  ]
+[; ;main.c: 302: {
+"302
+{
+[; ;main.c: 303: followLineState = 1;
+"303
+[e = _followLineState -> -> 1 `i `uc ]
+"304
+}
+[; ;main.c: 304: }
+[e $U 1439  ]
+"305
+[e :U 1438 ]
+[; ;main.c: 305: else if(ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)>CNY_black_middle)
+[e $ ! && < ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 -> _CNY_black_left `ui > ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1440  ]
+[; ;main.c: 306: {
+"306
+{
+[; ;main.c: 307: followLineState = 2;
+"307
+[e = _followLineState -> -> 2 `i `uc ]
+"308
+}
+[e :U 1440 ]
+"309
+[e :U 1439 ]
+[; ;main.c: 308: }
+[; ;main.c: 309: break;
+[e $U 1410  ]
+[; ;main.c: 315: case 4:
+"315
+[e :U 1441 ]
+[; ;main.c: 316: _delay((unsigned long)((100)*(64000000/4000.0)));
+"316
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 317: Speed_Motors(-6,-6);
+"317
+[e ( _Speed_Motors (2 , -U -> 6 `i -U -> 6 `i ]
+[; ;main.c: 318: _delay((unsigned long)((600)*(64000000/4000.0)));
+"318
+[e ( __delay (1 -> * -> -> 600 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 321: while(ADCC_GetSingleConversion(30)<CNY_black_middle){
+"321
 [e $U 1442  ]
 [e :U 1443 ]
 {
-[; ;main.c: 358: _delay((unsigned long)((100)*(64000000/4000.0)));
-"358
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"359
+[; ;main.c: 323: Motors(1);
+"323
+[e ( _Motors (1 -> -> 1 `i `uc ]
+[; ;main.c: 324: Speed_Motors(-6, -6);
+"324
+[e ( _Speed_Motors (2 , -U -> 6 `i -U -> 6 `i ]
+"325
 }
 [e :U 1442 ]
-"357
-[e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1443  ]
+"321
+[e $ < ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1443  ]
 [e :U 1444 ]
-[; ;main.c: 359: }
-[; ;main.c: 360: Ecrit_Valeur_selection(mainMenuState);
+[; ;main.c: 325: }
+[; ;main.c: 327: followLineState=3;
+"327
+[e = _followLineState -> -> 3 `i `uc ]
+[; ;main.c: 328: break;
+"328
+[e $U 1410  ]
+[; ;main.c: 334: case 5:
+"334
+[e :U 1445 ]
+[; ;main.c: 335: _delay((unsigned long)((100)*(64000000/4000.0)));
+"335
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 336: Speed_Motors(6, 6);
+"336
+[e ( _Speed_Motors (2 , -> 6 `i -> 6 `i ]
+[; ;main.c: 337: _delay((unsigned long)((400)*(64000000/4000.0)));
+"337
+[e ( __delay (1 -> * -> -> 400 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 340: while(ADCC_GetSingleConversion(30)<CNY_black_middle){
+"340
+[e $U 1446  ]
+[e :U 1447 ]
+{
+[; ;main.c: 342: Motors(1);
+"342
+[e ( _Motors (1 -> -> 1 `i `uc ]
+[; ;main.c: 343: Speed_Motors(6, 6);
+"343
+[e ( _Speed_Motors (2 , -> 6 `i -> 6 `i ]
+"344
+}
+[e :U 1446 ]
+"340
+[e $ < ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> _CNY_black_middle `ui 1447  ]
+[e :U 1448 ]
+[; ;main.c: 344: }
+[; ;main.c: 346: followLineState=2;
+"346
+[e = _followLineState -> -> 2 `i `uc ]
+[; ;main.c: 347: break;
+"347
+[e $U 1410  ]
+"350
+}
+[; ;main.c: 350: }
+[e $U 1410  ]
+"177
+[e :U 1411 ]
+[e [\ _followLineState , $ -> -> 0 `i `uc 1412
+ , $ -> -> 1 `i `uc 1414
+ , $ -> -> 2 `i `uc 1423
+ , $ -> -> 3 `i `uc 1432
+ , $ -> -> 4 `i `uc 1441
+ , $ -> -> 5 `i `uc 1445
+ 1410 ]
+"350
+[e :U 1410 ]
+[; ;main.c: 352: switch(turnState){
+"352
+[e $U 1450  ]
+{
+[; ;main.c: 354: case 0:
+"354
+[e :U 1451 ]
+[; ;main.c: 355: if(lineBlackLeft==3){
+"355
+[e $ ! == -> _lineBlackLeft `i -> 3 `i 1452  ]
+{
+[; ;main.c: 357: lineBlackLeft = 0;
+"357
+[e = _lineBlackLeft -> -> 0 `i `uc ]
+[; ;main.c: 358: lineBlackRight = 0;
+"358
+[e = _lineBlackRight -> -> 0 `i `uc ]
+[; ;main.c: 359: lineBlackMiddle = 0;
+"359
+[e = _lineBlackMiddle -> -> 0 `i `uc ]
+[; ;main.c: 360: turnState = 1;
 "360
-[e ( _Ecrit_Valeur_selection (1 -> _mainMenuState `ui ]
-[; ;main.c: 361: clearLCD();
+[e = _turnState -> -> 1 `i `uc ]
+[; ;main.c: 361: followLineState = 4;
 "361
-[e ( _clearLCD ..  ]
+[e = _followLineState -> -> 4 `i `uc ]
 "362
 }
-[e :U 1441 ]
+[e :U 1452 ]
 [; ;main.c: 362: }
-[; ;main.c: 363: _delay((unsigned long)((100)*(64000000/4000.0)));
+[; ;main.c: 363: break;
 "363
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"371
-}
-[e :U 1426 ]
-"293
-[e $ == -> _sensorsOverviewMode `i -> 1 `i 1427  ]
-[e :U 1428 ]
-[; ;main.c: 371: }
-[; ;main.c: 376: while(calibMode==1){
-"376
-[e $U 1445  ]
-[e :U 1446 ]
-{
-[; ;main.c: 377: switch(calibModeState){
-"377
 [e $U 1449  ]
+[; ;main.c: 365: case 1:
+"365
+[e :U 1453 ]
+[; ;main.c: 366: if(lineBlackRight==2){
+"366
+[e $ ! == -> _lineBlackRight `i -> 2 `i 1454  ]
 {
-[; ;main.c: 378: case 0:
+[; ;main.c: 367: lineBlackLeft = 0;
+"367
+[e = _lineBlackLeft -> -> 0 `i `uc ]
+[; ;main.c: 368: lineBlackRight = 0;
+"368
+[e = _lineBlackRight -> -> 0 `i `uc ]
+[; ;main.c: 369: lineBlackMiddle = 0;
+"369
+[e = _lineBlackMiddle -> -> 0 `i `uc ]
+[; ;main.c: 370: turnState = 2;
+"370
+[e = _turnState -> -> 2 `i `uc ]
+[; ;main.c: 371: followLineState = 4;
+"371
+[e = _followLineState -> -> 4 `i `uc ]
+"373
+}
+[e :U 1454 ]
+[; ;main.c: 373: }
+[; ;main.c: 374: break;
+"374
+[e $U 1449  ]
+[; ;main.c: 377: case 2:
+"377
+[e :U 1455 ]
+[; ;main.c: 378: if(lineBlackMiddle==3){
 "378
-[e :U 1450 ]
+[e $ ! == -> _lineBlackMiddle `i -> 3 `i 1456  ]
+{
 [; ;main.c: 379: Motors(0);
 "379
 [e ( _Motors (1 -> -> 0 `i `uc ]
-[; ;main.c: 380: gotoLCD(0,0); printLCD("Set the robot on");
 "380
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 23C `*uc ]
-[; ;main.c: 381: gotoLCD(1,0); printLCD("a white surface ");
-"381
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 24C `*uc ]
-[; ;main.c: 382: if(!BP_selection()){
-"382
-[e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1451  ]
-{
-[; ;main.c: 383: calibModeState=1;
-"383
-[e = _calibModeState -> -> 1 `i `uc ]
-[; ;main.c: 384: while(!BP_selection()){
-"384
-[e $U 1452  ]
-[e :U 1453 ]
-{
-[; ;main.c: 385: _delay((unsigned long)((100)*(64000000/4000.0)));
-"385
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"386
-}
-[e :U 1452 ]
-"384
-[e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1453  ]
-[e :U 1454 ]
-[; ;main.c: 386: }
-[; ;main.c: 387: Buzzer(1);
-"387
-[e ( _Buzzer (1 -> -> 1 `i `uc ]
-[; ;main.c: 388: _delay((unsigned long)((100)*(64000000/4000.0)));
-"388
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 389: Buzzer(0);
-"389
-[e ( _Buzzer (1 -> -> 0 `i `uc ]
-[; ;main.c: 390: clearLCD();
-"390
-[e ( _clearLCD ..  ]
-[; ;main.c: 391: CNY_black_left_max = 0;
-"391
-[e = _CNY_black_left_max -> 0 `i ]
-[; ;main.c: 392: CNY_black_middle_max = 0;
-"392
-[e = _CNY_black_middle_max -> 0 `i ]
-[; ;main.c: 393: CNY_black_right_max = 0;
-"393
-[e = _CNY_black_right_max -> 0 `i ]
-[; ;main.c: 394: startMillis = millis();
-"394
-[e = _startMillis -> ( _millis ..  `i ]
-"396
-}
-[e :U 1451 ]
-[; ;main.c: 396: }
-[; ;main.c: 397: break;
-"397
-[e $U 1448  ]
-[; ;main.c: 399: case 1:
-"399
-[e :U 1455 ]
-[; ;main.c: 400: gotoLCD(0,0); printLCD(" Calibrating... ");
-"400
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 25C `*uc ]
-[; ;main.c: 401: gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
-"401
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_left_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 402: gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
-"402
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_middle_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 403: gotoLCD(1,5); printLCD(" ");
-"403
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
-[e ( _printLCD (1 -> :s 26C `*uc ]
-[; ;main.c: 404: gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
-"404
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_right_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 405: gotoLCD(1,11); printLCD(" ");
-"405
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
-[e ( _printLCD (1 -> :s 27C `*uc ]
-[; ;main.c: 406: Motors(1);
-"406
-[e ( _Motors (1 -> -> 1 `i `uc ]
-[; ;main.c: 407: Speed_Motors(2, -2);
-"407
-[e ( _Speed_Motors (2 , -> 2 `i -U -> 2 `i ]
-[; ;main.c: 409: if(CNY_black_left_max < ADCC_GetSingleConversion(31)){
-"409
-[e $ ! < -> _CNY_black_left_max `ui ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 1456  ]
-{
-[; ;main.c: 410: CNY_black_left_max = ADCC_GetSingleConversion(31);
-"410
-[e = _CNY_black_left_max -> ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 `i ]
-"411
 }
 [e :U 1456 ]
-[; ;main.c: 411: }
-[; ;main.c: 412: if(CNY_black_middle_max < ADCC_GetSingleConversion(30)){
-"412
-[e $ ! < -> _CNY_black_middle_max `ui ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 1457  ]
-{
-[; ;main.c: 413: CNY_black_middle_max = ADCC_GetSingleConversion(30);
-"413
-[e = _CNY_black_middle_max -> ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 `i ]
-"414
+[; ;main.c: 380: }
+[; ;main.c: 381: break;
+"381
+[e $U 1449  ]
+"384
 }
-[e :U 1457 ]
-[; ;main.c: 414: }
-[; ;main.c: 415: if(CNY_black_right_max < ADCC_GetSingleConversion(29)){
-"415
-[e $ ! < -> _CNY_black_right_max `ui ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 1458  ]
-{
-[; ;main.c: 416: CNY_black_right_max = ADCC_GetSingleConversion(29);
-"416
-[e = _CNY_black_right_max -> ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 `i ]
-"417
+[; ;main.c: 384: }
+[e $U 1449  ]
+"352
+[e :U 1450 ]
+[e [\ _turnState , $ -> -> 0 `i `uc 1451
+ , $ -> -> 1 `i `uc 1453
+ , $ -> -> 2 `i `uc 1455
+ 1449 ]
+"384
+[e :U 1449 ]
+"420
 }
-[e :U 1458 ]
-[; ;main.c: 417: }
-[; ;main.c: 419: tempMillis = millis();
-"419
-[e = _tempMillis -> ( _millis ..  `i ]
-[; ;main.c: 421: if(tempMillis>(startMillis+2000)){
-"421
-[e $ ! > _tempMillis + _startMillis -> 2000 `i 1459  ]
-{
-[; ;main.c: 422: calibModeState=2;
-"422
-[e = _calibModeState -> -> 2 `i `uc ]
-[; ;main.c: 423: Speed_Motors(0, 0);
-"423
-[e ( _Speed_Motors (2 , -> 0 `i -> 0 `i ]
-[; ;main.c: 424: Motors(0);
-"424
-[e ( _Motors (1 -> -> 0 `i `uc ]
-[; ;main.c: 426: Buzzer(1);
-"426
-[e ( _Buzzer (1 -> -> 1 `i `uc ]
-[; ;main.c: 427: _delay((unsigned long)((100)*(64000000/4000.0)));
-"427
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 428: Buzzer(0);
-"428
-[e ( _Buzzer (1 -> -> 0 `i `uc ]
-[; ;main.c: 429: clearLCD();
-"429
-[e ( _clearLCD ..  ]
-"430
-}
-[e :U 1459 ]
-[; ;main.c: 430: }
-[; ;main.c: 431: _delay((unsigned long)((50)*(64000000/4000.0)));
-"431
-[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 432: break;
-"432
-[e $U 1448  ]
-[; ;main.c: 433: case 2:
-"433
-[e :U 1460 ]
-[; ;main.c: 434: gotoLCD(0,0); printLCD("  Calib. done!  ");
-"434
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 28C `*uc ]
-[; ;main.c: 435: gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
-"435
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_left_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 436: gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
-"436
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_middle_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 437: gotoLCD(1,5); printLCD(" ");
-"437
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
-[e ( _printLCD (1 -> :s 29C `*uc ]
-[; ;main.c: 438: gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
-"438
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
-[e ( _LCDvalue16fp (2 , -> _CNY_black_right_max `ui -> -> 0 `i `uc ]
-[; ;main.c: 439: gotoLCD(1,11); printLCD(" ");
-"439
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
-[e ( _printLCD (1 -> :s 30C `*uc ]
-[; ;main.c: 440: if(!BP_selection()){
-"440
-[e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1461  ]
-{
-[; ;main.c: 441: calibModeState=0;
-"441
-[e = _calibModeState -> -> 0 `i `uc ]
-[; ;main.c: 442: while(!BP_selection()){
-"442
-[e $U 1462  ]
-[e :U 1463 ]
-{
-[; ;main.c: 443: _delay((unsigned long)((100)*(64000000/4000.0)));
+[e :U 1403 ]
+"164
+[e $ == -> _followLineMode `i -> 1 `i 1404  ]
+[e :U 1405 ]
+[; ;main.c: 420: }
+[; ;main.c: 443: while(sensorsOverviewMode==1){
 "443
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"444
-}
-[e :U 1462 ]
-"442
-[e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1463  ]
-[e :U 1464 ]
-[; ;main.c: 444: }
-[; ;main.c: 445: CNY_black_left = CNY_black_left_max - substractNumber;
+[e $U 1457  ]
+[e :U 1458 ]
+{
+[; ;main.c: 445: if(Valeur_selection() < 0 || Valeur_selection() > 1000){
 "445
-[e = _CNY_black_left - _CNY_black_left_max _substractNumber ]
-[; ;main.c: 446: CNY_black_middle = CNY_black_middle_max - substractNumber;
+[e $ ! || < ( _Valeur_selection ..  -> -> 0 `i `ui > ( _Valeur_selection ..  -> -> 1000 `i `ui 1460  ]
+{
+[; ;main.c: 446: Ecrit_Valeur_selection(0);
 "446
-[e = _CNY_black_middle - _CNY_black_middle_max _substractNumber ]
-[; ;main.c: 447: CNY_black_right = CNY_black_right_max - substractNumber;
+[e ( _Ecrit_Valeur_selection (1 -> -> 0 `i `ui ]
 "447
-[e = _CNY_black_right - _CNY_black_right_max _substractNumber ]
-[; ;main.c: 455: Buzzer(1);
-"455
-[e ( _Buzzer (1 -> -> 1 `i `uc ]
-[; ;main.c: 456: gotoLCD(0,0); printLCD("Values saved in");
-"456
-[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 31C `*uc ]
-[; ;main.c: 457: gotoLCD(1,0); printLCD("the EEPROM ! :) ");
-"457
-[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
-[e ( _printLCD (1 -> :s 32C `*uc ]
-[; ;main.c: 458: for(int i=0;i<10;i++){
-"458
-{
-[v _i `i ~T0 @X0 1 a ]
-[e = _i -> 0 `i ]
-[e $ < _i -> 10 `i 1465  ]
-[e $U 1466  ]
-[e :U 1465 ]
-{
-[; ;main.c: 459: _delay((unsigned long)((100)*(64000000/4000.0)));
-"459
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-"460
 }
-"458
-[e ++ _i -> 1 `i ]
-[e $ < _i -> 10 `i 1465  ]
-[e :U 1466 ]
-"460
-}
-[; ;main.c: 460: }
-[; ;main.c: 461: Buzzer(0);
-"461
-[e ( _Buzzer (1 -> -> 0 `i `uc ]
-[; ;main.c: 462: calibMode=0;
-"462
-[e = _calibMode -> -> 0 `i `uc ]
-[; ;main.c: 463: clearLCD();
-"463
-[e ( _clearLCD ..  ]
-[; ;main.c: 464: Ecrit_Valeur_selection(mainMenuState);
-"464
-[e ( _Ecrit_Valeur_selection (1 -> _mainMenuState `ui ]
-"465
+[e :U 1460 ]
+[; ;main.c: 447: }
+[; ;main.c: 448: if(Valeur_selection() > 3){
+"448
+[e $ ! > ( _Valeur_selection ..  -> -> 3 `i `ui 1461  ]
+{
+[; ;main.c: 449: Ecrit_Valeur_selection(3);
+"449
+[e ( _Ecrit_Valeur_selection (1 -> -> 3 `i `ui ]
+"450
 }
 [e :U 1461 ]
-[; ;main.c: 465: }
-[; ;main.c: 466: Speed_Motors(0, 0);
-"466
-[e ( _Speed_Motors (2 , -> 0 `i -> 0 `i ]
-[; ;main.c: 467: Motors(0);
+[; ;main.c: 450: }
+[; ;main.c: 451: if(sensorsOverviewState!=Valeur_selection()){
+"451
+[e $ ! != -> _sensorsOverviewState `ui ( _Valeur_selection ..  1462  ]
+{
+[; ;main.c: 452: sensorsOverviewState=Valeur_selection();
+"452
+[e = _sensorsOverviewState -> ( _Valeur_selection ..  `uc ]
+[; ;main.c: 453: clearLCD();
+"453
+[e ( _clearLCD ..  ]
+"454
+}
+[e :U 1462 ]
+[; ;main.c: 454: }
+[; ;main.c: 456: switch(sensorsOverviewState){
+"456
+[e $U 1464  ]
+{
+[; ;main.c: 457: case 0:
+"457
+[e :U 1465 ]
+[; ;main.c: 459: gotoLCD(0,0); printLCD("CNY Sensors  1-4");
+"459
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 10C `*uc ]
+[; ;main.c: 460: gotoLCD(1,3); LCDvalue16fp(ADCC_GetSingleConversion(31), 0);
+"460
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
+[e ( _LCDvalue16fp (2 , ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 -> -> 0 `i `uc ]
+[; ;main.c: 461: gotoLCD(1,9); LCDvalue16fp(ADCC_GetSingleConversion(30), 0);
+"461
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
+[e ( _LCDvalue16fp (2 , ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 -> -> 0 `i `uc ]
+[; ;main.c: 462: gotoLCD(1,15); LCDvalue16fp(ADCC_GetSingleConversion(29), 0);
+"462
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
+[e ( _LCDvalue16fp (2 , ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 -> -> 0 `i `uc ]
+[; ;main.c: 463: gotoLCD(1,11); printLCD(" ");
+"463
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
+[e ( _printLCD (1 -> :s 11C `*uc ]
+[; ;main.c: 464: gotoLCD(1,5); printLCD(" ");
+"464
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
+[e ( _printLCD (1 -> :s 12C `*uc ]
+[; ;main.c: 465: break;
+"465
+[e $U 1463  ]
+[; ;main.c: 467: case 1:
 "467
-[e ( _Motors (1 -> -> 0 `i `uc ]
-[; ;main.c: 468: _delay((unsigned long)((100)*(64000000/4000.0)));
-"468
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
-[; ;main.c: 469: break;
+[e :U 1466 ]
+[; ;main.c: 469: gotoLCD(0,0); printLCD("CNY Boolean  2-4");
 "469
-[e $U 1448  ]
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 13C `*uc ]
+[; ;main.c: 470: gotoLCD(1,0); printLCD("left:");
 "470
-}
-[; ;main.c: 470: }
-[e $U 1448  ]
-"377
-[e :U 1449 ]
-[e [\ _calibModeState , $ -> -> 0 `i `uc 1450
- , $ -> -> 1 `i `uc 1455
- , $ -> -> 2 `i `uc 1460
- 1448 ]
-"470
-[e :U 1448 ]
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 14C `*uc ]
+[; ;main.c: 471: gotoLCD(1,5); LCDvalue_Boolean(Digital_read(1));
 "471
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
+[e ( _LCDvalue_Boolean (1 ( _Digital_read (1 -> -> 1 `i `uc ]
+[; ;main.c: 472: gotoLCD(1,9); printLCD("right:");
+"472
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
+[e ( _printLCD (1 -> :s 15C `*uc ]
+[; ;main.c: 473: gotoLCD(1,15); LCDvalue_Boolean(Digital_read(0));
+"473
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
+[e ( _LCDvalue_Boolean (1 ( _Digital_read (1 -> -> 0 `i `uc ]
+[; ;main.c: 474: break;
+"474
+[e $U 1463  ]
+[; ;main.c: 476: case 2:
+"476
+[e :U 1467 ]
+[; ;main.c: 478: gotoLCD(0,0); printLCD("Laser Sensor 3-4");
+"478
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 16C `*uc ]
+[; ;main.c: 479: gotoLCD(1,2); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(0));
+"479
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 2 `i `uc ]
+[e ( _LCDvalue_laser_Range (1 ( _VL53L0X_Read_Distance_No_Wait (1 -> -> 0 `i `uc ]
+[; ;main.c: 480: _delay((unsigned long)((50)*(64000000/4000.0)));
+"480
+[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 481: gotoLCD(1,7); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(1));
+"481
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 7 `i `uc ]
+[e ( _LCDvalue_laser_Range (1 ( _VL53L0X_Read_Distance_No_Wait (1 -> -> 1 `i `uc ]
+[; ;main.c: 482: _delay((unsigned long)((50)*(64000000/4000.0)));
+"482
+[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 483: gotoLCD(1,12); LCDvalue_laser_Range(VL53L0X_Read_Distance_No_Wait(2));
+"483
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 12 `i `uc ]
+[e ( _LCDvalue_laser_Range (1 ( _VL53L0X_Read_Distance_No_Wait (1 -> -> 2 `i `uc ]
+[; ;main.c: 484: gotoLCD(1,14); printLCD("mm");
+"484
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 14 `i `uc ]
+[e ( _printLCD (1 -> :s 17C `*uc ]
+[; ;main.c: 485: break;
+"485
+[e $U 1463  ]
+[; ;main.c: 487: case 3:
+"487
+[e :U 1468 ]
+[; ;main.c: 489: gotoLCD(0,0); printLCD("Microphone   4-4");
+"489
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 18C `*uc ]
+[; ;main.c: 491: if(Digital_read(2)){
+"491
+[e $ ! != -> ( _Digital_read (1 -> -> 2 `i `uc `i -> -> -> 0 `i `uc `i 1469  ]
+{
+[; ;main.c: 492: gotoLCD(1,4); printLCD("True  :)");
+"492
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 4 `i `uc ]
+[e ( _printLCD (1 -> :s 19C `*uc ]
+[; ;main.c: 493: Buzzer(1);
+"493
+[e ( _Buzzer (1 -> -> 1 `i `uc ]
+[; ;main.c: 494: _delay((unsigned long)((100)*(64000000/4000.0)));
+"494
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 495: Buzzer(0);
+"495
+[e ( _Buzzer (1 -> -> 0 `i `uc ]
+"497
 }
-[e :U 1445 ]
-"376
-[e $ == -> _calibMode `i -> 1 `i 1446  ]
-[e :U 1447 ]
-"475
+[; ;main.c: 497: } else {
+[e $U 1470  ]
+[e :U 1469 ]
+{
+[; ;main.c: 498: gotoLCD(1,4); printLCD("False :(");
+"498
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 4 `i `uc ]
+[e ( _printLCD (1 -> :s 20C `*uc ]
+"499
+}
+[e :U 1470 ]
+[; ;main.c: 499: }
+[; ;main.c: 500: break;
+"500
+[e $U 1463  ]
+[; ;main.c: 501: case 4:
+"501
+[e :U 1471 ]
+[; ;main.c: 502: break;
+"502
+[e $U 1463  ]
+"503
+}
+[; ;main.c: 503: }
+[e $U 1463  ]
+"456
+[e :U 1464 ]
+[e [\ _sensorsOverviewState , $ -> -> 0 `i `uc 1465
+ , $ -> -> 1 `i `uc 1466
+ , $ -> -> 2 `i `uc 1467
+ , $ -> -> 3 `i `uc 1468
+ , $ -> -> 4 `i `uc 1471
+ 1463 ]
+"503
+[e :U 1463 ]
+[; ;main.c: 505: if(!BP_selection()){
+"505
+[e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1472  ]
+{
+[; ;main.c: 506: sensorsOverviewMode=0;
+"506
+[e = _sensorsOverviewMode -> -> 0 `i `uc ]
+[; ;main.c: 507: while(!BP_selection()){
+"507
+[e $U 1473  ]
+[e :U 1474 ]
+{
+[; ;main.c: 508: _delay((unsigned long)((100)*(64000000/4000.0)));
+"508
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"509
+}
+[e :U 1473 ]
+"507
+[e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1474  ]
+[e :U 1475 ]
+[; ;main.c: 509: }
+[; ;main.c: 510: Ecrit_Valeur_selection(mainMenuState);
+"510
+[e ( _Ecrit_Valeur_selection (1 -> _mainMenuState `ui ]
+[; ;main.c: 511: clearLCD();
+"511
+[e ( _clearLCD ..  ]
+"512
+}
+[e :U 1472 ]
+[; ;main.c: 512: }
+[; ;main.c: 513: _delay((unsigned long)((100)*(64000000/4000.0)));
+"513
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"521
+}
+[e :U 1457 ]
+"443
+[e $ == -> _sensorsOverviewMode `i -> 1 `i 1458  ]
+[e :U 1459 ]
+[; ;main.c: 521: }
+[; ;main.c: 526: while(calibMode==1){
+"526
+[e $U 1476  ]
+[e :U 1477 ]
+{
+[; ;main.c: 527: switch(calibModeState){
+"527
+[e $U 1480  ]
+{
+[; ;main.c: 528: case 0:
+"528
+[e :U 1481 ]
+[; ;main.c: 529: Motors(0);
+"529
+[e ( _Motors (1 -> -> 0 `i `uc ]
+[; ;main.c: 530: gotoLCD(0,0); printLCD("Set the robot on");
+"530
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 21C `*uc ]
+[; ;main.c: 531: gotoLCD(1,0); printLCD("a white surface ");
+"531
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 22C `*uc ]
+[; ;main.c: 532: if(!BP_selection()){
+"532
+[e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1482  ]
+{
+[; ;main.c: 533: calibModeState=1;
+"533
+[e = _calibModeState -> -> 1 `i `uc ]
+[; ;main.c: 534: while(!BP_selection()){
+"534
+[e $U 1483  ]
+[e :U 1484 ]
+{
+[; ;main.c: 535: _delay((unsigned long)((100)*(64000000/4000.0)));
+"535
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"536
+}
+[e :U 1483 ]
+"534
+[e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1484  ]
+[e :U 1485 ]
+[; ;main.c: 536: }
+[; ;main.c: 537: Buzzer(1);
+"537
+[e ( _Buzzer (1 -> -> 1 `i `uc ]
+[; ;main.c: 538: _delay((unsigned long)((100)*(64000000/4000.0)));
+"538
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 539: Buzzer(0);
+"539
+[e ( _Buzzer (1 -> -> 0 `i `uc ]
+[; ;main.c: 540: clearLCD();
+"540
+[e ( _clearLCD ..  ]
+[; ;main.c: 541: CNY_black_left_max = 0;
+"541
+[e = _CNY_black_left_max -> 0 `i ]
+[; ;main.c: 542: CNY_black_middle_max = 0;
+"542
+[e = _CNY_black_middle_max -> 0 `i ]
+[; ;main.c: 543: CNY_black_right_max = 0;
+"543
+[e = _CNY_black_right_max -> 0 `i ]
+[; ;main.c: 544: startMillis = millis();
+"544
+[e = _startMillis -> ( _millis ..  `i ]
+"546
+}
+[e :U 1482 ]
+[; ;main.c: 546: }
+[; ;main.c: 547: break;
+"547
+[e $U 1479  ]
+[; ;main.c: 549: case 1:
+"549
+[e :U 1486 ]
+[; ;main.c: 550: gotoLCD(0,0); printLCD(" Calibrating... ");
+"550
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 23C `*uc ]
+[; ;main.c: 551: gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
+"551
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
+[e ( _LCDvalue16fp (2 , -> _CNY_black_left_max `ui -> -> 0 `i `uc ]
+[; ;main.c: 552: gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
+"552
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
+[e ( _LCDvalue16fp (2 , -> _CNY_black_middle_max `ui -> -> 0 `i `uc ]
+[; ;main.c: 553: gotoLCD(1,5); printLCD(" ");
+"553
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
+[e ( _printLCD (1 -> :s 24C `*uc ]
+[; ;main.c: 554: gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
+"554
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
+[e ( _LCDvalue16fp (2 , -> _CNY_black_right_max `ui -> -> 0 `i `uc ]
+[; ;main.c: 555: gotoLCD(1,11); printLCD(" ");
+"555
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
+[e ( _printLCD (1 -> :s 25C `*uc ]
+[; ;main.c: 556: Motors(1);
+"556
+[e ( _Motors (1 -> -> 1 `i `uc ]
+[; ;main.c: 557: Speed_Motors(2, -2);
+"557
+[e ( _Speed_Motors (2 , -> 2 `i -U -> 2 `i ]
+[; ;main.c: 559: if(CNY_black_left_max < ADCC_GetSingleConversion(31)){
+"559
+[e $ ! < -> _CNY_black_left_max `ui ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 1487  ]
+{
+[; ;main.c: 560: CNY_black_left_max = ADCC_GetSingleConversion(31);
+"560
+[e = _CNY_black_left_max -> ( _ADCC_GetSingleConversion (1 -> -> 31 `i `E12088 `i ]
+"561
+}
+[e :U 1487 ]
+[; ;main.c: 561: }
+[; ;main.c: 562: if(CNY_black_middle_max < ADCC_GetSingleConversion(30)){
+"562
+[e $ ! < -> _CNY_black_middle_max `ui ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 1488  ]
+{
+[; ;main.c: 563: CNY_black_middle_max = ADCC_GetSingleConversion(30);
+"563
+[e = _CNY_black_middle_max -> ( _ADCC_GetSingleConversion (1 -> -> 30 `i `E12088 `i ]
+"564
+}
+[e :U 1488 ]
+[; ;main.c: 564: }
+[; ;main.c: 565: if(CNY_black_right_max < ADCC_GetSingleConversion(29)){
+"565
+[e $ ! < -> _CNY_black_right_max `ui ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 1489  ]
+{
+[; ;main.c: 566: CNY_black_right_max = ADCC_GetSingleConversion(29);
+"566
+[e = _CNY_black_right_max -> ( _ADCC_GetSingleConversion (1 -> -> 29 `i `E12088 `i ]
+"567
+}
+[e :U 1489 ]
+[; ;main.c: 567: }
+[; ;main.c: 569: tempMillis = millis();
+"569
+[e = _tempMillis -> ( _millis ..  `i ]
+[; ;main.c: 571: if(tempMillis>(startMillis+2000)){
+"571
+[e $ ! > _tempMillis + _startMillis -> 2000 `i 1490  ]
+{
+[; ;main.c: 572: calibModeState=2;
+"572
+[e = _calibModeState -> -> 2 `i `uc ]
+[; ;main.c: 573: Speed_Motors(0, 0);
+"573
+[e ( _Speed_Motors (2 , -> 0 `i -> 0 `i ]
+[; ;main.c: 574: Motors(0);
+"574
+[e ( _Motors (1 -> -> 0 `i `uc ]
+[; ;main.c: 576: Buzzer(1);
+"576
+[e ( _Buzzer (1 -> -> 1 `i `uc ]
+[; ;main.c: 577: _delay((unsigned long)((100)*(64000000/4000.0)));
+"577
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 578: Buzzer(0);
+"578
+[e ( _Buzzer (1 -> -> 0 `i `uc ]
+[; ;main.c: 579: clearLCD();
+"579
+[e ( _clearLCD ..  ]
+"580
+}
+[e :U 1490 ]
+[; ;main.c: 580: }
+[; ;main.c: 581: _delay((unsigned long)((50)*(64000000/4000.0)));
+"581
+[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 582: break;
+"582
+[e $U 1479  ]
+[; ;main.c: 583: case 2:
+"583
+[e :U 1491 ]
+[; ;main.c: 584: gotoLCD(0,0); printLCD("  Calib. done!  ");
+"584
+[e ( _gotoLCD (2 , -> -> 0 `i `uc -> -> 0 `i `uc ]
+[e ( _printLCD (1 -> :s 26C `*uc ]
+[; ;main.c: 585: gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
+"585
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 3 `i `uc ]
+[e ( _LCDvalue16fp (2 , -> _CNY_black_left_max `ui -> -> 0 `i `uc ]
+[; ;main.c: 586: gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
+"586
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 9 `i `uc ]
+[e ( _LCDvalue16fp (2 , -> _CNY_black_middle_max `ui -> -> 0 `i `uc ]
+[; ;main.c: 587: gotoLCD(1,5); printLCD(" ");
+"587
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 5 `i `uc ]
+[e ( _printLCD (1 -> :s 27C `*uc ]
+[; ;main.c: 588: gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
+"588
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 15 `i `uc ]
+[e ( _LCDvalue16fp (2 , -> _CNY_black_right_max `ui -> -> 0 `i `uc ]
+[; ;main.c: 589: gotoLCD(1,11); printLCD(" ");
+"589
+[e ( _gotoLCD (2 , -> -> 1 `i `uc -> -> 11 `i `uc ]
+[e ( _printLCD (1 -> :s 28C `*uc ]
+[; ;main.c: 590: if(!BP_selection()){
+"590
+[e $ ! ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1492  ]
+{
+[; ;main.c: 591: calibModeState=0;
+"591
+[e = _calibModeState -> -> 0 `i `uc ]
+[; ;main.c: 592: while(!BP_selection()){
+"592
+[e $U 1493  ]
+[e :U 1494 ]
+{
+[; ;main.c: 593: _delay((unsigned long)((100)*(64000000/4000.0)));
+"593
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+"594
+}
+[e :U 1493 ]
+"592
+[e $ ! != -> ( _BP_selection ..  `i -> -> -> 0 `i `uc `i 1494  ]
+[e :U 1495 ]
+[; ;main.c: 594: }
+[; ;main.c: 597: CNY_black_left = CNY_black_left_max - substractNumber;
+"597
+[e = _CNY_black_left - _CNY_black_left_max _substractNumber ]
+[; ;main.c: 598: CNY_black_middle = CNY_black_middle_max - substractNumber;
+"598
+[e = _CNY_black_middle - _CNY_black_middle_max _substractNumber ]
+[; ;main.c: 599: CNY_black_right = CNY_black_right_max - substractNumber;
+"599
+[e = _CNY_black_right - _CNY_black_right_max _substractNumber ]
+[; ;main.c: 608: Buzzer(1);
+"608
+[e ( _Buzzer (1 -> -> 1 `i `uc ]
+[; ;main.c: 614: Buzzer(0);
+"614
+[e ( _Buzzer (1 -> -> 0 `i `uc ]
+[; ;main.c: 615: calibMode=0;
+"615
+[e = _calibMode -> -> 0 `i `uc ]
+[; ;main.c: 616: clearLCD();
+"616
+[e ( _clearLCD ..  ]
+[; ;main.c: 617: Ecrit_Valeur_selection(mainMenuState);
+"617
+[e ( _Ecrit_Valeur_selection (1 -> _mainMenuState `ui ]
+"618
+}
+[e :U 1492 ]
+[; ;main.c: 618: }
+[; ;main.c: 619: Speed_Motors(0, 0);
+"619
+[e ( _Speed_Motors (2 , -> 0 `i -> 0 `i ]
+[; ;main.c: 620: Motors(0);
+"620
+[e ( _Motors (1 -> -> 0 `i `uc ]
+[; ;main.c: 621: _delay((unsigned long)((100)*(64000000/4000.0)));
+"621
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 64000000 `l `d .4000.0 `ul ]
+[; ;main.c: 622: break;
+"622
+[e $U 1479  ]
+"623
+}
+[; ;main.c: 623: }
+[e $U 1479  ]
+"527
+[e :U 1480 ]
+[e [\ _calibModeState , $ -> -> 0 `i `uc 1481
+ , $ -> -> 1 `i `uc 1486
+ , $ -> -> 2 `i `uc 1491
+ 1479 ]
+"623
+[e :U 1479 ]
+"624
+}
+[e :U 1476 ]
+"526
+[e $ == -> _calibMode `i -> 1 `i 1477  ]
+[e :U 1478 ]
+"628
 }
 [e :U 1380 ]
-"71
+"77
 [e $U 1381  ]
 [e :U 1382 ]
-[; ;main.c: 471: }
-[; ;main.c: 475: }
-[; ;main.c: 477: }
-"477
+[; ;main.c: 624: }
+[; ;main.c: 628: }
+[; ;main.c: 630: }
+"630
 [e :UE 1376 ]
 }
-[a 23C 83 101 116 32 116 104 101 32 114 111 98 111 116 32 111 110 0 ]
-[a 31C 86 97 108 117 101 115 32 115 97 118 101 100 32 105 110 0 ]
-[a 19C 109 109 0 ]
-[a 17C 114 105 103 104 116 58 0 ]
-[a 16C 108 101 102 116 58 0 ]
-[a 20C 77 105 99 114 111 112 104 111 110 101 32 32 32 52 45 52 0 ]
-[a 18C 76 97 115 101 114 32 83 101 110 115 111 114 32 51 45 52 0 ]
-[a 15C 67 78 89 32 66 111 111 108 101 97 110 32 32 50 45 52 0 ]
-[a 12C 67 78 89 32 83 101 110 115 111 114 115 32 32 49 45 52 0 ]
+[a 21C 83 101 116 32 116 104 101 32 114 111 98 111 116 32 111 110 0 ]
+[a 17C 109 109 0 ]
+[a 15C 114 105 103 104 116 58 0 ]
+[a 14C 108 101 102 116 58 0 ]
+[a 18C 77 105 99 114 111 112 104 111 110 101 32 32 32 52 45 52 0 ]
+[a 16C 76 97 115 101 114 32 83 101 110 115 111 114 32 51 45 52 0 ]
+[a 13C 67 78 89 32 66 111 111 108 101 97 110 32 32 50 45 52 0 ]
+[a 10C 67 78 89 32 83 101 110 115 111 114 115 32 32 49 45 52 0 ]
 [a 1C 45 45 32 87 101 108 99 111 109 101 32 58 41 32 45 45 0 ]
-[a 21C 84 114 117 101 32 32 58 41 0 ]
-[a 22C 70 97 108 115 101 32 58 40 0 ]
+[a 19C 84 114 117 101 32 32 58 41 0 ]
+[a 20C 70 97 108 115 101 32 58 40 0 ]
 [a 5C 62 83 101 110 115 111 114 115 32 82 101 118 105 101 119 32 0 ]
 [a 3C 32 83 101 110 115 111 114 115 32 82 101 118 105 101 119 32 0 ]
-[a 24C 97 32 119 104 105 116 101 32 115 117 114 102 97 99 101 32 0 ]
-[a 25C 32 67 97 108 105 98 114 97 116 105 110 103 46 46 46 32 0 ]
-[a 32C 116 104 101 32 69 69 80 82 79 77 32 33 32 58 41 32 0 ]
+[a 22C 97 32 119 104 105 116 101 32 115 117 114 102 97 99 101 32 0 ]
+[a 23C 32 67 97 108 105 98 114 97 116 105 110 103 46 46 46 32 0 ]
 [a 2C 62 70 111 108 108 111 119 32 97 32 76 105 110 101 32 32 0 ]
 [a 4C 32 70 111 108 108 111 119 32 97 32 76 105 110 101 32 32 0 ]
-[a 28C 32 32 67 97 108 105 98 46 32 100 111 110 101 33 32 32 0 ]
+[a 26C 32 32 67 97 108 105 98 46 32 100 111 110 101 33 32 32 0 ]
 [a 6C 62 67 97 108 105 98 46 32 77 111 100 101 32 32 32 32 0 ]
 [a 8C 32 67 97 108 105 98 46 32 77 111 100 101 32 32 32 32 0 ]
 [a 9C 62 52 32 32 32 32 32 32 32 32 32 32 32 32 32 32 0 ]
 [a 7C 32 52 32 32 32 32 32 32 32 32 32 32 32 32 32 32 0 ]
-[a 10C 32 0 ]
 [a 11C 32 0 ]
-[a 13C 32 0 ]
-[a 14C 32 0 ]
-[a 26C 32 0 ]
+[a 12C 32 0 ]
+[a 24C 32 0 ]
+[a 25C 32 0 ]
 [a 27C 32 0 ]
-[a 29C 32 0 ]
-[a 30C 32 0 ]
+[a 28C 32 0 ]
