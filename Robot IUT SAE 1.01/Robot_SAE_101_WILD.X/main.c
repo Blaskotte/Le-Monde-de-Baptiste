@@ -191,23 +191,29 @@ while (1)
             case 1:
                 
                 Motors(1);
-                Speed_Motors(8, -8);
+                Speed_Motors(7, -7);
                 
                 
                 
                 
-                if(Digital_read(0)==1&&Digital_read(1)==1){
-                    lineBlackMiddle++;
-                    __delay_ms(130);
-                    
-                } else if(Digital_read(0)==1){
-                    lineBlackRight++;
-                    __delay_ms(130);
+                if(Digital_read(0)==1||Digital_read(1)==1){
+                     __delay_ms(50);
+                    if (Digital_read(1)==1){
+                        lineBlackLeft++;
+                        LED(0, 1);
                 
-                } else if (Digital_read(1)==1){
-                    lineBlackLeft++;
-                    __delay_ms(130);
+                    }
+                    if (Digital_read(0)==1){
+                        lineBlackRight++;
+                        LED(1, 1);
                 
+                    }
+                    __delay_ms(200);
+                     LED(0, 0);
+                     LED(1, 0);
+                
+                
+
                 }
                 
                 
@@ -237,23 +243,29 @@ while (1)
             case 2: //tourner vers la droite
                 
                 Motors(1);
-                Speed_Motors(8, 0);
+                Speed_Motors(7, 0);
                 
                 
                 
                 
-                if(Digital_read(0)==1&&Digital_read(1)==1){
-                    lineBlackMiddle++;
-                    __delay_ms(130);
-                    
-                } else if(Digital_read(0)==1){
-                    lineBlackRight++;
-                    __delay_ms(130);
+                if(Digital_read(0)==1||Digital_read(1)==1){
+                     __delay_ms(50);
+                    if (Digital_read(1)==1){
+                        lineBlackLeft++;
+                        LED(0, 1);
                 
-                } else if (Digital_read(1)==1){
-                    lineBlackLeft++;
-                    __delay_ms(130);
+                    }
+                    if (Digital_read(0)==1){
+                        lineBlackRight++;
+                        LED(1, 1);
                 
+                    }
+                    __delay_ms(200);
+                     LED(0, 0);
+                     LED(1, 0);
+                
+                
+
                 }
                 
                 
@@ -275,26 +287,29 @@ while (1)
                 
             case 3: // tourner vers la gauche
                 Motors(1);
-                Speed_Motors(0, -8);
+                Speed_Motors(0, -7);
                 
                 
                 
                 
                 
-                if(Digital_read(0)==1&&Digital_read(1)==1){
-                    lineBlackMiddle++;
-                    __delay_ms(130);
-                    
-                } else if(Digital_read(0)==1){
-                    lineBlackRight++;
-                    __delay_ms(130);
+                if(Digital_read(0)==1||Digital_read(1)==1){
+                     __delay_ms(50);
+                    if (Digital_read(1)==1){
+                        lineBlackLeft++;
+                        LED(0, 1);
+                    }
+                    if (Digital_read(0)==1){
+                        lineBlackRight++;
+                        LED(1, 1);
+                    }
+                    __delay_ms(200);
+                     LED(0, 0);
+                     LED(1, 0);
                 
-                } else if (Digital_read(1)==1){
-                    lineBlackLeft++;
-                    __delay_ms(130);
                 
+
                 }
-                
                 
                 
                 
@@ -314,14 +329,14 @@ while (1)
                 
                 case 4: // tourner à gauche
                 __delay_ms(100);
-                Speed_Motors(-6,-6);
+                Speed_Motors(-8,-8);
                 __delay_ms(600);
                 
                 
                 while(ADCC_GetSingleConversion(30)<CNY_black_middle){ //tant qu'il ne detecte pas du noir
                 
                     Motors(1);
-                    Speed_Motors(-6, -6);
+                    Speed_Motors(-8, -8);
                 }
                 
                 followLineState=3;
@@ -333,14 +348,14 @@ while (1)
                 
                 case 5: // tourner à droite
                 __delay_ms(100);
-                Speed_Motors(6, 6);
-                __delay_ms(400);
+                Speed_Motors(8, 8);
+                __delay_ms(600);
                 
                 
                 while(ADCC_GetSingleConversion(30)<CNY_black_middle){ //tant qu'il ne detecte pas du noir
                 
                     Motors(1);
-                    Speed_Motors(6, 6);
+                    Speed_Motors(8, 8);
                 }
                 
                 followLineState=2;
@@ -352,33 +367,58 @@ while (1)
         switch(turnState){
         
             case 0:
-                if(lineBlackLeft==3){
+                if(lineBlackRight>=3){
 
                 lineBlackLeft = 0;
                 lineBlackRight = 0;
-                lineBlackMiddle = 0;
                 turnState = 1;
                 followLineState = 4;
                 }
                 break;
                 
             case 1:
-                if(lineBlackRight==2){
+                if(lineBlackLeft==3){
                 lineBlackLeft = 0;
                 lineBlackRight = 0;
-                lineBlackMiddle = 0;
                 turnState = 2;
-                followLineState = 4;
+                //followLineState = 4;
                 //Motors(0); while(1){}
                 }
                 break;
                 
                 
             case 2:
-                if(lineBlackMiddle==3){
-                    Motors(0);
+                Motors(0); while(1);
+                break;
+            /*case 3:
+                if(lineBlackRight==2||lineBlackLeft==1){
+                    lineBlackLeft = 0;
+                    lineBlackRight = 0;
+                    turnState = 4;
+                    followLineState = 5;
                 }
                 break;
+            case 4:
+                if(lineBlackRight==1||lineBlackLeft==1){
+                    lineBlackLeft = 0;
+                    lineBlackRight = 0;
+                    turnState = 5;
+                    followLineState = 5;
+                }
+                break;
+            case 5:
+                if(lineBlackRight==1||lineBlackLeft==1){
+                    lineBlackLeft = 0;
+                    lineBlackRight = 0;
+                    turnState = 6;
+                    followLineState = 4;
+                }
+                break;
+            case 6:
+                if(lineBlackRight==2||lineBlackLeft==1){
+                    Motors(0); while(1){}
+                }
+                break;*/
         
         
         }
@@ -547,12 +587,6 @@ while (1)
                 break;
                 
             case 1:
-                gotoLCD(0,0); printLCD(" Calibrating... ");
-                gotoLCD(1,3); LCDvalue16fp(CNY_black_left_max, 0);
-                gotoLCD(1,9); LCDvalue16fp(CNY_black_middle_max, 0);
-                gotoLCD(1,5); printLCD(" ");
-                gotoLCD(1,15); LCDvalue16fp(CNY_black_right_max, 0);
-                gotoLCD(1,11); printLCD(" ");
                 Motors(1);
                 Speed_Motors(2, -2);
                 
