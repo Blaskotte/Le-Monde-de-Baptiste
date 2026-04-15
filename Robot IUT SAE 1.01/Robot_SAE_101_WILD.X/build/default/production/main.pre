@@ -15355,6 +15355,14 @@ void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData);
 uint8_t DATAEE_ReadByte(uint16_t bAdd);
 
 # 11 "main.c"
+char lineBlackRight = 0;
+char lineBlackLeft = 0;
+
+void lateral(void){
+
+# 31
+}
+
 void main(void)
 {
 SYSTEM_Initialize();
@@ -15385,9 +15393,7 @@ Buzzer(0);
 
 char mainMenuState=0;
 
-char lineBlackRight = 0;
-char lineBlackLeft = 0;
-char lineBlackMiddle = 0;
+
 char turnState=0;
 
 char sensorsOverviewMode=0;
@@ -15403,7 +15409,8 @@ char followLineState =0;
 int tempMillis=0;
 int startMillis=0;
 
-# 67
+
+
 int CNY_black_left_max;
 int CNY_black_right_max;
 int CNY_black_middle_max;
@@ -15439,7 +15446,6 @@ _delay((unsigned long)((100)*(64000000/4000.0)));
 }
 lineBlackRight = 0;
 lineBlackLeft = 0;
-lineBlackMiddle = 0;
 turnState = 0;
 clearLCD();
 }
@@ -15479,7 +15485,7 @@ gotoLCD(1,0); printLCD(">4              ");
 break;
 }
 
-# 164
+# 177
 while(followLineMode==1){
 
 if(!BP_selection()){
@@ -15510,32 +15516,13 @@ break;
 case 1:
 
 Motors(1);
-Speed_Motors(7, -7);
+Speed_Motors(6, -6);
 
 
 
 
-if(Digital_read(0)==1||Digital_read(1)==1){
-_delay((unsigned long)((50)*(64000000/4000.0)));
-if (Digital_read(1)==1){
-lineBlackLeft++;
-LED(0, 1);
+lateral();
 
-}
-if (Digital_read(0)==1){
-lineBlackRight++;
-LED(1, 1);
-
-}
-_delay((unsigned long)((200)*(64000000/4000.0)));
-LED(0, 0);
-LED(1, 0);
-
-
-
-}
-
-# 223
 if (ADCC_GetSingleConversion(31)<CNY_black_left && ADCC_GetSingleConversion(30)<CNY_black_middle)
 {
 followLineState = 2;
@@ -15544,39 +15531,16 @@ followLineState = 2;
 followLineState = 3;
 }
 
-# 240
 break;
 
 
 case 2:
 
 Motors(1);
-Speed_Motors(7, 0);
+Speed_Motors(6, 0);
 
+lateral();
 
-
-
-if(Digital_read(0)==1||Digital_read(1)==1){
-_delay((unsigned long)((50)*(64000000/4000.0)));
-if (Digital_read(1)==1){
-lineBlackLeft++;
-LED(0, 1);
-
-}
-if (Digital_read(0)==1){
-lineBlackRight++;
-LED(1, 1);
-
-}
-_delay((unsigned long)((200)*(64000000/4000.0)));
-LED(0, 0);
-LED(1, 0);
-
-
-
-}
-
-# 275
 if(ADCC_GetSingleConversion(30)>CNY_black_middle)
 {
 followLineState = 1;
@@ -15586,30 +15550,13 @@ followLineState = 3;
 }
 break;
 
-# 288
+# 245
 case 3:
+
 Motors(1);
-Speed_Motors(0, -7);
+Speed_Motors(0, -6);
 
-# 296
-if(Digital_read(0)==1||Digital_read(1)==1){
-_delay((unsigned long)((50)*(64000000/4000.0)));
-if (Digital_read(1)==1){
-lineBlackLeft++;
-LED(0, 1);
-}
-if (Digital_read(0)==1){
-lineBlackRight++;
-LED(1, 1);
-}
-_delay((unsigned long)((200)*(64000000/4000.0)));
-LED(0, 0);
-LED(1, 0);
-
-
-
-}
-
+lateral();
 
 
 if(ADCC_GetSingleConversion(30)>CNY_black_middle)
@@ -15622,7 +15569,7 @@ followLineState = 2;
 }
 break;
 
-# 330
+# 267
 case 4:
 _delay((unsigned long)((100)*(64000000/4000.0)));
 Speed_Motors(-8,-8);
@@ -15632,13 +15579,13 @@ _delay((unsigned long)((600)*(64000000/4000.0)));
 while(ADCC_GetSingleConversion(30)<CNY_black_middle){
 
 Motors(1);
-Speed_Motors(-8, -8);
+Speed_Motors(-8, 8);
 }
 
 followLineState=3;
 break;
 
-# 349
+# 286
 case 5:
 _delay((unsigned long)((100)*(64000000/4000.0)));
 Speed_Motors(8, 8);
@@ -15657,40 +15604,10 @@ break;
 
 }
 
-switch(turnState){
-
-case 0:
-if(lineBlackRight>=3){
-
-lineBlackLeft = 0;
-lineBlackRight = 0;
-turnState = 1;
-followLineState = 4;
-}
-break;
-
-case 1:
-if(lineBlackLeft==3){
-lineBlackLeft = 0;
-lineBlackRight = 0;
-turnState = 2;
-
-
-}
-break;
-
-
-case 2:
-Motors(0); while(1);
-break;
-
-# 424
+# 365
 }
 
-# 460
-}
-
-# 483
+# 389
 while(sensorsOverviewMode==1){
 
 if(Valeur_selection() < 0 || Valeur_selection() > 1000){
@@ -15763,7 +15680,7 @@ clearLCD();
 }
 _delay((unsigned long)((100)*(64000000/4000.0)));
 
-# 561
+
 }
 
 
@@ -15838,11 +15755,6 @@ CNY_black_left = CNY_black_left_max - substractNumber;
 CNY_black_middle = CNY_black_middle_max - substractNumber;
 CNY_black_right = CNY_black_right_max - substractNumber;
 
-# 642
-Buzzer(1);
-
-# 648
-Buzzer(0);
 calibMode=0;
 clearLCD();
 Ecrit_Valeur_selection(mainMenuState);
@@ -15856,7 +15768,7 @@ break;
 
 
 
-}
 
+}
 }
 
